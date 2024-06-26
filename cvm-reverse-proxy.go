@@ -5,15 +5,16 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/konvera/geth-sev/constellation/atls"
-	"github.com/konvera/geth-sev/constellation/attestation/azure/tdx"
-	"github.com/konvera/geth-sev/constellation/config"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strconv"
+
+	"github.com/konvera/geth-sev/constellation/atls"
+	"github.com/konvera/geth-sev/constellation/attestation/azure/tdx"
+	"github.com/konvera/geth-sev/constellation/config"
 )
 
 type Proxy struct {
@@ -43,7 +44,7 @@ func main() {
 	client := flag.Bool("client", false, "Set to true if running as a client")
 	server := flag.Bool("server", false, "Set to true if running as a server")
 	targetPort := flag.Int("target-port", 0, "Target port number")
-	targetDomain := flag.String("target-domain", "", "Target domain")
+	targetDomain := flag.String("target-domain", "https://localhost", "Target domain")
 	listenPort := flag.Int("listen-port", 0, "Listen port number")
 	measurements := flag.String("measurements", "", "Path to JSON Attestation Measurement file")
 
@@ -55,13 +56,13 @@ func main() {
 		log.Fatal("Error: Both client and server cannot be true simultaneously.")
 	}
 
+	proxyTarget := *targetDomain + ":" + strconv.Itoa(*targetPort) + "/"
 	if *client {
-		client_side_tls_termination("https://"+*targetDomain+":"+strconv.Itoa(*targetPort)+"/", strconv.Itoa(*listenPort), *measurements)
+		client_side_tls_termination(proxyTarget, strconv.Itoa(*listenPort), *measurements)
 	}
 
 	if *server {
-		server_side_tls_termination(strconv.Itoa(*targetPort), strconv.Itoa(*listenPort))
-
+		server_side_tls_termination(proxyTarget, strconv.Itoa(*listenPort))
 	}
 }
 
@@ -106,8 +107,8 @@ func client_side_tls_termination(targetUrl string, listenPort string, measuremen
 	}
 }
 
-func server_side_tls_termination(targetPort string, listenPort string) {
-	target, err := url.Parse("http://localhost:" + targetPort)
+func server_side_tls_termination(proxyTarget string, listenPort string) {
+	target, err := url.Parse(proxyTarget)
 	if err != nil {
 		panic(err)
 	}
