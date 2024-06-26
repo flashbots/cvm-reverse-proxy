@@ -42,10 +42,10 @@ Running as Server
 To run the application as a server, execute the following command:
 
 ```bash
-./cvm-reverse-proxy -server -target-port=<target-port> -listen-port=<listen-port>
+./cvm-reverse-proxy -server -target-domain=<target-domain> -target-port=<target-port> -listen-port=<listen-port>
 ```
 
-Replace `<target-port>` and `<listen-port>` with appropriate values.
+Replace `<target-domain>`, `<target-port>` and `<listen-port>` with appropriate values.
 License
 
 ## License
