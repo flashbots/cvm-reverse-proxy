@@ -67,7 +67,7 @@ func server_side_tls_termination(cCtx *cli.Context) error {
 	targetAddr := cCtx.String("target-addr")
 	logJSON := cCtx.Bool("log-json")
 	logDebug := cCtx.Bool("log-debug")
-	logService := cCtx.String("cvm-azure-tdx-server")
+	logService := cCtx.String("proxy-server")
 
 	log := common.SetupLogger(&common.LoggingOpts{
 		Debug:   logDebug,

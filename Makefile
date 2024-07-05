@@ -14,12 +14,12 @@ clean:
 .PHONY: build-proxy-client
 build-proxy-client:
 	@mkdir -p ./build
-	go build -trimpath -ldflags "-X github.com/flashbots/go-template/common.Version=${VERSION}" -v -o ./build/proxy-client cmd/proxy-client/main.go
+	go build -trimpath -ldflags "-X cvm-reverse-proxy/common.Version=${VERSION}" -v -o ./build/proxy-client cmd/proxy-client/main.go
 
 .PHONY: build-server
 build-proxy-server:
 	@mkdir -p ./build
-	go build -trimpath -ldflags "-X github.com/flashbots/go-template/common.Version=${VERSION}" -v -o ./build/proxy-server cmd/proxy-server/main.go
+	go build -trimpath -ldflags "-X cvm-reverse-proxy/common.Version=${VERSION}" -v -o ./build/proxy-server cmd/proxy-server/main.go
 
 .PHONY: test
 test:
