@@ -13,6 +13,7 @@ import (
 
 	"github.com/konvera/geth-sev/constellation/atls"
 	azure_tdx "github.com/konvera/geth-sev/constellation/attestation/azure/tdx"
+	"github.com/konvera/geth-sev/constellation/attestation/measurements"
 	baremetal_tdx "github.com/konvera/geth-sev/constellation/attestation/tdx"
 	"github.com/konvera/geth-sev/constellation/config"
 
@@ -74,7 +75,9 @@ func client_side_tls_termination(cCtx *cli.Context) error {
 	measurementsPath := cCtx.String("measurements")
 	logJSON := cCtx.Bool("log-json")
 	logDebug := cCtx.Bool("log-debug")
-	logService := cCtx.String("cvm-azure-tdx-client")
+	logService := cCtx.String("proxy-client")
+
+	attestationType := cCtx.String("attestation-type")
 
 	log := common.SetupLogger(&common.LoggingOpts{
 		Debug:   logDebug,
@@ -90,14 +93,31 @@ func client_side_tls_termination(cCtx *cli.Context) error {
 		return err
 	}
 
-	attConfig := config.DefaultForAzureTDX()
-	err = json.Unmarshal(jsonMeasurements, &attConfig.Measurements)
+	var measurementsStruct measurements.M
+	err = json.Unmarshal(jsonMeasurements, &measurementsStruct)
 	if err != nil {
 		log.Error("could not decode measurements", "err", err)
 		return err
 	}
 
-	validators := []atls.Validator{azure_tdx.NewValidator(attConfig, proxy.AttestationLogger{})}
+	// Create attested TLS config
+	validators := []atls.Validator{}
+	var issuer atls.Issuer
+	switch attestationType {
+	case "azure-tdx":
+		attConfig := config.DefaultForAzureTDX()
+		attConfig.SetMeasurements(measurementsStruct)
+		validators = append(validators, azure_tdx.NewValidator(attConfig, proxy.AttestationLogger{}))
+		issuer = azure_tdx.NewIssuer(nil)
+	case "baremetal-tdx":
+		attConfig := config.QEMUTDX{Measurements: measurementsStruct}
+		validators = append(validators, baremetal_tdx.NewValidator(&attConfig, proxy.AttestationLogger{}))
+		issuer = baremetal_tdx.NewIssuer(nil)
+	default:
+		log.With("attestation-type", attestationType).Error("invalid attestation-type passed, must be one of [azure-tdx, baremetal-tdx]")
+		return errors.New("invalid attestation-type passed in")
+	}
+
 	tlsConfig, err := atls.CreateAttestationClientTLSConfig(nil, validators)
 	if err != nil {
 		log.Error("could not create atls config", "err", err)
@@ -105,19 +125,6 @@ func client_side_tls_termination(cCtx *cli.Context) error {
 	}
 
 	proxy := proxy.NewProxy(targetAddr).WithTransport(&http.Transport{TLSClientConfig: tlsConfig})
-
-	// Create attested TLS config
-	var issuer atls.Issuer
-	attestationType := cCtx.String("attestation-type")
-	switch attestationType {
-	case "azure-tdx":
-		issuer = azure_tdx.NewIssuer(nil)
-	case "baremetal-tdx":
-		issuer = baremetal_tdx.NewIssuer(nil)
-	default:
-		log.With("attestation-type", attestationType).Error("invalid attestation-type passed, must be one of [azure-tdx, baremetal-tdx]")
-		return errors.New("invalid attestation-type passed in")
-	}
 
 	confTLS, err := atls.CreateAttestationServerTLSConfig(issuer, nil)
 	if err != nil {
