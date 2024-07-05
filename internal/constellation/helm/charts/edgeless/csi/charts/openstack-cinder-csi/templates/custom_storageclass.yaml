@@ -1,3 +1,0 @@
-{{- if .Values.storageClass.custom -}}
-{{ .Values.storageClass.custom }}
-{{- end }}
