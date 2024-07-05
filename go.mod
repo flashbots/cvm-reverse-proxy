@@ -9,7 +9,10 @@ replace (
 	github.com/tink-crypto/tink-go/v2 v2.0.0 => github.com/derpsteb/tink-go/v2 v2.0.0-20231002051717-a808e454eed6
 )
 
-require github.com/konvera/geth-sev v0.0.0-20240419144745-4b416f03a50e
+require (
+	github.com/konvera/geth-sev v0.0.0-20240419144745-4b416f03a50e
+	github.com/urfave/cli/v2 v2.27.2
+)
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
@@ -35,6 +38,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sts v1.27.1 // indirect
 	github.com/aws/smithy-go v1.20.0 // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
 	github.com/cyberphone/json-canonicalization v0.0.0-20231217050601-ba74d44ecf5f // indirect
 	github.com/edgelesssys/go-tdx-qpl v0.0.0-20240123150912-dcad3c41ec5f // indirect
 	github.com/fatih/color v1.16.0 // indirect
@@ -88,6 +92,7 @@ require (
 	github.com/prometheus/client_model v0.6.0 // indirect
 	github.com/prometheus/common v0.47.0 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
+	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sassoftware/relic v7.2.1+incompatible // indirect
 	github.com/secure-systems-lab/go-securesystemslib v0.8.0 // indirect
 	github.com/siderolabs/talos/pkg/machinery v1.6.4 // indirect
@@ -100,6 +105,8 @@ require (
 	github.com/titanous/rocacheck v0.0.0-20171023193734-afe73141d399 // indirect
 	github.com/transparency-dev/merkle v0.0.2 // indirect
 	github.com/vincent-petithory/dataurl v1.0.0 // indirect
+	github.com/vtolstov/go-ioctl v0.0.0-20151206205506-6be9cced4810 // indirect
+	github.com/xrash/smetrics v0.0.0-20240312152122-5f08fbb34913 // indirect
 	go.mongodb.org/mongo-driver v1.14.0 // indirect
 	go.opentelemetry.io/otel v1.23.1 // indirect
 	go.opentelemetry.io/otel/metric v1.23.1 // indirect
