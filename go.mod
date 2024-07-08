@@ -128,3 +128,5 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/utils v0.0.0-20240102154912-e7106e64919e // indirect
 )
+
+replace github.com/edgelesssys/go-tdx-qpl => github.com/ruteri/go-tdx-qpl v0.0.0-20240705142333-1da84ccf7c1b

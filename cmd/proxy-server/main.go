@@ -83,9 +83,9 @@ func server_side_tls_termination(cCtx *cli.Context) error {
 	attestationType := cCtx.String("attestation-type")
 	switch attestationType {
 	case "azure-tdx":
-		issuer = azure_tdx.NewIssuer(nil)
+		issuer = azure_tdx.NewIssuer(log)
 	case "baremetal-tdx":
-		issuer = baremetal_tdx.NewIssuer(nil)
+		issuer = baremetal_tdx.NewIssuer(log)
 	default:
 		log.With("attestation-type", attestationType).Error("invalid attestation-type passed, must be one of [azure-tdx, baremetal-tdx]")
 		return errors.New("invalid attestation-type passed in")
