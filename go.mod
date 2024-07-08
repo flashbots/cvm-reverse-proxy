@@ -310,3 +310,5 @@ require (
 	sigs.k8s.io/kustomize/kyaml v0.14.3-0.20230601165947-6ce0bf390ce3 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
 )
+
+replace github.com/edgelesssys/go-tdx-qpl => github.com/ruteri/go-tdx-qpl v0.0.0-20240705142333-1da84ccf7c1b

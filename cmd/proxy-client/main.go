@@ -1,15 +1,11 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
 	"os"
-	"os/signal"
-	"syscall"
-	"time"
 
 	"cvm-reverse-proxy/internal/atls"
 	azure_tdx "cvm-reverse-proxy/internal/attestation/azure/tdx"
@@ -102,17 +98,14 @@ func client_side_tls_termination(cCtx *cli.Context) error {
 
 	// Create attested TLS config
 	validators := []atls.Validator{}
-	var issuer atls.Issuer
 	switch attestationType {
 	case "azure-tdx":
 		attConfig := config.DefaultForAzureTDX()
 		attConfig.SetMeasurements(measurementsStruct)
 		validators = append(validators, azure_tdx.NewValidator(attConfig, proxy.AttestationLogger{}))
-		issuer = azure_tdx.NewIssuer(nil)
 	case "baremetal-tdx":
 		attConfig := config.QEMUTDX{Measurements: measurementsStruct}
 		validators = append(validators, baremetal_tdx.NewValidator(&attConfig, proxy.AttestationLogger{}))
-		issuer = baremetal_tdx.NewIssuer(nil)
 	default:
 		log.With("attestation-type", attestationType).Error("invalid attestation-type passed, must be one of [azure-tdx, baremetal-tdx]")
 		return errors.New("invalid attestation-type passed in")
@@ -125,29 +118,6 @@ func client_side_tls_termination(cCtx *cli.Context) error {
 	}
 
 	proxy := proxy.NewProxy(targetAddr).WithTransport(&http.Transport{TLSClientConfig: tlsConfig})
-
-	confTLS, err := atls.CreateAttestationServerTLSConfig(issuer, nil)
-	if err != nil {
-		panic(err)
-	}
-
-	// Create an HTTP server
-	server := &http.Server{
-		Addr:      listenAddr,
-		Handler:   proxy,
-		TLSConfig: confTLS,
-	}
-
-	exit := make(chan os.Signal, 1)
-	signal.Notify(exit, os.Interrupt, syscall.SIGTERM)
-	// Shutdown server once termination signal is received
-
-	go func() {
-		<-exit
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-		defer cancel()
-		server.Shutdown(ctx)
-	}()
 
 	log.With("listenAddr", listenAddr).Info("about to start proxy")
 	err = http.ListenAndServe(listenAddr, proxy)
