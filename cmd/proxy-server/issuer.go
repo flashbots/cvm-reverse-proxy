@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"cvm-reverse-proxy/internal/attestation"
+	"cvm-reverse-proxy/internal/attestation/variant"
+
 	"github.com/google/go-tdx-guest/client"
-	"github.com/konvera/geth-sev/constellation/attestation"
-	"github.com/konvera/geth-sev/constellation/attestation/variant"
 )
 
 // Issuer is the TDX attestation issuer.
