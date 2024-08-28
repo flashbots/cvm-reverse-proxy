@@ -10,6 +10,7 @@ replace (
 )
 
 require (
+	github.com/google/go-tdx-guest v0.3.1
 	github.com/konvera/geth-sev v0.0.0-20240419144745-4b416f03a50e
 	github.com/urfave/cli/v2 v2.27.2
 )
@@ -65,7 +66,6 @@ require (
 	github.com/google/go-configfs-tsm v0.2.2 // indirect
 	github.com/google/go-containerregistry v0.19.0 // indirect
 	github.com/google/go-sev-guest v0.9.3 // indirect
-	github.com/google/go-tdx-guest v0.3.1 // indirect
 	github.com/google/go-tpm v0.9.0 // indirect
 	github.com/google/go-tpm-tools v0.4.3-0.20240112165732-912a43636883 // indirect
 	github.com/google/go-tspi v0.3.0 // indirect
