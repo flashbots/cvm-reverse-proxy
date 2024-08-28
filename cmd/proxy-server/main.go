@@ -13,7 +13,6 @@ import (
 
 	"cvm-reverse-proxy/internal/atls"
 	azure_tdx "cvm-reverse-proxy/internal/attestation/azure/tdx"
-	baremetal_tdx "cvm-reverse-proxy/internal/attestation/tdx"
 
 	"cvm-reverse-proxy/common"
 	"cvm-reverse-proxy/proxy"
@@ -85,7 +84,7 @@ func server_side_tls_termination(cCtx *cli.Context) error {
 	case "azure-tdx":
 		issuer = azure_tdx.NewIssuer(log)
 	case "baremetal-tdx":
-		issuer = baremetal_tdx.NewIssuer(log)
+		issuer = NewIssuer(log)
 	default:
 		log.With("attestation-type", attestationType).Error("invalid attestation-type passed, must be one of [azure-tdx, baremetal-tdx]")
 		return errors.New("invalid attestation-type passed in")
