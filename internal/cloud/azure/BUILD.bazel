@@ -1,0 +1,58 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("//bazel/go:go_test.bzl", "go_test")
+
+go_library(
+    name = "azure",
+    srcs = [
+        "azure.go",
+        "imds.go",
+        "interface.go",
+        "iptables_cross.go",
+        "iptables_linux.go",
+    ],
+    importpath = "cvm-reverse-proxy/internal/cloud/azure",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cloud",
+        "//internal/cloud/azureshared",
+        "//internal/cloud/metadata",
+        "//internal/constants",
+        "//internal/role",
+        "@com_github_azure_azure_sdk_for_go_sdk_azcore//runtime",
+        "@com_github_azure_azure_sdk_for_go_sdk_azidentity//:azidentity",
+        "@com_github_azure_azure_sdk_for_go_sdk_resourcemanager_compute_armcompute_v6//:armcompute",
+        "@com_github_azure_azure_sdk_for_go_sdk_resourcemanager_network_armnetwork_v6//:armnetwork",
+    ] + select({
+        "@io_bazel_rules_go//go/platform:android": [
+            "@io_k8s_kubernetes//pkg/util/iptables",
+            "@io_k8s_utils//exec",
+        ],
+        "@io_bazel_rules_go//go/platform:linux": [
+            "@io_k8s_kubernetes//pkg/util/iptables",
+            "@io_k8s_utils//exec",
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+go_test(
+    name = "azure_test",
+    srcs = [
+        "azure_test.go",
+        "imds_test.go",
+    ],
+    embed = [":azure"],
+    deps = [
+        "//internal/cloud",
+        "//internal/cloud/metadata",
+        "//internal/role",
+        "@com_github_azure_azure_sdk_for_go_sdk_azcore//runtime",
+        "@com_github_azure_azure_sdk_for_go_sdk_azcore//to",
+        "@com_github_azure_azure_sdk_for_go_sdk_resourcemanager_compute_armcompute_v6//:armcompute",
+        "@com_github_azure_azure_sdk_for_go_sdk_resourcemanager_network_armnetwork_v6//:armnetwork",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@org_golang_google_grpc//test/bufconn",
+        "@org_uber_go_goleak//:goleak",
+    ],
+)

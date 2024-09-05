@@ -1,0 +1,6 @@
+# Name of the key within the respective secret that holds the salt.
+saltKeyName: salt
+# Name of the secret that contains the master secret.
+masterSecretName: constellation-mastersecret
+# Name of the key within the respective secret that holds the master secret.
+masterSecretKeyName: mastersecret

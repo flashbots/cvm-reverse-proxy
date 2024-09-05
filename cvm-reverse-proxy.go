@@ -12,9 +12,10 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/konvera/geth-sev/constellation/atls"
-	"github.com/konvera/geth-sev/constellation/attestation/azure/tdx"
-	"github.com/konvera/geth-sev/constellation/config"
+	"cvm-reverse-proxy/internal/atls"
+
+	"cvm-reverse-proxy/internal/attestation/azure/tdx"
+	"cvm-reverse-proxy/internal/config"
 )
 
 type Proxy struct {

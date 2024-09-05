@@ -1,0 +1,51 @@
+apiVersion: v2
+name: constellation-services
+description: A chart to deploy all microservices that are part of a valid constellation cluster
+type: application
+version: 0.0.0
+dependencies:
+  - name: key-service
+    version: 0.0.0
+    tags:
+      - AWS
+      - Azure
+      - GCP
+      - OpenStack
+      - QEMU
+  - name: join-service
+    version: 0.0.0
+    tags:
+      - AWS
+      - Azure
+      - GCP
+      - OpenStack
+      - QEMU
+  - name: ccm
+    version: 0.0.0
+    tags:
+      - AWS
+      - Azure
+      - GCP
+      - OpenStack
+  - name: cnm
+    version: 0.0.0
+    tags:
+      - Azure
+  - name: autoscaler
+    version: 0.0.0
+    tags:
+      - Azure
+      - GCP
+      - AWS
+  - name: verification-service
+    version: 0.0.0
+    tags:
+      - AWS
+      - Azure
+      - GCP
+      - OpenStack
+      - QEMU
+  - name: gcp-guest-agent
+    version: 0.0.0
+    tags:
+      - GCP

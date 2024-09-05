@@ -1,0 +1,9 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "fetcher",
+    srcs = ["fetcher.go"],
+    importpath = "cvm-reverse-proxy/internal/api/fetcher",
+    visibility = ["//:__subpackages__"],
+    deps = ["//internal/sigstore"],
+)

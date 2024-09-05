@@ -1,0 +1,41 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("//bazel/go:go_test.bzl", "go_test")
+
+go_library(
+    name = "imagefetcher",
+    srcs = [
+        "imagefetcher.go",
+        "raw.go",
+    ],
+    importpath = "cvm-reverse-proxy/internal/imagefetcher",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/api/fetcher",
+        "//internal/api/versionsapi",
+        "//internal/attestation/variant",
+        "//internal/cloud/cloudprovider",
+        "//internal/mpimage",
+        "//internal/semver",
+        "@com_github_schollz_progressbar_v3//:progressbar",
+        "@com_github_spf13_afero//:afero",
+    ],
+)
+
+go_test(
+    name = "imagefetcher_test",
+    srcs = [
+        "imagefetcher_test.go",
+        "raw_test.go",
+    ],
+    embed = [":imagefetcher"],
+    deps = [
+        "//internal/api/versionsapi",
+        "//internal/attestation/variant",
+        "//internal/cloud/cloudprovider",
+        "//internal/file",
+        "@com_github_spf13_afero//:afero",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@org_uber_go_goleak//:goleak",
+    ],
+)

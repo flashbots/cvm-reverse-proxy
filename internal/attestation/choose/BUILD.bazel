@@ -1,0 +1,37 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("//bazel/go:go_test.bzl", "go_test")
+
+go_library(
+    name = "choose",
+    srcs = ["choose.go"],
+    importpath = "cvm-reverse-proxy/internal/attestation/choose",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/atls",
+        "//internal/attestation",
+        "//internal/attestation/aws/nitrotpm",
+        "//internal/attestation/aws/snp",
+        "//internal/attestation/azure/snp",
+        "//internal/attestation/azure/tdx",
+        "//internal/attestation/azure/trustedlaunch",
+        "//internal/attestation/gcp/es",
+        "//internal/attestation/gcp/snp",
+        "//internal/attestation/qemu",
+        "//internal/attestation/tdx",
+        "//internal/attestation/variant",
+        "//internal/config",
+    ],
+)
+
+go_test(
+    name = "choose_test",
+    srcs = ["choose_test.go"],
+    embed = [":choose"],
+    deps = [
+        "//internal/attestation/measurements",
+        "//internal/attestation/variant",
+        "//internal/config",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+    ],
+)

@@ -1,0 +1,23 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "gcp",
+    srcs = [
+        "gcp.go",
+        "metadata.go",
+        "restclient.go",
+    ],
+    importpath = "cvm-reverse-proxy/internal/attestation/gcp",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/attestation/snp",
+        "//internal/attestation/variant",
+        "//internal/attestation/vtpm",
+        "@com_github_google_go_tpm_tools//proto/attest",
+        "@com_github_googleapis_gax_go_v2//:gax-go",
+        "@com_google_cloud_go_compute//apiv1",
+        "@com_google_cloud_go_compute//apiv1/computepb",
+        "@com_google_cloud_go_compute_metadata//:metadata",
+        "@org_golang_google_api//option",
+    ],
+)

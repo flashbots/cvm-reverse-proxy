@@ -1,0 +1,44 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("//bazel/go:go_test.bzl", "go_test")
+
+go_library(
+    name = "aws",
+    srcs = ["aws.go"],
+    importpath = "cvm-reverse-proxy/internal/cloud/aws",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cloud",
+        "//internal/cloud/metadata",
+        "//internal/constants",
+        "//internal/role",
+        "@com_github_aws_aws_sdk_go_v2//aws",
+        "@com_github_aws_aws_sdk_go_v2_config//:config",
+        "@com_github_aws_aws_sdk_go_v2_feature_ec2_imds//:imds",
+        "@com_github_aws_aws_sdk_go_v2_service_ec2//:ec2",
+        "@com_github_aws_aws_sdk_go_v2_service_ec2//types",
+        "@com_github_aws_aws_sdk_go_v2_service_elasticloadbalancingv2//:elasticloadbalancingv2",
+        "@com_github_aws_aws_sdk_go_v2_service_elasticloadbalancingv2//types",
+        "@com_github_aws_aws_sdk_go_v2_service_resourcegroupstaggingapi//:resourcegroupstaggingapi",
+        "@com_github_aws_aws_sdk_go_v2_service_resourcegroupstaggingapi//types",
+    ],
+)
+
+go_test(
+    name = "aws_test",
+    srcs = ["aws_test.go"],
+    embed = [":aws"],
+    deps = [
+        "//internal/cloud",
+        "//internal/cloud/metadata",
+        "//internal/role",
+        "@com_github_aws_aws_sdk_go_v2//aws",
+        "@com_github_aws_aws_sdk_go_v2_feature_ec2_imds//:imds",
+        "@com_github_aws_aws_sdk_go_v2_service_ec2//:ec2",
+        "@com_github_aws_aws_sdk_go_v2_service_ec2//types",
+        "@com_github_aws_aws_sdk_go_v2_service_elasticloadbalancingv2//:elasticloadbalancingv2",
+        "@com_github_aws_aws_sdk_go_v2_service_elasticloadbalancingv2//types",
+        "@com_github_aws_aws_sdk_go_v2_service_resourcegroupstaggingapi//:resourcegroupstaggingapi",
+        "@com_github_aws_aws_sdk_go_v2_service_resourcegroupstaggingapi//types",
+        "@com_github_stretchr_testify//assert",
+    ],
+)
