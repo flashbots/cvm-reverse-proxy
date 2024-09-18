@@ -1,5 +1,0 @@
-apiVersion: v2
-name: autoscaler
-description: A Helm chart to deploy the cluster autoscaler.
-type: application
-version: 0.0.0

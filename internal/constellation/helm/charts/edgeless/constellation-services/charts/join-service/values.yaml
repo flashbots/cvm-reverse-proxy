@@ -1,4 +1,0 @@
-csp: "gcp"
-attestationVariant: ""
-joinServicePort: 9090
-joinServiceNodePort: 30090
