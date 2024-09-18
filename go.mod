@@ -1,6 +1,8 @@
 module cvm-reverse-proxy
 
-go 1.23
+go 1.22.4
+
+toolchain go1.23.1
 
 replace github.com/martinjungblut/go-cryptsetup => github.com/daniel-weisse/go-cryptsetup v0.0.0-20230705150314-d8c07bd1723c
 

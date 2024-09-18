@@ -35,7 +35,7 @@ var flags []cli.Flag = []cli.Flag{
 	&cli.StringFlag{
 		Name:  "attestation-type",
 		Value: "azure",
-		Usage: "type of attestation to present (azure-tdx, baremetal-tdx) [azure-tdx]",
+		Usage: "type of attestation to present (azure-tdx, dcap-tdx) [azure-tdx]",
 	},
 	&cli.BoolFlag{
 		Name:  "log-json",
@@ -84,10 +84,10 @@ func server_side_tls_termination(cCtx *cli.Context) error {
 	switch attestationType {
 	case "azure-tdx":
 		issuer = azure_tdx.NewIssuer(log)
-	case "baremetal-tdx":
+	case "dcap-tdx":
 		issuer = cvm_tdx.NewIssuer(log)
 	default:
-		log.With("attestation-type", attestationType).Error("invalid attestation-type passed, must be one of [azure-tdx, baremetal-tdx]")
+		log.With("attestation-type", attestationType).Error("invalid attestation-type passed, must be one of [azure-tdx, dcap-tdx]")
 		return errors.New("invalid attestation-type passed in")
 	}
 

@@ -10,7 +10,7 @@ import (
 	"cvm-reverse-proxy/internal/atls"
 	azure_tdx "cvm-reverse-proxy/internal/attestation/azure/tdx"
 	"cvm-reverse-proxy/internal/attestation/measurements"
-	baremetal_tdx "cvm-reverse-proxy/internal/attestation/tdx"
+	dcap_tdx "cvm-reverse-proxy/internal/attestation/tdx"
 	"cvm-reverse-proxy/internal/config"
 
 	"cvm-reverse-proxy/common"
@@ -38,7 +38,7 @@ var flags []cli.Flag = []cli.Flag{
 	&cli.StringFlag{
 		Name:  "attestation-type",
 		Value: "azure",
-		Usage: "type of attestation to present (azure-tdx, baremetal-tdx) [azure-tdx]",
+		Usage: "type of attestation to present (azure-tdx, dcap-tdx) [azure-tdx]",
 	},
 	&cli.BoolFlag{
 		Name:  "log-json",
@@ -103,11 +103,11 @@ func client_side_tls_termination(cCtx *cli.Context) error {
 		attConfig := config.DefaultForAzureTDX()
 		attConfig.SetMeasurements(measurementsStruct)
 		validators = append(validators, azure_tdx.NewValidator(attConfig, proxy.AttestationLogger{}))
-	case "baremetal-tdx":
+	case "dcap-tdx":
 		attConfig := config.QEMUTDX{Measurements: measurementsStruct}
-		validators = append(validators, baremetal_tdx.NewValidator(&attConfig, proxy.AttestationLogger{}))
+		validators = append(validators, dcap_tdx.NewValidator(&attConfig, proxy.AttestationLogger{}))
 	default:
-		log.With("attestation-type", attestationType).Error("invalid attestation-type passed, must be one of [azure-tdx, baremetal-tdx]")
+		log.With("attestation-type", attestationType).Error("invalid attestation-type passed, must be one of [azure-tdx, dcap-tdx]")
 		return errors.New("invalid attestation-type passed in")
 	}
 

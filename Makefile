@@ -16,7 +16,7 @@ build-proxy-client:
 	@mkdir -p ./build
 	go build -trimpath -ldflags "-X cvm-reverse-proxy/common.Version=${VERSION}" -v -o ./build/proxy-client cmd/proxy-client/main.go
 
-.PHONY: build-server
+.PHONY: build-proxy-server
 build-proxy-server:
 	@mkdir -p ./build
 	go build -trimpath -ldflags "-X cvm-reverse-proxy/common.Version=${VERSION}" -v -o ./build/proxy-server cmd/proxy-server/main.go
