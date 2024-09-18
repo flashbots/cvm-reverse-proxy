@@ -1,0 +1,29 @@
+controllerManager:
+  manager:
+    resources:
+      limits:
+        cpu: 500m
+        memory: 128Mi
+      requests:
+        cpu: 10m
+        memory: 64Mi
+  replicas: 1
+kubernetesClusterDomain: cluster.local
+managerConfig:
+  controllerManagerConfigYaml:
+    health:
+      healthProbeBindAddress: :8081
+    leaderElection:
+      leaderElect: true
+      resourceName: 38cc1645.edgeless.systems
+    metrics:
+      bindAddress: 127.0.0.1:8080
+    webhook:
+      port: 9443
+metricsService:
+  ports:
+  - name: https
+    port: 8443
+    protocol: TCP
+    targetPort: https
+  type: ClusterIP

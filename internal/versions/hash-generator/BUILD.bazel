@@ -1,0 +1,30 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+load("//bazel/go:go_test.bzl", "go_test")
+
+go_library(
+    name = "hash-generator_lib",
+    srcs = ["generate.go"],
+    importpath = "cvm-reverse-proxy/internal/versions/hash-generator",
+    visibility = ["//visibility:private"],
+    deps = [
+        "@com_github_regclient_regclient//:regclient",
+        "@com_github_regclient_regclient//types/ref",
+        "@com_github_vincent_petithory_dataurl//:dataurl",
+        "@io_k8s_kubernetes//cmd/kubeadm/app/apis/kubeadm",
+        "@io_k8s_kubernetes//cmd/kubeadm/app/images",
+        "@org_golang_x_tools//go/ast/astutil",
+    ],
+)
+
+go_binary(
+    name = "hash-generator",
+    embed = [":hash-generator_lib"],
+    visibility = ["//:__subpackages__"],
+)
+
+go_test(
+    name = "hash-generator_test",
+    srcs = ["generate_test.go"],
+    embed = [":hash-generator_lib"],
+    deps = ["@org_uber_go_goleak//:goleak"],
+)

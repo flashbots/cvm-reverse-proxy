@@ -1,0 +1,139 @@
+{
+    "$schema": "https://json-schema.org/draft-07/schema#",
+    "properties": {
+        "csp": {
+            "description": "CSP to which the chart is deployed.",
+            "enum": [
+                "AWS",
+                "Azure",
+                "GCP",
+                "OpenStack",
+                "QEMU"
+            ]
+        },
+        "image": {
+            "description": "Container image to use for the Cloud Controller Manager.",
+            "type": "string"
+        },
+        "Azure": {
+            "description": "Config values required for deployment on Azure",
+            "type": "object",
+            "properties": {
+                "azureConfig": {
+                    "description": "Base64 encoded json string that hold required config parameters for Azure CCM.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "azureConfig"
+            ]
+        },
+        "GCP": {
+            "description": "Config values required for deployment on GCP",
+            "type": "object",
+            "properties": {
+                "projectID": {
+                    "description": "ID of the GCP project into which the cluster is deployed",
+                    "type": "string",
+                    "examples": [
+                        "demoproject-581925"
+                    ]
+                },
+                "uid": {
+                    "description": "Unique identifier for the cluster",
+                    "type": "string"
+                },
+                "secretData": {
+                    "description": "GCP service account key as a json-string",
+                    "type": "string"
+                },
+                "subnetworkPodCIDR": {
+                    "description": "CIDR Range for Pods in cluster",
+                    "type": "string",
+                    "examples": [
+                        "192.0.2.0/24"
+                    ],
+                    "pattern": "[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}/[0-9]{1,2}"
+                }
+            },
+            "required": [
+                "projectID",
+                "uid",
+                "secretData",
+                "subnetworkPodCIDR"
+            ]
+        },
+        "OpenStack": {
+            "description": "Config values required for deployment on OpenStack",
+            "type": "object",
+            "properties": {
+                "secretData": {
+                    "description": "OpenStack service account key as a json-string",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "secretData"
+            ]
+        }
+    },
+    "required": [
+        "csp",
+        "image"
+    ],
+    "allOf": [
+        {
+            "if": {
+                "properties": {
+                    "csp": {
+                        "const": "Azure"
+                    }
+                },
+                "required": [
+                    "csp"
+                ]
+            },
+            "then": {
+                "required": [
+                    "Azure"
+                ]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "csp": {
+                        "const": "GCP"
+                    }
+                },
+                "required": [
+                    "csp"
+                ]
+            },
+            "then": {
+                "required": [
+                    "GCP"
+                ]
+            }
+        },
+        {
+            "if": {
+                "properties": {
+                    "csp": {
+                        "const": "OpenStack"
+                    }
+                },
+                "required": [
+                    "csp"
+                ]
+            },
+            "then": {
+                "required": [
+                    "OpenStack"
+                ]
+            }
+        }
+    ],
+    "title": "Values",
+    "type": "object"
+}

@@ -1,0 +1,9 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "testdata",
+    srcs = ["testdata.go"],
+    embedsrcs = ["hclreport.bin"],
+    importpath = "cvm-reverse-proxy/internal/attestation/azure/tdx/testdata",
+    visibility = ["//:__subpackages__"],
+)

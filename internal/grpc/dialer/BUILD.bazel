@@ -1,0 +1,32 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("//bazel/go:go_test.bzl", "go_test")
+
+go_library(
+    name = "dialer",
+    srcs = ["dialer.go"],
+    importpath = "cvm-reverse-proxy/internal/grpc/dialer",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/atls",
+        "//internal/grpc/atlscredentials",
+        "@org_golang_google_grpc//:grpc",
+        "@org_golang_google_grpc//credentials/insecure",
+    ],
+)
+
+go_test(
+    name = "dialer_test",
+    srcs = ["dialer_test.go"],
+    embed = [":dialer"],
+    deps = [
+        "//internal/atls",
+        "//internal/attestation/variant",
+        "//internal/grpc/atlscredentials",
+        "//internal/grpc/testdialer",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@org_golang_google_grpc//:grpc",
+        "@org_golang_google_grpc//interop/grpc_testing",
+        "@org_uber_go_goleak//:goleak",
+    ],
+)

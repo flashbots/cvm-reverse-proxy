@@ -1,0 +1,51 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("//bazel/go:go_test.bzl", "go_test")
+
+go_library(
+    name = "openstack",
+    srcs = [
+        "accountkey.go",
+        "api.go",
+        "imds.go",
+        "openstack.go",
+        "plumbing.go",
+        "wrappers.go",
+    ],
+    importpath = "cvm-reverse-proxy/internal/cloud/openstack",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/cloud",
+        "//internal/cloud/metadata",
+        "//internal/constants",
+        "//internal/role",
+        "@com_github_gophercloud_gophercloud_v2//:gophercloud",
+        "@com_github_gophercloud_gophercloud_v2//openstack/compute/v2/servers",
+        "@com_github_gophercloud_gophercloud_v2//openstack/networking/v2/networks",
+        "@com_github_gophercloud_gophercloud_v2//openstack/networking/v2/subnets",
+        "@com_github_gophercloud_gophercloud_v2//pagination",
+        "@com_github_gophercloud_utils_v2//openstack/clientconfig",
+    ],
+)
+
+go_test(
+    name = "openstack_test",
+    srcs = [
+        "accountkey_test.go",
+        "api_test.go",
+        "imds_test.go",
+        "openstack_test.go",
+        "plumbing_test.go",
+    ],
+    embed = [":openstack"],
+    deps = [
+        "//internal/cloud/metadata",
+        "//internal/role",
+        "@com_github_gophercloud_gophercloud_v2//:gophercloud",
+        "@com_github_gophercloud_gophercloud_v2//openstack/compute/v2/servers",
+        "@com_github_gophercloud_gophercloud_v2//openstack/networking/v2/networks",
+        "@com_github_gophercloud_gophercloud_v2//openstack/networking/v2/subnets",
+        "@com_github_gophercloud_gophercloud_v2//pagination",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+    ],
+)

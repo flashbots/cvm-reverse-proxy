@@ -1,0 +1,17 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "migration",
+    srcs = ["migration.go"],
+    importpath = "cvm-reverse-proxy/internal/config/migration",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/attestation/idkeydigest",
+        "//internal/attestation/measurements",
+        "//internal/config",
+        "//internal/file",
+        "//internal/role",
+        "//internal/semver",
+        "//internal/versions",
+    ],
+)

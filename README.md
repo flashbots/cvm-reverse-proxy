@@ -28,7 +28,23 @@ This application provides a reverse proxy with TLS termination, supporting confi
 
 ### Example Usage
 
-#### Running as Client
+#### Building the client
+
+```bash
+go build
+```
+
+### Running the server
+
+To run the application as a server, execute the following command:
+
+```bash
+sudo ./cvm-reverse-proxy -server -target-domain=<target-domain> -target-port=<target-port> -listen-port=<listen-port>
+```
+
+Replace `<target-domain>`, `<target-port>` and `<listen-port>` with appropriate values.
+
+#### Running as client
 
 To run the application as a client, execute the following command:
 
@@ -37,17 +53,12 @@ To run the application as a client, execute the following command:
 ```
 
 Replace `<target-domain>`, `<target-port>`, `<listen-port>`, and `<path-to-measurements-file>` with appropriate values.
-Running as Server
 
-To run the application as a server, execute the following command:
+You can start with an empty measurements file (i.e. `echo "{}" > measurements.json`)
 
-```bash
-./cvm-reverse-proxy -server -target-domain=<target-domain> -target-port=<target-port> -listen-port=<listen-port>
-```
 
-Replace `<target-domain>`, `<target-port>` and `<listen-port>` with appropriate values.
-License
+---
 
-## License
+## Notes
 
-This project is licensed under the [MIT License](LICENSE).
+- Files in `internal/` are copied from https://github.com/edgelesssys/constellation

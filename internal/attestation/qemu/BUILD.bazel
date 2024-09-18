@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "qemu",
+    srcs = [
+        "issuer.go",
+        "qemu.go",
+        "validator.go",
+    ],
+    importpath = "cvm-reverse-proxy/internal/attestation/qemu",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/attestation",
+        "//internal/attestation/variant",
+        "//internal/attestation/vtpm",
+        "//internal/config",
+        "@com_github_google_go_tpm//legacy/tpm2",
+        "@com_github_google_go_tpm_tools//client",
+        "@com_github_google_go_tpm_tools//proto/attest",
+    ],
+)

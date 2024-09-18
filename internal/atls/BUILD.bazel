@@ -1,0 +1,25 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("//bazel/go:go_test.bzl", "go_test")
+
+go_library(
+    name = "atls",
+    srcs = ["atls.go"],
+    importpath = "cvm-reverse-proxy/internal/atls",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/attestation/variant",
+        "//internal/crypto",
+    ],
+)
+
+go_test(
+    name = "atls_test",
+    srcs = ["atls_test.go"],
+    embed = [":atls"],
+    deps = [
+        "//internal/attestation/variant",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@org_uber_go_goleak//:goleak",
+    ],
+)
