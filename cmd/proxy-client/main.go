@@ -37,7 +37,7 @@ var flags []cli.Flag = []cli.Flag{
 	},
 	&cli.StringFlag{
 		Name:  "attestation-type",
-		Value: "azure",
+		Value: "azure-tdx",
 		Usage: "type of attestation to present (azure-tdx, dcap-tdx) [azure-tdx]",
 	},
 	&cli.BoolFlag{

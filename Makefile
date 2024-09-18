@@ -32,7 +32,7 @@ test-race:
 .PHONY: lint
 lint:
 	gofmt -d -s .
-	gofumpt -d -extra .
+	gofumpt -d -extra cmd common proxy tdx
 	go vet ./...
 	staticcheck ./...
 	golangci-lint run
@@ -40,9 +40,9 @@ lint:
 
 .PHONY: fmt
 fmt:
-	gofmt -s -w .
-	gci write .
-	gofumpt -w -extra .
+	gofmt -s -w cmd common proxy tdx
+	gci write cmd common proxy tdx
+	gofumpt -w -extra cmd common proxy tdx
 	go mod tidy
 
 .PHONY: gofumpt
