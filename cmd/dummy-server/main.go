@@ -6,10 +6,10 @@ import (
 )
 
 func getRoot(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, "checkcheck\n")
+	_, _ = io.WriteString(w, "checkcheck\n")
 }
 
 func main() {
 	http.HandleFunc("/", getRoot)
-	http.ListenAndServe(":8085", nil)
+	_ = http.ListenAndServe(":8085", nil)
 }

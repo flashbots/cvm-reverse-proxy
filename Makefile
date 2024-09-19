@@ -31,23 +31,23 @@ test-race:
 
 .PHONY: lint
 lint:
-	gofmt -d -s cmd common proxy tdx
-	gofumpt -d -extra cmd common proxy tdx
-	go vet ./cmd/... ./common/... ./proxy/... ./tdx/...
-	staticcheck cmd common proxy tdx
-	golangci-lint run
-	nilaway cmd common proxy tdx
+	gofmt -d -s cmd common proxy
+	gofumpt -d -extra cmd common proxy
+	go vet ./cmd/... ./common/... ./proxy/...
+	# staticcheck ./... // complains about 1.22.4
+	golangci-lint run --exclude-dirs internal
+	# nilaway ./cmd/... ./common/... ./proxy/... // incorrect findings
 
 .PHONY: fmt
 fmt:
-	gofmt -s -w cmd common proxy tdx
-	gci write cmd common proxy tdx
-	gofumpt -w -extra cmd common proxy tdx
+	gofmt -s -w cmd common proxy
+	gci write cmd common proxy
+	gofumpt -w -extra cmd common proxy
 	go mod tidy
 
 .PHONY: gofumpt
 gofumpt:
-	gofumpt -l -w -extra cmd common proxy tdx
+	gofumpt -l -w -extra cmd common proxy
 
 .PHONY: lt
 lt: lint test

@@ -16,12 +16,6 @@ import (
 	"github.com/urfave/cli/v2" // imports as package "cli"
 )
 
-const (
-	AttestationNone     string = "none"
-	AttestationAzureTDX string = "azure-tdx"
-	AttestationDCAPTDX  string = "dcap-tdx"
-)
-
 var flags []cli.Flag = []cli.Flag{
 	&cli.StringFlag{
 		Name:  "listen-addr",
@@ -35,13 +29,13 @@ var flags []cli.Flag = []cli.Flag{
 	},
 	&cli.StringFlag{
 		Name:  "server-attestation-type",
-		Value: AttestationAzureTDX,
-		Usage: "type of attestation to present (" + AttestationNone + ", " + AttestationAzureTDX + ", " + AttestationDCAPTDX + ")",
+		Value: string(proxy.AttestationAzureTDX),
+		Usage: "type of attestation to present (" + proxy.AvailableAttestationTypes + ")",
 	},
 	&cli.StringFlag{
 		Name:  "client-attestation-type",
-		Value: AttestationNone,
-		Usage: "type of attestation to expect and verify (" + AttestationNone + ", " + AttestationAzureTDX + ", " + AttestationDCAPTDX + ")",
+		Value: string(proxy.AttestationNone),
+		Usage: "type of attestation to expect and verify (" + proxy.AvailableAttestationTypes + ")",
 	},
 	&cli.StringFlag{
 		Name:  "client-measurements",
@@ -139,7 +133,10 @@ func server_side_tls_termination(cCtx *cli.Context) error {
 		<-exit
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
-		server.Shutdown(ctx)
+		err := server.Shutdown(ctx)
+		if err != nil {
+			log.Error("could not cleanly shutdown", "err", err)
+		}
 	}()
 
 	log.With("listenAddr", listenAddr).Info("about to start proxy")
