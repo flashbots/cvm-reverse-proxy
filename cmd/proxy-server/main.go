@@ -21,6 +21,9 @@ import (
 	"github.com/urfave/cli/v2" // imports as package "cli"
 )
 
+const AttestationAzureTDX string = "azure-tdx"
+const AttestationDCAPTDX string = "dcap-tdx"
+
 var flags []cli.Flag = []cli.Flag{
 	&cli.StringFlag{
 		Name:  "listen-addr",
@@ -34,8 +37,8 @@ var flags []cli.Flag = []cli.Flag{
 	},
 	&cli.StringFlag{
 		Name:  "attestation-type",
-		Value: "azure",
-		Usage: "type of attestation to present (azure-tdx, dcap-tdx) [azure-tdx]",
+		Value: AttestationAzureTDX,
+		Usage: "type of attestation to present (" + AttestationAzureTDX + ", " + AttestationDCAPTDX + ") [" + AttestationAzureTDX + "]",
 	},
 	&cli.BoolFlag{
 		Name:  "log-json",
@@ -82,12 +85,12 @@ func server_side_tls_termination(cCtx *cli.Context) error {
 	var issuer atls.Issuer
 	attestationType := cCtx.String("attestation-type")
 	switch attestationType {
-	case "azure-tdx":
+	case AttestationAzureTDX:
 		issuer = azure_tdx.NewIssuer(log)
-	case "dcap-tdx":
+	case AttestationDCAPTDX:
 		issuer = cvm_tdx.NewIssuer(log)
 	default:
-		log.With("attestation-type", attestationType).Error("invalid attestation-type passed, must be one of [azure-tdx, dcap-tdx]")
+		log.With("attestation-type", attestationType).Error("invalid attestation-type passed, see --help")
 		return errors.New("invalid attestation-type passed in")
 	}
 

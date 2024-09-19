@@ -19,6 +19,9 @@ import (
 	"github.com/urfave/cli/v2" // imports as package "cli"
 )
 
+const AttestationAzureTDX string = "azure-tdx"
+const AttestationDCAPTDX string = "dcap-tdx"
+
 var flags []cli.Flag = []cli.Flag{
 	&cli.StringFlag{
 		Name:  "listen-addr",
@@ -37,8 +40,8 @@ var flags []cli.Flag = []cli.Flag{
 	},
 	&cli.StringFlag{
 		Name:  "attestation-type",
-		Value: "azure-tdx",
-		Usage: "type of attestation to present (azure-tdx, dcap-tdx) [azure-tdx]",
+		Value: AttestationAzureTDX,
+		Usage: "type of attestation to present (" + AttestationDCAPTDX + ", " + AttestationDCAPTDX + ") [" + AttestationDCAPTDX + "]",
 	},
 	&cli.BoolFlag{
 		Name:  "log-json",
@@ -99,15 +102,15 @@ func client_side_tls_termination(cCtx *cli.Context) error {
 	// Create attested TLS config
 	validators := []atls.Validator{}
 	switch attestationType {
-	case "azure-tdx":
+	case AttestationAzureTDX:
 		attConfig := config.DefaultForAzureTDX()
 		attConfig.SetMeasurements(measurementsStruct)
 		validators = append(validators, azure_tdx.NewValidator(attConfig, proxy.AttestationLogger{}))
-	case "dcap-tdx":
+	case AttestationDCAPTDX:
 		attConfig := config.QEMUTDX{Measurements: measurementsStruct}
 		validators = append(validators, dcap_tdx.NewValidator(&attConfig, proxy.AttestationLogger{}))
 	default:
-		log.With("attestation-type", attestationType).Error("invalid attestation-type passed, must be one of [azure-tdx, dcap-tdx]")
+		log.With("attestation-type", attestationType).Error("invalid attestation-type passed, see --help")
 		return errors.New("invalid attestation-type passed in")
 	}
 
