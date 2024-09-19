@@ -23,11 +23,6 @@ var flags []cli.Flag = []cli.Flag{
 		Usage: "address to proxy requests to",
 	},
 	&cli.StringFlag{
-		Name:  "client-attestation-type",
-		Value: string(proxy.AttestationNone),
-		Usage: "type of attestation to present (" + proxy.AvailableAttestationTypes + ")",
-	},
-	&cli.StringFlag{
 		Name:  "server-attestation-type",
 		Value: string(proxy.AttestationAzureTDX),
 		Usage: "type of attestation to expect and verify (" + proxy.AvailableAttestationTypes + ")",
@@ -35,6 +30,11 @@ var flags []cli.Flag = []cli.Flag{
 	&cli.StringFlag{
 		Name:  "server-measurements",
 		Usage: "optional path to JSON measurements enforced on the server",
+	},
+	&cli.StringFlag{
+		Name:  "client-attestation-type",
+		Value: string(proxy.AttestationNone),
+		Usage: "type of attestation to present (" + proxy.AvailableAttestationTypes + ")",
 	},
 	&cli.BoolFlag{
 		Name:  "log-json",

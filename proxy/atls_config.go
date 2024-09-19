@@ -45,6 +45,10 @@ func CreateAttestationIssuer(log *slog.Logger, attestationType AttestationType) 
 }
 
 func CreateAttestationValidators(attestationType AttestationType, jsonMeasurementsPath string) ([]atls.Validator, error) {
+	if attestationType == AttestationNone {
+		return nil, nil
+	}
+
 	jsonMeasurements, err := os.ReadFile(jsonMeasurementsPath)
 	if err != nil {
 		return nil, err
@@ -57,8 +61,6 @@ func CreateAttestationValidators(attestationType AttestationType, jsonMeasuremen
 	}
 
 	switch attestationType {
-	case AttestationNone:
-		return nil, nil
 	case AttestationAzureTDX:
 		attConfig := config.DefaultForAzureTDX()
 		attConfig.SetMeasurements(measurementsStruct)

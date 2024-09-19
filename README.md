@@ -54,11 +54,9 @@ This repository contains a [dummy http server](./cmd/dummy-server/main.go) that 
 
 - `--listen-addr`: address to listen on (default: "127.0.0.1:8080")
 - `--target-addr`: address to proxy requests to (default: "https://localhost:80")
-- `--server-measurements`: path to JSON measurements
-- `--attestation-type`: type of attestation to present (azure-tdx) (default: "azure")
-- `--client-attestation-type`: type of attestation to present (none, azure-tdx) (default: "none")
 - `--server-attestation-type`: type of attestation to expect and verify (none, azure-tdx) (default: "azure-tdx")
 - `--server-measurements`: optional path to JSON measurements enforced on the server
+- `--client-attestation-type`: type of attestation to present (none, azure-tdx) (default: "none")
 - `--log-json`: log in JSON format (default: false)
 - `--log-debug`: log debug messages (default: false)
 - `--help, -h`: show help
@@ -73,7 +71,7 @@ make build-proxy-client
 #### Run the client
 
 ```bash
-./build/proxy-client --listen-addr=<listen-addr> --target-addr=<target-addr> --measurements=<measurements-fule> [--attestation-type=<attestation-type>]
+./build/proxy-client --listen-addr=<listen-addr> --target-addr=<target-addr> [--server-measurements=<server-measurements-file>] [--server-attestation-type=<server-attestation-type>] [--client-attestation-type=<client-attestation-type>]
 ```
 
 By default the client will expect the server to present an Azure TDX attestation, and you can modify that via the `--server-attestation-type` and  `--server-measurements` flags.
