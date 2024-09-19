@@ -21,11 +21,9 @@ This application provides a reverse proxy with TLS termination, supporting confi
 
 - `--listen-addr`: address to listen on (default: "127.0.0.1:8080")
 - `--target-addr`: address to proxy requests to (default: "https://localhost:80")
-- `--attestation-type`: type of attestation to present (azure-tdx, dcap-tdx) (default: "azure")
-- `--client-measurements`: path to JSON measurements enforced on connecting clients
-   --server-attestation-type value  type of attestation to present (none, azure-tdx, dcap-tdx) (default: "azure-tdx")
-   --client-attestation-type value  type of attestation to expect and verify (none, azure-tdx, dcap-tdx) (default: "none")
-   --client-measurements value      optional path to JSON measurements enforced on the client
+- `--server-attestation-type`: type of attestation to present (none, azure-tdx) (default: "azure-tdx")
+- `--client-attestation-type`: type of attestation to expect and verify (none, azure-tdx) (default: "none")
+- `--client-measurements`: optional path to JSON measurements enforced on the client
 - `--log-json`: log in JSON format (default: false)
 - `--log-debug`: log debug messages (default: false)
 - `--help, -h`: show help
@@ -57,10 +55,10 @@ This repository contains a [dummy http server](./cmd/dummy-server/main.go) that 
 - `--listen-addr`: address to listen on (default: "127.0.0.1:8080")
 - `--target-addr`: address to proxy requests to (default: "https://localhost:80")
 - `--server-measurements`: path to JSON measurements
-- `--attestation-type`: type of attestation to present (azure-tdx, dcap-tdx) (default: "azure")
-   --client-attestation-type value  type of attestation to present (none, azure-tdx, dcap-tdx) (default: "none")
-   --server-attestation-type value  type of attestation to expect and verify (none, azure-tdx, dcap-tdx) (default: "azure-tdx")
-   --server-measurements value      optional path to JSON measurements enforced on the server
+- `--attestation-type`: type of attestation to present (azure-tdx) (default: "azure")
+- `--client-attestation-type`: type of attestation to present (none, azure-tdx) (default: "none")
+- `--server-attestation-type`: type of attestation to expect and verify (none, azure-tdx) (default: "azure-tdx")
+- `--server-measurements`: optional path to JSON measurements enforced on the server
 - `--log-json`: log in JSON format (default: false)
 - `--log-debug`: log debug messages (default: false)
 - `--help, -h`: show help
