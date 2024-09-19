@@ -153,6 +153,8 @@ github.com/edgelesssys/constellation/v2 v2.17.0 h1:F8USbhB/ZfvEA4myRxSflz/8wzsDb
 github.com/edgelesssys/constellation/v2 v2.17.0/go.mod h1:wRcABpDM9CpKWr1utudPv7UTyOIlCWIjjN5WdX3Jv+E=
 github.com/edgelesssys/go-azguestattestation v0.0.0-20240513062303-05f8770a633d h1:XcoMVhZve0RRkSxFDn9Bs/z4FpHqZ3eHgVNWNCNOkqc=
 github.com/edgelesssys/go-azguestattestation v0.0.0-20240513062303-05f8770a633d/go.mod h1:Lz4QaomI4wU2YbatD4/W7vatW2Q35tnkoJezB1clscc=
+github.com/edgelesssys/go-tdx-qpl v0.0.0-20240123150912-dcad3c41ec5f h1:TCGUmmH50cQBGXPJsn32APf93fmWQXcSMi7pMbDPtV0=
+github.com/edgelesssys/go-tdx-qpl v0.0.0-20240123150912-dcad3c41ec5f/go.mod h1:IC72qyykUIWl0ZmSk53L4xbLCFDBEGZVaujUmPQOEyw=
 github.com/emicklei/go-restful/v3 v3.11.0 h1:rAQeMHw1c7zTmncogyy8VvRZwtkmkZ4FxERmMY4rD+g=
 github.com/emicklei/go-restful/v3 v3.11.0/go.mod h1:6n3XBCmQQb25CM2LCACGz8ukIrRry+4bhvbpWn3mrbc=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
@@ -424,8 +426,6 @@ github.com/rogpeppe/go-internal v1.12.0 h1:exVL4IDcn6na9z1rAb56Vxr+CgyK3nn3O+epU
 github.com/rogpeppe/go-internal v1.12.0/go.mod h1:E+RYuTGaKKdloAfM02xzb0FW3Paa99yedzYV+kq4uf4=
 github.com/russross/blackfriday/v2 v2.1.0 h1:JIOH55/0cWyOuilr9/qlrm0BSXldqnqwMsf35Ld67mk=
 github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
-github.com/ruteri/go-tdx-qpl v0.0.0-20240705142333-1da84ccf7c1b h1:J9PSLtp+c+p54rpek86oSe0UUzry/Ygo0x0C2kZJUFg=
-github.com/ruteri/go-tdx-qpl v0.0.0-20240705142333-1da84ccf7c1b/go.mod h1:IC72qyykUIWl0ZmSk53L4xbLCFDBEGZVaujUmPQOEyw=
 github.com/sassoftware/relic v7.2.1+incompatible h1:Pwyh1F3I0r4clFJXkSI8bOyJINGqpgjJU3DYAZeI05A=
 github.com/sassoftware/relic v7.2.1+incompatible/go.mod h1:CWfAxv73/iLZ17rbyhIEq3K9hs5w6FpNMdUT//qR+zk=
 github.com/sassoftware/relic/v7 v7.6.2 h1:rS44Lbv9G9eXsukknS4mSjIAuuX+lMq/FnStgmZlUv4=

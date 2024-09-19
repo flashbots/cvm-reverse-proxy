@@ -1,7 +1,6 @@
 package proxy
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -33,14 +32,4 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL)
 	r.Host = p.target.Host
 	p.proxy.ServeHTTP(w, r)
-}
-
-type AttestationLogger struct{}
-
-func (w AttestationLogger) Info(format string, args ...any) {
-	log.Print(fmt.Sprintf(format, args...))
-}
-
-func (w AttestationLogger) Warn(format string, args ...any) {
-	log.Print(fmt.Sprintf(format, args...))
 }

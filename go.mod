@@ -244,5 +244,3 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
-
-replace github.com/edgelesssys/go-tdx-qpl => github.com/ruteri/go-tdx-qpl v0.0.0-20240705142333-1da84ccf7c1b

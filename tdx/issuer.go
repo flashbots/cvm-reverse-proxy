@@ -7,7 +7,6 @@ import (
 
 	"cvm-reverse-proxy/internal/attestation"
 	"cvm-reverse-proxy/internal/attestation/variant"
-
 	"github.com/google/go-tdx-guest/client"
 )
 
@@ -29,7 +28,7 @@ func NewIssuer(log attestation.Logger) *Issuer {
 }
 
 // Issue issues a TDX attestation document.
-func (i *Issuer) Issue(_ context.Context, userData []byte, nonce []byte) (attDoc []byte, err error) {
+func (i *Issuer) Issue(_ context.Context, userData, nonce []byte) (attDoc []byte, err error) {
 	i.log.Info("Issuing attestation statement")
 	defer func() {
 		if err != nil {

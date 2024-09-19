@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"errors"
 	"log"
 	"net/http"
 	"os"
@@ -11,18 +10,17 @@ import (
 	"syscall"
 	"time"
 
-	"cvm-reverse-proxy/internal/atls"
-	azure_tdx "cvm-reverse-proxy/internal/attestation/azure/tdx"
-
 	"cvm-reverse-proxy/common"
+	"cvm-reverse-proxy/internal/atls"
 	"cvm-reverse-proxy/proxy"
-	cvm_tdx "cvm-reverse-proxy/tdx"
-
 	"github.com/urfave/cli/v2" // imports as package "cli"
 )
 
-const AttestationAzureTDX string = "azure-tdx"
-const AttestationDCAPTDX string = "dcap-tdx"
+const (
+	AttestationNone     string = "none"
+	AttestationAzureTDX string = "azure-tdx"
+	AttestationDCAPTDX  string = "dcap-tdx"
+)
 
 var flags []cli.Flag = []cli.Flag{
 	&cli.StringFlag{
@@ -36,9 +34,18 @@ var flags []cli.Flag = []cli.Flag{
 		Usage: "address to proxy requests to",
 	},
 	&cli.StringFlag{
-		Name:  "attestation-type",
+		Name:  "server-attestation-type",
 		Value: AttestationAzureTDX,
-		Usage: "type of attestation to present (" + AttestationAzureTDX + ", " + AttestationDCAPTDX + ") [" + AttestationAzureTDX + "]",
+		Usage: "type of attestation to present (" + AttestationNone + ", " + AttestationAzureTDX + ", " + AttestationDCAPTDX + ")",
+	},
+	&cli.StringFlag{
+		Name:  "client-attestation-type",
+		Value: AttestationNone,
+		Usage: "type of attestation to expect and verify (" + AttestationNone + ", " + AttestationAzureTDX + ", " + AttestationDCAPTDX + ")",
+	},
+	&cli.StringFlag{
+		Name:  "client-measurements",
+		Usage: "optional path to JSON measurements enforced on the client",
 	},
 	&cli.BoolFlag{
 		Name:  "log-json",
@@ -68,33 +75,44 @@ func main() {
 func server_side_tls_termination(cCtx *cli.Context) error {
 	listenAddr := cCtx.String("listen-addr")
 	targetAddr := cCtx.String("target-addr")
+	clientMeasurements := cCtx.String("client-measurements")
 	logJSON := cCtx.Bool("log-json")
 	logDebug := cCtx.Bool("log-debug")
-	logService := cCtx.String("proxy-server")
 
 	log := common.SetupLogger(&common.LoggingOpts{
 		Debug:   logDebug,
 		JSON:    logJSON,
-		Service: logService,
+		Service: "proxy-server",
 		Version: common.Version,
 	})
 
-	proxy := proxy.NewProxy(targetAddr)
-
-	// Create attested TLS config
-	var issuer atls.Issuer
-	attestationType := cCtx.String("attestation-type")
-	switch attestationType {
-	case AttestationAzureTDX:
-		issuer = azure_tdx.NewIssuer(log)
-	case AttestationDCAPTDX:
-		issuer = cvm_tdx.NewIssuer(log)
-	default:
-		log.With("attestation-type", attestationType).Error("invalid attestation-type passed, see --help")
-		return errors.New("invalid attestation-type passed in")
+	serverAttestationType, err := proxy.ParseAttestationType(cCtx.String("server-attestation-type"))
+	if err != nil {
+		log.With("attestation-type", cCtx.String("server-attestation-type")).Error("invalid server-attestation-type passed, see --help")
+		return err
 	}
 
-	confTLS, err := atls.CreateAttestationServerTLSConfig(issuer, nil)
+	clientAttestationType, err := proxy.ParseAttestationType(cCtx.String("client-attestation-type"))
+	if err != nil {
+		log.With("attestation-type", cCtx.String("client-attestation-type")).Error("invalid client-attestation-type passed, see --help")
+		return err
+	}
+
+	proxyHandler := proxy.NewProxy(targetAddr)
+
+	issuer, err := proxy.CreateAttestationIssuer(log, serverAttestationType)
+	if err != nil {
+		log.Error("could not create attestation issuer", "err", err)
+		return err
+	}
+
+	validators, err := proxy.CreateAttestationValidators(clientAttestationType, clientMeasurements)
+	if err != nil {
+		log.Error("could not create attestation validators", "err", err)
+		return err
+	}
+
+	confTLS, err := atls.CreateAttestationServerTLSConfig(issuer, validators)
 	if err != nil {
 		panic(err)
 	}
@@ -102,7 +120,7 @@ func server_side_tls_termination(cCtx *cli.Context) error {
 	// Create an HTTP server
 	server := &http.Server{
 		Addr:      listenAddr,
-		Handler:   proxy,
+		Handler:   proxyHandler,
 		TLSConfig: confTLS,
 	}
 

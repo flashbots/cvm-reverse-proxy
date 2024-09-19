@@ -31,12 +31,12 @@ test-race:
 
 .PHONY: lint
 lint:
-	gofmt -d -s .
+	gofmt -d -s cmd common proxy tdx
 	gofumpt -d -extra cmd common proxy tdx
-	go vet ./...
-	staticcheck ./...
+	go vet ./cmd/... ./common/... ./proxy/... ./tdx/...
+	staticcheck cmd common proxy tdx
 	golangci-lint run
-	nilaway ./...
+	nilaway cmd common proxy tdx
 
 .PHONY: fmt
 fmt:
@@ -47,7 +47,7 @@ fmt:
 
 .PHONY: gofumpt
 gofumpt:
-	gofumpt -l -w -extra .
+	gofumpt -l -w -extra cmd common proxy tdx
 
 .PHONY: lt
 lt: lint test
