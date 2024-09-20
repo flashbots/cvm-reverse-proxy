@@ -15,47 +15,70 @@ This application provides a reverse proxy with TLS termination, supporting confi
 - TDX support only, SEV-SNP can be added
 - uses edgeless systems [constellation](https://github.com/edgelesssys/constellation) codebase to provide attestation on Azure using MAA
 
-## Usage
+## proxy-server
 
-### Command-line Flags
+### Command line arguments
 
-- `-client`: Set to true if running as a client.
-- `-server`: Set to true if running as a server.
-- `-target-port`: Target port number.
-- `-target-domain`: Target domain.
-- `-listen-port`: Listen port number.
-- `-measurements`: Path to JSON Attestation Measurement file.
+- `--listen-addr`: address to listen on (default: "127.0.0.1:8080")
+- `--target-addr`: address to proxy requests to (default: "https://localhost:80")
+- `--server-attestation-type`: type of attestation to present (none, azure-tdx) (default: "azure-tdx")
+- `--client-attestation-type`: type of attestation to expect and verify (none, azure-tdx) (default: "none")
+- `--client-measurements`: optional path to JSON measurements enforced on the client
+- `--log-json`: log in JSON format (default: false)
+- `--log-debug`: log debug messages (default: false)
+- `--help, -h`: show help
 
-### Example Usage
 
-#### Building the client
-
-```bash
-go build
-```
-
-### Running the server
-
-To run the application as a server, execute the following command:
+### Build the server
 
 ```bash
-sudo ./cvm-reverse-proxy -server -target-domain=<target-domain> -target-port=<target-port> -listen-port=<listen-port>
+make build-proxy-server
 ```
 
-Replace `<target-domain>`, `<target-port>` and `<listen-port>` with appropriate values.
-
-#### Running as client
-
-To run the application as a client, execute the following command:
+### Run the server
 
 ```bash
-./cvm-reverse-proxy -client -target-domain=<target-domain> -target-port=<target-port> -listen-port=<listen-port> -measurements=<path-to-measurements-file>
+sudo ./build/proxy-server --listen-addr=<listen-addr> --target-addr=<target-addr> [--server-attestation-type=<server-attestation-type>] [--client-attestation-type=<client-attestation-type>] [--client-measurements=<client-measurements>]
 ```
 
-Replace `<target-domain>`, `<target-port>`, `<listen-port>`, and `<path-to-measurements-file>` with appropriate values.
+By default the server will present Azure TDX attestation, and you can modify that via the `--server-attestation-type` flag.
 
-You can start with an empty measurements file (i.e. `echo "{}" > measurements.json`)
+By default the server will not verify client attestations, you can change that via `--client-attestation-type` and `--client-measurements` flags.
 
+
+This repository contains a [dummy http server](./cmd/dummy-server/main.go) that you can use for testing the server. Simply run `go run ./cmd/dummy-server/main.go` and point your `--target-addr=http://127.0.0.1:8085`. You can also use the sample [measurements.json](./measurements.json).
+
+## proxy-client
+
+### Command line arguments
+
+- `--listen-addr`: address to listen on (default: "127.0.0.1:8080")
+- `--target-addr`: address to proxy requests to (default: "https://localhost:80")
+- `--server-attestation-type`: type of attestation to expect and verify (none, azure-tdx) (default: "azure-tdx")
+- `--server-measurements`: optional path to JSON measurements enforced on the server
+- `--client-attestation-type`: type of attestation to present (none, azure-tdx) (default: "none")
+- `--log-json`: log in JSON format (default: false)
+- `--log-debug`: log debug messages (default: false)
+- `--help, -h`: show help
+
+
+#### Build the client
+
+```bash
+make build-proxy-client
+```
+
+#### Run the client
+
+```bash
+./build/proxy-client --listen-addr=<listen-addr> --target-addr=<target-addr> [--server-measurements=<server-measurements-file>] [--server-attestation-type=<server-attestation-type>] [--client-attestation-type=<client-attestation-type>]
+```
+
+By default the client will expect the server to present an Azure TDX attestation, and you can modify that via the `--server-attestation-type` and  `--server-measurements` flags.
+
+By default the client will not present client attestations, you can change that via `--client-attestation-type` flag.
+
+This repository contains a sample [measurements.json](./measurements.json) file that you can use. The client will (correctly) complain about unexpected measurements that you can then correct.
 
 ---
 

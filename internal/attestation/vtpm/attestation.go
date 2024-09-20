@@ -16,12 +16,13 @@ import (
 	"io"
 	"slices"
 
-	"github.com/google/go-sev-guest/proto/sevsnp"
+	// "github.com/google/go-sev-guest/proto/sevsnp"
 	tpmClient "github.com/google/go-tpm-tools/client"
 	"github.com/google/go-tpm-tools/proto/attest"
 	tpmProto "github.com/google/go-tpm-tools/proto/tpm"
 	tpmServer "github.com/google/go-tpm-tools/server"
 	"github.com/google/go-tpm/legacy/tpm2"
+		tdxproto "github.com/google/go-tdx-guest/proto/tdx"
 
 	"cvm-reverse-proxy/internal/attestation"
 	"cvm-reverse-proxy/internal/attestation/measurements"
@@ -196,14 +197,15 @@ func (v *Validator) Validate(ctx context.Context, attDocRaw []byte, nonce []byte
 	// TODO(msanft): select the correct attestation type (SEV-SNP, TDX, ...) here.
 	attDoc := AttestationDocument{
 		Attestation: &attest.Attestation{
-			TeeAttestation: &attest.Attestation_SevSnpAttestation{
-				SevSnpAttestation: &sevsnp.Attestation{},
+			TeeAttestation: &attest.Attestation_TdxAttestation{
+				TdxAttestation: &tdxproto.QuoteV4{},
 			},
 		},
 	}
 	if err := json.Unmarshal(attDocRaw, &attDoc); err != nil {
 		return nil, fmt.Errorf("unmarshaling TPM attestation document: %w", err)
 	}
+	v.log.Warn(fmt.Sprintf("Attestation document: %s", string(attDocRaw)))
 
 	extraData := attestation.MakeExtraData(attDoc.UserData, nonce)
 
