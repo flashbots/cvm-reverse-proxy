@@ -58,7 +58,7 @@ func main() {
 		Name:   "proxy-server",
 		Usage:  "Serve API, and metrics",
 		Flags:  flags,
-		Action: server_side_tls_termination,
+		Action: run_server,
 	}
 
 	if err := app.Run(os.Args); err != nil {
@@ -66,7 +66,7 @@ func main() {
 	}
 }
 
-func server_side_tls_termination(cCtx *cli.Context) error {
+func run_server(cCtx *cli.Context) error {
 	listenAddr := cCtx.String("listen-addr")
 	targetAddr := cCtx.String("target-addr")
 	clientMeasurements := cCtx.String("client-measurements")
