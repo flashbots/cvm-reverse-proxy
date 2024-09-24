@@ -12,8 +12,10 @@ import (
 
 	"github.com/flashbots/cvm-reverse-proxy/internal/atls"
 	azure_tdx "github.com/flashbots/cvm-reverse-proxy/internal/attestation/azure/tdx"
+	dcap_tdx "github.com/flashbots/cvm-reverse-proxy/tdx"
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/measurements"
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/cloudprovider"
 	"github.com/flashbots/cvm-reverse-proxy/internal/config"
 )
 
@@ -22,9 +24,10 @@ type AttestationType string
 const (
 	AttestationNone     AttestationType = "none"
 	AttestationAzureTDX AttestationType = "azure-tdx"
+	AttestationDCAPTDX  AttestationType = "dcap-tdx"
 )
 
-const AvailableAttestationTypes string = "none, azure-tdx"
+const AvailableAttestationTypes string = "none, azure-tdx, dcap-tdx"
 
 func ParseAttestationType(attestationType string) (AttestationType, error) {
 	switch attestationType {
@@ -32,6 +35,8 @@ func ParseAttestationType(attestationType string) (AttestationType, error) {
 		return AttestationNone, nil
 	case string(AttestationAzureTDX):
 		return AttestationAzureTDX, nil
+	case string(AttestationDCAPTDX):
+		return AttestationDCAPTDX, nil
 	default:
 		return AttestationType(""), errors.New("invalid attestation-type passed in")
 	}
@@ -43,6 +48,8 @@ func CreateAttestationIssuer(log *slog.Logger, attestationType AttestationType) 
 		return nil, nil
 	case AttestationAzureTDX:
 		return azure_tdx.NewIssuer(log), nil
+	case AttestationDCAPTDX:
+		return dcap_tdx.NewIssuer(log), nil
 	default:
 		return nil, errors.New("invalid attestation-type passed in")
 	}
@@ -73,6 +80,14 @@ func CreateAttestationValidators(log *slog.Logger, attestationType AttestationTy
 			validators = append(validators, azure_tdx.NewValidator(attConfig, AttestationLogger{Log: log}))
 		}
 		return []atls.Validator{NewMultiValidator(validators)}, nil
+	case AttestationDCAPTDX:
+		validators := []atls.Validator{}
+		for _, measurement := range parsedMeasurements {
+			attConfig := &config.QEMUTDX{Measurements: measurements.DefaultsFor(cloudprovider.QEMU, variant.QEMUTDX{})}
+			attConfig.SetMeasurements(measurement)
+			validators = append(validators, dcap_tdx.NewValidator(attConfig, AttestationLogger{Log: log}))
+		}
+		return []atls.Validator{NewMultiValidator(validators)}, nil
 	default:
 		return nil, errors.New("invalid attestation-type passed in")
 	}
@@ -82,6 +97,12 @@ func ExtractMeasurementsFromExtension(ext *pkix.Extension, v variant.Variant) (m
 	switch v {
 	case variant.AzureTDX{}:
 		measurements, err := azure_tdx.ParseAzureTDXAttestationMeasurements(ext.Value)
+		if err != nil {
+			return nil, errors.New("could not parse measurements from raw attestations document")
+		}
+		return measurements, nil
+	case variant.QEMUTDX{}:
+		measurements, err := dcap_tdx.ParseDcapTDXAttestationMeasurementsRaw(ext.Value)
 		if err != nil {
 			return nil, errors.New("could not parse measurements from raw attestations document")
 		}
