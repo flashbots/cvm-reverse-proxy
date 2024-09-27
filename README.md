@@ -18,12 +18,12 @@ This application provides a reverse proxy with TLS termination, supporting confi
 ## Modes of operation
 
 Server
-- TCP/HTTP server with aTLS on the server side, to allow client verify the server measurement (with client supporting one or more multiple measurements)
+- TCP/HTTP server with aTLS on the server side, to allow client verify the server measurement.
 - TCP/HTTP server that verifies the client (via client-side aTLS certificate). The measurement is passed along to the proxy target as header.
 
 Client
-- Client making a request, verifying server aTLS
-- Client making a request with a client-side aTLS cert
+- Client making a request, verifying server aTLS (supporting one or multiple whitelisted measurements).
+- Client making a request with a client-side aTLS cert.
 
 ---
 
