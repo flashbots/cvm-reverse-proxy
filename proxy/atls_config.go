@@ -54,7 +54,7 @@ func CreateAttestationValidators(attestationType AttestationType, jsonMeasuremen
 		return nil, err
 	}
 
-	var parsedMeasurements []measurements.M
+	parsedMeasurements := make(map[string]measurements.M)
 	err = json.Unmarshal(jsonMeasurements, &parsedMeasurements)
 	if err != nil {
 		return nil, err

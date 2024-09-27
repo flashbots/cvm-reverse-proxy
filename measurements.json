@@ -1,5 +1,5 @@
-[
-	{
+{
+	"azure-tdx-example": {
 		"11": {
 			"expected": "efa43e0beff151b0f251c4abf48152382b1452b4414dbd737b4127de05ca31f7"
 		},
@@ -22,4 +22,4 @@
 			"expected": "c9f429296634072d1063a03fb287bed0b2d177b0a504755ad9194cffd90b2489"
 		}
 	}
-]
+}
