@@ -10,6 +10,8 @@ This application provides a reverse proxy with TLS termination, supporting confi
 - Server-side TLS termination with confidentialVM attestation verification.
 - Reverse proxy functionality to forward requests between client and server.
 
+Both the client-side and the server-side TLS termination can be separately configured to provide attestations and verify attestations.
+
 ## Limitations
 
 - TDX support only, SEV-SNP can be added
@@ -79,6 +81,12 @@ By default the client will expect the server to present an Azure TDX attestation
 By default the client will not present client attestations, you can change that via `--client-attestation-type` flag.
 
 This repository contains a sample [measurements.json](./measurements.json) file that you can use. The client will (correctly) complain about unexpected measurements that you can then correct.
+
+
+## Measurements
+
+Attestation verification requires the expected measurements which you pass through the `--{client, server}-measurements` flag.  
+The measurements are expected to be a JSON map, and multiple valid measurements can be provided. The verifier will attempt to verify with each of the provided measurements, and if any succeeds, the attestation is assumed valid.
 
 ---
 
