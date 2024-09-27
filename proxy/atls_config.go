@@ -54,17 +54,21 @@ func CreateAttestationValidators(attestationType AttestationType, jsonMeasuremen
 		return nil, err
 	}
 
-	var measurementsStruct measurements.M
-	err = json.Unmarshal(jsonMeasurements, &measurementsStruct)
+	var parsedMeasurements []measurements.M
+	err = json.Unmarshal(jsonMeasurements, &parsedMeasurements)
 	if err != nil {
 		return nil, err
 	}
 
 	switch attestationType {
 	case AttestationAzureTDX:
-		attConfig := config.DefaultForAzureTDX()
-		attConfig.SetMeasurements(measurementsStruct)
-		return []atls.Validator{azure_tdx.NewValidator(attConfig, AttestationLogger{})}, nil
+		validators := []atls.Validator{}
+		for _, measurement := range parsedMeasurements {
+			attConfig := config.DefaultForAzureTDX()
+			attConfig.SetMeasurements(measurement)
+			validators = append(validators, azure_tdx.NewValidator(attConfig, AttestationLogger{}))
+		}
+		return []atls.Validator{NewMultiValidator(validators)}, nil
 	default:
 		return nil, errors.New("invalid attestation-type passed in")
 	}
