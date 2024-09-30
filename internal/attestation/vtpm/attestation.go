@@ -17,12 +17,12 @@ import (
 	"slices"
 
 	// "github.com/google/go-sev-guest/proto/sevsnp"
+	tdxproto "github.com/google/go-tdx-guest/proto/tdx"
 	tpmClient "github.com/google/go-tpm-tools/client"
 	"github.com/google/go-tpm-tools/proto/attest"
 	tpmProto "github.com/google/go-tpm-tools/proto/tpm"
 	tpmServer "github.com/google/go-tpm-tools/server"
 	"github.com/google/go-tpm/legacy/tpm2"
-		tdxproto "github.com/google/go-tdx-guest/proto/tdx"
 
 	"cvm-reverse-proxy/internal/attestation"
 	"cvm-reverse-proxy/internal/attestation/measurements"
@@ -179,6 +179,25 @@ func NewValidator(expected measurements.M, getTrustedKey GetTPMTrustedAttestatio
 		validateCVM:   validateCVM,
 		log:           log,
 	}
+}
+
+func ParseAzureTDXAttestationMeasurements(attDocRaw []byte) (map[uint32][]byte, error) {
+	attDoc := AttestationDocument{
+		Attestation: &attest.Attestation{
+			TeeAttestation: &attest.Attestation_TdxAttestation{
+				TdxAttestation: &tdxproto.QuoteV4{},
+			},
+		},
+	}
+	if err := json.Unmarshal(attDocRaw, &attDoc); err != nil {
+		return nil, fmt.Errorf("unmarshaling TPM attestation document: %w", err)
+	}
+
+	quoteIdx, err := GetSHA256QuoteIndex(attDoc.Attestation.Quotes)
+	if err != nil {
+		return nil, err
+	}
+	return attDoc.Attestation.Quotes[quoteIdx].Pcrs.Pcrs, nil
 }
 
 // Validate a TPM based attestation.

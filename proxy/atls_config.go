@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"crypto/x509/pkix"
 	"encoding/json"
 	"errors"
 	"log"
@@ -10,6 +11,7 @@ import (
 	"cvm-reverse-proxy/internal/atls"
 	azure_tdx "cvm-reverse-proxy/internal/attestation/azure/tdx"
 	"cvm-reverse-proxy/internal/attestation/measurements"
+	"cvm-reverse-proxy/internal/attestation/variant"
 	"cvm-reverse-proxy/internal/config"
 )
 
@@ -71,6 +73,24 @@ func CreateAttestationValidators(attestationType AttestationType, jsonMeasuremen
 		return []atls.Validator{NewMultiValidator(validators)}, nil
 	default:
 		return nil, errors.New("invalid attestation-type passed in")
+	}
+}
+
+func ExtractExtensionATLSVariant(ext *pkix.Extension) (variant.Variant, error) {
+	return variant.FromString(ext.Id.String())
+}
+
+func ExtractMeasurementsFromExtension(ext *pkix.Extension, v variant.Variant) (map[uint32][]byte, error) {
+	switch v {
+	case variant.AzureTDX{}:
+		// TODO: make sure that all extensions had their quotes validated at this point!
+		measurements, err := azure_tdx.ParseAzureTDXAttestationMeasurements(ext.Value)
+		if err != nil {
+			return nil, errors.New("could not parse measurements from raw attestations document")
+		}
+		return measurements, nil
+	default:
+		return nil, errors.New("unsupported ATLS variant!")
 	}
 }
 
