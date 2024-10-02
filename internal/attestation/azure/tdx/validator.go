@@ -123,3 +123,5 @@ func (v *Validator) validateQuote(tdxQuote *tdx.QuoteV4) error {
 type hclAkValidator interface {
 	Validate(runtimeDataRaw []byte, reportData []byte, rsaParameters *tpm2.RSAParams) error
 }
+
+var ParseAzureTDXAttestationMeasurements = vtpm.ParseAzureTDXAttestationMeasurements

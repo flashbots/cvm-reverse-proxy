@@ -92,7 +92,11 @@ func run_server(cCtx *cli.Context) error {
 		return err
 	}
 
-	proxyHandler := proxy.NewProxy(targetAddr)
+	validators, err := proxy.CreateAttestationValidators(log, clientAttestationType, clientMeasurements)
+	if err != nil {
+		log.Error("could not create attestation validators", "err", err)
+		return err
+	}
 
 	issuer, err := proxy.CreateAttestationIssuer(log, serverAttestationType)
 	if err != nil {
@@ -100,11 +104,7 @@ func run_server(cCtx *cli.Context) error {
 		return err
 	}
 
-	validators, err := proxy.CreateAttestationValidators(clientAttestationType, clientMeasurements)
-	if err != nil {
-		log.Error("could not create attestation validators", "err", err)
-		return err
-	}
+	proxyHandler := proxy.NewProxy(targetAddr, validators)
 
 	confTLS, err := atls.CreateAttestationServerTLSConfig(issuer, validators)
 	if err != nil {

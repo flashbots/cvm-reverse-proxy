@@ -1,15 +1,18 @@
 package proxy
 
 import (
+	"context"
+	"crypto/x509/pkix"
 	"encoding/json"
 	"errors"
-	"log"
+	"fmt"
 	"log/slog"
 	"os"
 
 	"cvm-reverse-proxy/internal/atls"
 	azure_tdx "cvm-reverse-proxy/internal/attestation/azure/tdx"
 	"cvm-reverse-proxy/internal/attestation/measurements"
+	"cvm-reverse-proxy/internal/attestation/variant"
 	"cvm-reverse-proxy/internal/config"
 )
 
@@ -44,7 +47,7 @@ func CreateAttestationIssuer(log *slog.Logger, attestationType AttestationType) 
 	}
 }
 
-func CreateAttestationValidators(attestationType AttestationType, jsonMeasurementsPath string) ([]atls.Validator, error) {
+func CreateAttestationValidators(log *slog.Logger, attestationType AttestationType, jsonMeasurementsPath string) ([]atls.Validator, error) {
 	if attestationType == AttestationNone {
 		return nil, nil
 	}
@@ -66,7 +69,7 @@ func CreateAttestationValidators(attestationType AttestationType, jsonMeasuremen
 		for _, measurement := range parsedMeasurements {
 			attConfig := config.DefaultForAzureTDX()
 			attConfig.SetMeasurements(measurement)
-			validators = append(validators, azure_tdx.NewValidator(attConfig, AttestationLogger{}))
+			validators = append(validators, azure_tdx.NewValidator(attConfig, AttestationLogger{Log: log}))
 		}
 		return []atls.Validator{NewMultiValidator(validators)}, nil
 	default:
@@ -74,12 +77,27 @@ func CreateAttestationValidators(attestationType AttestationType, jsonMeasuremen
 	}
 }
 
-type AttestationLogger struct{}
+func ExtractMeasurementsFromExtension(ext *pkix.Extension, v variant.Variant) (map[uint32][]byte, error) {
+	switch v {
+	case variant.AzureTDX{}:
+		measurements, err := azure_tdx.ParseAzureTDXAttestationMeasurements(ext.Value)
+		if err != nil {
+			return nil, errors.New("could not parse measurements from raw attestations document")
+		}
+		return measurements, nil
+	default:
+		return nil, errors.New("unsupported ATLS variant!")
+	}
+}
+
+type AttestationLogger struct {
+	Log *slog.Logger
+}
 
 func (w AttestationLogger) Info(format string, args ...any) {
-	log.Printf(format, args...)
+	w.Log.Log(context.TODO(), slog.LevelInfo, fmt.Sprintf(format, args...))
 }
 
 func (w AttestationLogger) Warn(format string, args ...any) {
-	log.Printf(format, args...)
+	w.Log.Log(context.TODO(), slog.LevelWarn, fmt.Sprintf(format, args...))
 }

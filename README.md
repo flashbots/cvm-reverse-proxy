@@ -22,10 +22,12 @@ Both the client-side and the server-side TLS termination can be separately confi
 Server
 - TCP/HTTP server with aTLS on the server side, to allow client verify the server measurement.
 - TCP/HTTP server that verifies the client (via client-side aTLS certificate). The measurement is passed along to the proxy target as header.
+- TCP/HTTP server that performs mutual attestation, that is it both provides its own attestation, and verifies the client. The *client's* measurement is forwarded as a header.
 
 Client
-- Client making a request, verifying server aTLS (supporting one or multiple whitelisted measurements).
+- Client making a request, verifying server aTLS (supporting one or multiple whitelisted measurements). The *server's* measurement is returned as a header.
 - Client making a request with a client-side aTLS cert.
+- Client making a request mutual attestation, both verifying server aTLS and providing the client-side aTLS handshake. The *sever's* measurement is returned as a header.
 
 ---
 
@@ -98,7 +100,10 @@ This repository contains a sample [measurements.json](./measurements.json) file 
 ## Measurements
 
 Attestation verification requires the expected measurements which you pass through the `--{client, server}-measurements` flag.  
-The measurements are expected to be a JSON map, and multiple valid measurements can be provided. The verifier will attempt to verify with each of the provided measurements, and if any succeeds, the attestation is assumed valid.
+The measurements are expected to be a JSON map, and multiple valid measurements can be provided. The verifier will attempt to verify with each of the provided measurements, and if any succeeds, the attestation is assumed valid.  
+
+The (single) validated measurement is forwarded (returned in the case of client) as "X-Flashbots-Cert-Extensions-<validator extension OID>".  
+To only validate and forward the measurement, simply provide an empty expected measurements object.  
 
 ---
 
