@@ -13,6 +13,7 @@ import (
 	"cvm-reverse-proxy/common"
 	"cvm-reverse-proxy/internal/atls"
 	"cvm-reverse-proxy/proxy"
+
 	"github.com/urfave/cli/v2" // imports as package "cli"
 )
 
@@ -58,7 +59,7 @@ func main() {
 		Name:   "proxy-server",
 		Usage:  "Serve API, and metrics",
 		Flags:  flags,
-		Action: run_server,
+		Action: runServer,
 	}
 
 	if err := app.Run(os.Args); err != nil {
@@ -66,7 +67,7 @@ func main() {
 	}
 }
 
-func run_server(cCtx *cli.Context) error {
+func runServer(cCtx *cli.Context) error {
 	listenAddr := cCtx.String("listen-addr")
 	targetAddr := cCtx.String("target-addr")
 	clientMeasurements := cCtx.String("client-measurements")

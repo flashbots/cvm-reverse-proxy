@@ -22,8 +22,8 @@ type Proxy struct {
 	validatorOIDs []asn1.ObjectIdentifier
 }
 
-func NewProxy(targetUrl string, validators []atls.Validator) *Proxy {
-	target, err := url.Parse(targetUrl)
+func NewProxy(targetURL string, validators []atls.Validator) *Proxy {
+	target, err := url.Parse(targetURL)
 	if err != nil {
 		panic(err)
 	}
@@ -46,7 +46,7 @@ func NewProxy(targetUrl string, validators []atls.Validator) *Proxy {
 		}
 
 		if res.TLS != nil {
-			err, _ := proxy.copyMeasurementsToHeader(res.TLS, &res.Header)
+			_, err := proxy.copyMeasurementsToHeader(res.TLS, &res.Header)
 			return err
 		}
 
@@ -75,7 +75,7 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if r.TLS != nil {
 		// Forwards validated measurement to the *proxied-to service*
-		err, errStatus := p.copyMeasurementsToHeader(r.TLS, &r.Header)
+		errStatus, err := p.copyMeasurementsToHeader(r.TLS, &r.Header)
 		if err != nil {
 			http.Error(w, err.Error(), errStatus)
 			return
@@ -85,7 +85,7 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	p.proxy.ServeHTTP(w, r)
 }
 
-func (p *Proxy) copyMeasurementsToHeader(conn *tls.ConnectionState, header *http.Header) (error, int) {
+func (p *Proxy) copyMeasurementsToHeader(conn *tls.ConnectionState, header *http.Header) (int, error) {
 	// In verifyEmbeddedReport which is used to validate the extensions, only the first matching extension is validated! Refuse to accept multiple
 	var ATLSExtension *pkix.Extension = nil
 	for _, cert := range conn.PeerCertificates {
@@ -93,7 +93,7 @@ func (p *Proxy) copyMeasurementsToHeader(conn *tls.ConnectionState, header *http
 			for _, validatorOID := range p.validatorOIDs {
 				if ext.Id.Equal(validatorOID) {
 					if ATLSExtension != nil {
-						return errors.New("more than one ATLS extension provided, refusing to continue"), http.StatusBadRequest
+						return http.StatusBadRequest, errors.New("more than one ATLS extension provided, refusing to continue")
 					}
 					ATLSExtension = &ext
 				}
@@ -102,24 +102,24 @@ func (p *Proxy) copyMeasurementsToHeader(conn *tls.ConnectionState, header *http
 	}
 
 	if ATLSExtension == nil {
-		return nil, 0
+		return 0, nil
 	}
 
 	atlsVariant, err := variant.FromOID(ATLSExtension.Id)
 	if err != nil {
-		return errors.New("could not get ATLS variant back from a matched extension"), http.StatusTeapot
+		return http.StatusTeapot, errors.New("could not get ATLS variant back from a matched extension")
 	}
 
 	measurements, err := ExtractMeasurementsFromExtension(ATLSExtension, atlsVariant)
 	if err != nil {
-		return errors.New("could not extract measurement from tls extension"), http.StatusTeapot
+		return http.StatusTeapot, errors.New("could not extract measurement from tls extension")
 	}
 
 	marshaledPcrs, err := json.Marshal(measurements)
 	if err != nil {
-		return errors.New("could not marshal measurement extracted from tls extension"), http.StatusInternalServerError
+		return http.StatusInternalServerError, errors.New("could not marshal measurement extracted from tls extension")
 	}
 
 	header.Set("X-Flashbots-Cert-Extensions-"+ATLSExtension.Id.String(), string(marshaledPcrs))
-	return nil, 0
+	return 0, nil
 }

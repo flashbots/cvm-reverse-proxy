@@ -1,3 +1,4 @@
+// Package common contains shared utilities
 package common
 
 import (

@@ -1,3 +1,4 @@
+// Package proxy contains the core proxy functionality and aTLS configuration
 package proxy
 
 import (
@@ -86,7 +87,7 @@ func ExtractMeasurementsFromExtension(ext *pkix.Extension, v variant.Variant) (m
 		}
 		return measurements, nil
 	default:
-		return nil, errors.New("unsupported ATLS variant!")
+		return nil, errors.New("unsupported ATLS variant")
 	}
 }
 
