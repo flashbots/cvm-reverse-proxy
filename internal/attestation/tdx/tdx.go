@@ -12,7 +12,7 @@ import (
 	"io"
 	"os"
 
-	"cvm-reverse-proxy/internal/attestation/measurements"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/measurements"
 
 	"github.com/edgelesssys/go-tdx-qpl/tdx"
 )

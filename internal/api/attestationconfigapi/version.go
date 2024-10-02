@@ -13,7 +13,7 @@ import (
 	"sort"
 	"strings"
 
-	"cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
 )
 
 // AttestationURLPath is the URL path to the attestation versions.

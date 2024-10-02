@@ -16,7 +16,7 @@ import (
 	"testing"
 	"time"
 
-	"cvm-reverse-proxy/internal/logger"
+	"github.com/flashbots/cvm-reverse-proxy/internal/logger"
 
 	s3manager "github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/cloudfront"

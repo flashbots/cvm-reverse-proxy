@@ -12,11 +12,11 @@ import (
 	"log/slog"
 	"path"
 
-	"cvm-reverse-proxy/internal/api/attestationconfigapi"
-	"cvm-reverse-proxy/internal/api/attestationconfigapi/cli/client"
-	"cvm-reverse-proxy/internal/attestation/variant"
-	"cvm-reverse-proxy/internal/logger"
-	"cvm-reverse-proxy/internal/staticupload"
+	"github.com/flashbots/cvm-reverse-proxy/internal/api/attestationconfigapi"
+	"github.com/flashbots/cvm-reverse-proxy/internal/api/attestationconfigapi/cli/client"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/logger"
+	"github.com/flashbots/cvm-reverse-proxy/internal/staticupload"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"

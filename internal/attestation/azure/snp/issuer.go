@@ -12,11 +12,11 @@ import (
 	"fmt"
 	"io"
 
-	"cvm-reverse-proxy/internal/attestation"
-	"cvm-reverse-proxy/internal/attestation/azure"
-	"cvm-reverse-proxy/internal/attestation/snp"
-	"cvm-reverse-proxy/internal/attestation/variant"
-	"cvm-reverse-proxy/internal/attestation/vtpm"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/azure"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/snp"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/vtpm"
 
 	"github.com/edgelesssys/go-azguestattestation/maa"
 )

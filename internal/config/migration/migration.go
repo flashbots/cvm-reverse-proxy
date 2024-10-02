@@ -15,13 +15,13 @@ import (
 	"os"
 	"strings"
 
-	"cvm-reverse-proxy/internal/attestation/idkeydigest"
-	"cvm-reverse-proxy/internal/attestation/measurements"
-	"cvm-reverse-proxy/internal/config"
-	"cvm-reverse-proxy/internal/file"
-	"cvm-reverse-proxy/internal/role"
-	"cvm-reverse-proxy/internal/semver"
-	"cvm-reverse-proxy/internal/versions"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/idkeydigest"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/measurements"
+	"github.com/flashbots/cvm-reverse-proxy/internal/config"
+	"github.com/flashbots/cvm-reverse-proxy/internal/file"
+	"github.com/flashbots/cvm-reverse-proxy/internal/role"
+	"github.com/flashbots/cvm-reverse-proxy/internal/semver"
+	"github.com/flashbots/cvm-reverse-proxy/internal/versions"
 )
 
 const (

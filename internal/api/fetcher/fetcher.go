@@ -25,7 +25,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"cvm-reverse-proxy/internal/sigstore"
+	"github.com/flashbots/cvm-reverse-proxy/internal/sigstore"
 )
 
 // NewHTTPClient returns a new http client.

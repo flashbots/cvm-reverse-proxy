@@ -11,9 +11,9 @@ import (
 	"net/url"
 	"strings"
 
-	"cvm-reverse-proxy/internal/cloud/cloudprovider"
-	"cvm-reverse-proxy/internal/constants"
-	"cvm-reverse-proxy/internal/semver"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/cloudprovider"
+	"github.com/flashbots/cvm-reverse-proxy/internal/constants"
+	"github.com/flashbots/cvm-reverse-proxy/internal/semver"
 )
 
 // MarketplaceImage represents a CSP-agnostic marketplace image.

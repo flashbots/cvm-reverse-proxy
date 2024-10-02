@@ -14,9 +14,9 @@ import (
 	"fmt"
 	"io"
 
-	"cvm-reverse-proxy/internal/kms/config"
-	"cvm-reverse-proxy/internal/kms/storage"
-	"cvm-reverse-proxy/internal/kms/uri"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/config"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/storage"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/uri"
 
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"

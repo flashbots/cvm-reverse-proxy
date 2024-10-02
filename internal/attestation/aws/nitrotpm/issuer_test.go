@@ -12,7 +12,7 @@ import (
 	"os"
 	"testing"
 
-	"cvm-reverse-proxy/internal/attestation/simulator"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/simulator"
 
 	"github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
 	"github.com/aws/smithy-go/middleware"

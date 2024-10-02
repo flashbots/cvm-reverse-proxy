@@ -24,8 +24,8 @@ import (
 	"slices"
 	"time"
 
-	"cvm-reverse-proxy/internal/retry"
-	"cvm-reverse-proxy/internal/versions/components"
+	"github.com/flashbots/cvm-reverse-proxy/internal/retry"
+	"github.com/flashbots/cvm-reverse-proxy/internal/versions/components"
 
 	"github.com/spf13/afero"
 	"github.com/vincent-petithory/dataurl"

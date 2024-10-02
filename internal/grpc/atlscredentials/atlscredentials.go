@@ -12,7 +12,7 @@ import (
 	"errors"
 	"net"
 
-	"cvm-reverse-proxy/internal/atls"
+	"github.com/flashbots/cvm-reverse-proxy/internal/atls"
 
 	"google.golang.org/grpc/credentials"
 )

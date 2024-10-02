@@ -25,8 +25,8 @@ import (
 	"net/url"
 	"strings"
 
-	"cvm-reverse-proxy/internal/attestation/snp"
-	"cvm-reverse-proxy/internal/config"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/snp"
+	"github.com/flashbots/cvm-reverse-proxy/internal/config"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/go-sev-guest/abi"

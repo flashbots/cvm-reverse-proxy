@@ -12,7 +12,7 @@ import (
 	"net/url"
 	"path"
 
-	"cvm-reverse-proxy/internal/constants"
+	"github.com/flashbots/cvm-reverse-proxy/internal/constants"
 
 	"golang.org/x/mod/semver"
 )

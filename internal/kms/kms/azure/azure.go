@@ -12,9 +12,9 @@ import (
 	"errors"
 	"fmt"
 
-	"cvm-reverse-proxy/internal/kms/kms"
-	"cvm-reverse-proxy/internal/kms/kms/internal"
-	"cvm-reverse-proxy/internal/kms/uri"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/kms"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/kms/internal"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/uri"
 
 	azurekeyvault "github.com/hashicorp/go-kms-wrapping/wrappers/azurekeyvault/v2"
 )

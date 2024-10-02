@@ -10,9 +10,9 @@ import (
 	"encoding/asn1"
 	"testing"
 
-	"cvm-reverse-proxy/internal/attestation/measurements"
-	"cvm-reverse-proxy/internal/attestation/variant"
-	"cvm-reverse-proxy/internal/config"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/measurements"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/config"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

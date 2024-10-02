@@ -13,7 +13,7 @@ import (
 	"io"
 	"testing"
 
-	"cvm-reverse-proxy/internal/kms/storage"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/storage"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"

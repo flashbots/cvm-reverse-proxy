@@ -14,10 +14,10 @@ import (
 	"testing"
 	"time"
 
-	"cvm-reverse-proxy/internal/kms/kms/aws"
-	"cvm-reverse-proxy/internal/kms/storage/awss3"
-	"cvm-reverse-proxy/internal/kms/storage/memfs"
-	"cvm-reverse-proxy/internal/kms/uri"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/kms/aws"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/storage/awss3"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/storage/memfs"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/uri"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"

@@ -20,15 +20,15 @@ import (
 	"fmt"
 	"net/url"
 
-	"cvm-reverse-proxy/internal/kms/kms"
-	"cvm-reverse-proxy/internal/kms/kms/aws"
-	"cvm-reverse-proxy/internal/kms/kms/azure"
-	"cvm-reverse-proxy/internal/kms/kms/cluster"
-	"cvm-reverse-proxy/internal/kms/kms/gcp"
-	"cvm-reverse-proxy/internal/kms/storage/awss3"
-	"cvm-reverse-proxy/internal/kms/storage/azureblob"
-	"cvm-reverse-proxy/internal/kms/storage/gcs"
-	"cvm-reverse-proxy/internal/kms/uri"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/kms"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/kms/aws"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/kms/azure"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/kms/cluster"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/kms/gcp"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/storage/awss3"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/storage/azureblob"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/storage/gcs"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/uri"
 )
 
 // KMSInformation about an existing KMS.

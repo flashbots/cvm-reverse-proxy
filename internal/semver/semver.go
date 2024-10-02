@@ -22,7 +22,7 @@ import (
 	"sort"
 	"strings"
 
-	"cvm-reverse-proxy/internal/compatibility"
+	"github.com/flashbots/cvm-reverse-proxy/internal/compatibility"
 
 	"golang.org/x/mod/semver"
 )

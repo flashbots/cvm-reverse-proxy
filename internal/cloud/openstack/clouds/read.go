@@ -12,7 +12,7 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 
-	"cvm-reverse-proxy/internal/file"
+	"github.com/flashbots/cvm-reverse-proxy/internal/file"
 )
 
 // ReadCloudsYAML reads a clouds.yaml file and returns its contents.

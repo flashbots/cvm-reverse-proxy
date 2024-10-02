@@ -15,7 +15,7 @@ import (
 	"errors"
 	"fmt"
 
-	"cvm-reverse-proxy/internal/attestation"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation"
 
 	"github.com/google/go-sev-guest/abi"
 	"github.com/google/go-sev-guest/client"

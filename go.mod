@@ -1,4 +1,4 @@
-module cvm-reverse-proxy
+module github.com/flashbots/cvm-reverse-proxy
 
 go 1.22.4
 

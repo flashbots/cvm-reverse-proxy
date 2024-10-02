@@ -20,12 +20,12 @@ import (
 	"regexp"
 	"testing"
 
-	"cvm-reverse-proxy/internal/attestation"
-	"cvm-reverse-proxy/internal/attestation/aws/snp/testdata"
-	"cvm-reverse-proxy/internal/attestation/snp"
-	"cvm-reverse-proxy/internal/attestation/vtpm"
-	"cvm-reverse-proxy/internal/config"
-	"cvm-reverse-proxy/internal/logger"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/aws/snp/testdata"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/snp"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/vtpm"
+	"github.com/flashbots/cvm-reverse-proxy/internal/config"
+	"github.com/flashbots/cvm-reverse-proxy/internal/logger"
 
 	"github.com/google/go-sev-guest/abi"
 	"github.com/google/go-sev-guest/proto/sevsnp"

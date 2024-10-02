@@ -17,7 +17,7 @@ import (
 
 	"golang.org/x/mod/semver"
 
-	"cvm-reverse-proxy/internal/constants"
+	"github.com/flashbots/cvm-reverse-proxy/internal/constants"
 )
 
 // ReleaseRef is the ref used for release versions.

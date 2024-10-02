@@ -12,8 +12,8 @@ import (
 	"os"
 	"testing"
 
-	"cvm-reverse-proxy/internal/attestation/measurements"
-	"cvm-reverse-proxy/internal/attestation/simulator"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/measurements"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/simulator"
 
 	"github.com/google/go-tpm-tools/client"
 	"github.com/google/go-tpm/legacy/tpm2"

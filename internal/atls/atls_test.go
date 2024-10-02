@@ -15,7 +15,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

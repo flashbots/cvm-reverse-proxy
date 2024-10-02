@@ -22,11 +22,11 @@ import (
 	"path"
 	"strconv"
 
-	"cvm-reverse-proxy/internal/cloud"
-	"cvm-reverse-proxy/internal/cloud/azureshared"
-	"cvm-reverse-proxy/internal/cloud/metadata"
-	"cvm-reverse-proxy/internal/constants"
-	"cvm-reverse-proxy/internal/role"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/azureshared"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/metadata"
+	"github.com/flashbots/cvm-reverse-proxy/internal/constants"
+	"github.com/flashbots/cvm-reverse-proxy/internal/role"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v6"

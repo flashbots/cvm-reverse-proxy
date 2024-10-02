@@ -16,9 +16,9 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/mod/semver"
 
-	apiclient "cvm-reverse-proxy/internal/api/client"
-	"cvm-reverse-proxy/internal/api/versionsapi"
-	"cvm-reverse-proxy/internal/logger"
+	apiclient "github.com/flashbots/cvm-reverse-proxy/internal/api/client"
+	"github.com/flashbots/cvm-reverse-proxy/internal/api/versionsapi"
+	"github.com/flashbots/cvm-reverse-proxy/internal/logger"
 )
 
 func newListCmd() *cobra.Command {

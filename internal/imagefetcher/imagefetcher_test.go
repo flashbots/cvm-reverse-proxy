@@ -13,10 +13,10 @@ import (
 	"net/http"
 	"testing"
 
-	"cvm-reverse-proxy/internal/api/versionsapi"
-	"cvm-reverse-proxy/internal/attestation/variant"
-	"cvm-reverse-proxy/internal/cloud/cloudprovider"
-	"cvm-reverse-proxy/internal/file"
+	"github.com/flashbots/cvm-reverse-proxy/internal/api/versionsapi"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/cloudprovider"
+	"github.com/flashbots/cvm-reverse-proxy/internal/file"
 
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"

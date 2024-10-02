@@ -13,11 +13,11 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"cvm-reverse-proxy/internal/attestation"
-	"cvm-reverse-proxy/internal/attestation/azure"
-	"cvm-reverse-proxy/internal/attestation/variant"
-	"cvm-reverse-proxy/internal/attestation/vtpm"
-	"cvm-reverse-proxy/internal/config"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/azure"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/vtpm"
+	"github.com/flashbots/cvm-reverse-proxy/internal/config"
 
 	"github.com/google/go-tdx-guest/abi"
 	"github.com/google/go-tdx-guest/proto/tdx"

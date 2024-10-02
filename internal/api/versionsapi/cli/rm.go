@@ -17,9 +17,9 @@ import (
 	"strings"
 	"time"
 
-	apiclient "cvm-reverse-proxy/internal/api/client"
-	"cvm-reverse-proxy/internal/api/versionsapi"
-	"cvm-reverse-proxy/internal/logger"
+	apiclient "github.com/flashbots/cvm-reverse-proxy/internal/api/client"
+	"github.com/flashbots/cvm-reverse-proxy/internal/api/versionsapi"
+	"github.com/flashbots/cvm-reverse-proxy/internal/logger"
 
 	compute "cloud.google.com/go/compute/apiv1"
 	"cloud.google.com/go/compute/apiv1/computepb"

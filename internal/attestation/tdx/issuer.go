@@ -11,8 +11,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"cvm-reverse-proxy/internal/attestation"
-	"cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
 
 	"github.com/edgelesssys/go-tdx-qpl/tdx"
 )

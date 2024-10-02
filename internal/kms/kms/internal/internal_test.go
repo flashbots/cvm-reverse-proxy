@@ -12,7 +12,7 @@ import (
 	"errors"
 	"testing"
 
-	"cvm-reverse-proxy/internal/kms/storage"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/storage"
 
 	cloudkms "cloud.google.com/go/kms/apiv1"
 	wrapping "github.com/hashicorp/go-kms-wrapping/v2"

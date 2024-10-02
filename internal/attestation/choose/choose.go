@@ -9,19 +9,19 @@ package choose
 import (
 	"fmt"
 
-	"cvm-reverse-proxy/internal/atls"
-	"cvm-reverse-proxy/internal/attestation"
-	"cvm-reverse-proxy/internal/attestation/aws/nitrotpm"
-	awssnp "cvm-reverse-proxy/internal/attestation/aws/snp"
-	azuresnp "cvm-reverse-proxy/internal/attestation/azure/snp"
-	azuretdx "cvm-reverse-proxy/internal/attestation/azure/tdx"
-	"cvm-reverse-proxy/internal/attestation/azure/trustedlaunch"
-	"cvm-reverse-proxy/internal/attestation/gcp/es"
-	gcpsnp "cvm-reverse-proxy/internal/attestation/gcp/snp"
-	"cvm-reverse-proxy/internal/attestation/qemu"
-	"cvm-reverse-proxy/internal/attestation/tdx"
-	"cvm-reverse-proxy/internal/attestation/variant"
-	"cvm-reverse-proxy/internal/config"
+	"github.com/flashbots/cvm-reverse-proxy/internal/atls"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/aws/nitrotpm"
+	awssnp "github.com/flashbots/cvm-reverse-proxy/internal/attestation/aws/snp"
+	azuresnp "github.com/flashbots/cvm-reverse-proxy/internal/attestation/azure/snp"
+	azuretdx "github.com/flashbots/cvm-reverse-proxy/internal/attestation/azure/tdx"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/azure/trustedlaunch"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/gcp/es"
+	gcpsnp "github.com/flashbots/cvm-reverse-proxy/internal/attestation/gcp/snp"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/qemu"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/tdx"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/config"
 )
 
 // Issuer returns the issuer for the given variant.

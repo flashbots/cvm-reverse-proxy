@@ -25,10 +25,10 @@ import (
 	"sync"
 	"time"
 
-	"cvm-reverse-proxy/internal/cloud"
-	"cvm-reverse-proxy/internal/cloud/gcpshared"
-	"cvm-reverse-proxy/internal/cloud/metadata"
-	"cvm-reverse-proxy/internal/role"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/gcpshared"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/metadata"
+	"github.com/flashbots/cvm-reverse-proxy/internal/role"
 
 	compute "cloud.google.com/go/compute/apiv1"
 	"cloud.google.com/go/compute/apiv1/computepb"

@@ -19,7 +19,7 @@ import (
 	"context"
 	"errors"
 
-	"cvm-reverse-proxy/internal/crypto"
+	"github.com/flashbots/cvm-reverse-proxy/internal/crypto"
 )
 
 // KMS implements the kms.CloudKMS interface for in cluster key management.

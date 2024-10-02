@@ -10,10 +10,10 @@ import (
 	"os"
 	"slices"
 
-	"cvm-reverse-proxy/internal/api/attestationconfigapi/cli/client"
-	"cvm-reverse-proxy/internal/attestation/variant"
-	"cvm-reverse-proxy/internal/file"
-	"cvm-reverse-proxy/internal/verify"
+	"github.com/flashbots/cvm-reverse-proxy/internal/api/attestationconfigapi/cli/client"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/file"
+	"github.com/flashbots/cvm-reverse-proxy/internal/verify"
 
 	"github.com/google/go-tdx-guest/proto/tdx"
 	"github.com/spf13/afero"

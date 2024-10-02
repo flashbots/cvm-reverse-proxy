@@ -12,8 +12,8 @@ import (
 	"fmt"
 	"testing"
 
-	"cvm-reverse-proxy/internal/cloud/metadata"
-	"cvm-reverse-proxy/internal/role"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/metadata"
+	"github.com/flashbots/cvm-reverse-proxy/internal/role"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"

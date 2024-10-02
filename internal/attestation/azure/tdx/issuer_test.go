@@ -15,7 +15,7 @@ import (
 	"net/http"
 	"testing"
 
-	"cvm-reverse-proxy/internal/attestation/azure/tdx/testdata"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/azure/tdx/testdata"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

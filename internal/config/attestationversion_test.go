@@ -11,7 +11,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"cvm-reverse-proxy/internal/encoding"
+	"github.com/flashbots/cvm-reverse-proxy/internal/encoding"
 
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"

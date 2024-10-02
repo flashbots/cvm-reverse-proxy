@@ -9,7 +9,7 @@ package config
 import (
 	"testing"
 
-	"cvm-reverse-proxy/internal/semver"
+	"github.com/flashbots/cvm-reverse-proxy/internal/semver"
 
 	"github.com/stretchr/testify/assert"
 )

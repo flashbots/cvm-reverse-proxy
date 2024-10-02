@@ -17,9 +17,9 @@ import (
 	"testing"
 	"time"
 
-	"cvm-reverse-proxy/internal/kms/config"
-	"cvm-reverse-proxy/internal/kms/kms"
-	"cvm-reverse-proxy/internal/kms/storage"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/config"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/kms"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/storage"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

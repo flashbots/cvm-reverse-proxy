@@ -11,8 +11,8 @@ import (
 	"io"
 	"time"
 
-	"cvm-reverse-proxy/internal/api/versionsapi"
-	"cvm-reverse-proxy/internal/cloud/cloudprovider"
+	"github.com/flashbots/cvm-reverse-proxy/internal/api/versionsapi"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/cloudprovider"
 )
 
 // UploadRequest is a request to upload an os image.

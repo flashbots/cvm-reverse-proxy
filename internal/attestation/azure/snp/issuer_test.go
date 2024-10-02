@@ -13,7 +13,7 @@ import (
 	"io"
 	"testing"
 
-	"cvm-reverse-proxy/internal/attestation/snp"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/snp"
 
 	"github.com/edgelesssys/go-azguestattestation/maa"
 	"github.com/stretchr/testify/assert"

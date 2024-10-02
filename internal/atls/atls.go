@@ -25,8 +25,8 @@ import (
 	"math/big"
 	"time"
 
-	"cvm-reverse-proxy/internal/attestation/variant"
-	"cvm-reverse-proxy/internal/crypto"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/crypto"
 )
 
 const attestationTimeout = 30 * time.Second

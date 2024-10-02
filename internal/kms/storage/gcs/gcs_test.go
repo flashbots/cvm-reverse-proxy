@@ -13,7 +13,7 @@ import (
 	"io"
 	"testing"
 
-	"cvm-reverse-proxy/internal/kms/storage"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/storage"
 
 	gcstorage "cloud.google.com/go/storage"
 	"github.com/stretchr/testify/assert"

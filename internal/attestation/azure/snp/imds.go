@@ -10,7 +10,7 @@ import (
 	"context"
 	"fmt"
 
-	"cvm-reverse-proxy/internal/cloud/azure"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/azure"
 )
 
 const tagMAAURL = "constellation-maa-url"

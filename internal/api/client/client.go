@@ -37,8 +37,8 @@ import (
 	"strings"
 	"time"
 
-	"cvm-reverse-proxy/internal/sigstore"
-	"cvm-reverse-proxy/internal/staticupload"
+	"github.com/flashbots/cvm-reverse-proxy/internal/sigstore"
+	"github.com/flashbots/cvm-reverse-proxy/internal/staticupload"
 
 	s3manager "github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"

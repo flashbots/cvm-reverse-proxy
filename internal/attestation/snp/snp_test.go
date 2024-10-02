@@ -15,9 +15,9 @@ import (
 	"strings"
 	"testing"
 
-	"cvm-reverse-proxy/internal/attestation/snp/testdata"
-	"cvm-reverse-proxy/internal/config"
-	"cvm-reverse-proxy/internal/logger"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/snp/testdata"
+	"github.com/flashbots/cvm-reverse-proxy/internal/config"
+	"github.com/flashbots/cvm-reverse-proxy/internal/logger"
 
 	"github.com/google/go-sev-guest/kds"
 	"github.com/google/go-sev-guest/verify/trust"

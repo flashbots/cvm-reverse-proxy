@@ -15,8 +15,8 @@ import (
 
 	"golang.org/x/mod/semver"
 
-	apiclient "cvm-reverse-proxy/internal/api/client"
-	"cvm-reverse-proxy/internal/constants"
+	apiclient "github.com/flashbots/cvm-reverse-proxy/internal/api/client"
+	"github.com/flashbots/cvm-reverse-proxy/internal/constants"
 )
 
 // Client is a client for the versions API.

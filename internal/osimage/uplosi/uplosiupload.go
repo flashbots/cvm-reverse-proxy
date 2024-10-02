@@ -21,9 +21,9 @@ import (
 	"strings"
 	"time"
 
-	"cvm-reverse-proxy/internal/api/versionsapi"
-	"cvm-reverse-proxy/internal/cloud/cloudprovider"
-	"cvm-reverse-proxy/internal/osimage"
+	"github.com/flashbots/cvm-reverse-proxy/internal/api/versionsapi"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/cloudprovider"
+	"github.com/flashbots/cvm-reverse-proxy/internal/osimage"
 
 	"github.com/BurntSushi/toml"
 )

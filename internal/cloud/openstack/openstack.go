@@ -14,9 +14,9 @@ import (
 	"strconv"
 	"strings"
 
-	"cvm-reverse-proxy/internal/cloud/metadata"
-	"cvm-reverse-proxy/internal/constants"
-	"cvm-reverse-proxy/internal/role"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/metadata"
+	"github.com/flashbots/cvm-reverse-proxy/internal/constants"
+	"github.com/flashbots/cvm-reverse-proxy/internal/role"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"

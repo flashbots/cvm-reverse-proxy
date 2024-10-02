@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"cvm-reverse-proxy/internal/constants"
+	"github.com/flashbots/cvm-reverse-proxy/internal/constants"
 
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"

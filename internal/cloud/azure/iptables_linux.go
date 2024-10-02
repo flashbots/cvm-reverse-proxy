@@ -13,7 +13,7 @@ import (
 	"fmt"
 	"log/slog"
 
-	"cvm-reverse-proxy/internal/role"
+	"github.com/flashbots/cvm-reverse-proxy/internal/role"
 
 	"k8s.io/kubernetes/pkg/util/iptables"
 	"k8s.io/utils/exec"

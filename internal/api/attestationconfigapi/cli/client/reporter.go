@@ -16,9 +16,9 @@ import (
 	"strings"
 	"time"
 
-	"cvm-reverse-proxy/internal/api/attestationconfigapi"
-	"cvm-reverse-proxy/internal/api/client"
-	"cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/api/attestationconfigapi"
+	"github.com/flashbots/cvm-reverse-proxy/internal/api/client"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
 )
 
 // cachedVersionsSubDir is the subdirectory in the bucket where the cached versions are stored.

@@ -23,7 +23,7 @@ import (
 	"os"
 	"os/signal"
 
-	"cvm-reverse-proxy/internal/constants"
+	"github.com/flashbots/cvm-reverse-proxy/internal/constants"
 
 	"github.com/spf13/cobra"
 )

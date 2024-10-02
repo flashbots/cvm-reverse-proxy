@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"strings"
 
-	"cvm-reverse-proxy/internal/encoding"
+	"github.com/flashbots/cvm-reverse-proxy/internal/encoding"
 )
 
 type versionValue interface {

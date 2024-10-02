@@ -10,10 +10,10 @@ import (
 	"context"
 	"testing"
 
-	"cvm-reverse-proxy/internal/atls"
-	"cvm-reverse-proxy/internal/attestation/variant"
-	"cvm-reverse-proxy/internal/grpc/atlscredentials"
-	"cvm-reverse-proxy/internal/grpc/testdialer"
+	"github.com/flashbots/cvm-reverse-proxy/internal/atls"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/grpc/atlscredentials"
+	"github.com/flashbots/cvm-reverse-proxy/internal/grpc/testdialer"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

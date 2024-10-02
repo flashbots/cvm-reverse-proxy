@@ -16,8 +16,8 @@ import (
 	"testing"
 	"time"
 
-	"cvm-reverse-proxy/internal/attestation/variant"
-	"cvm-reverse-proxy/internal/constants"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/constants"
 
 	"github.com/stretchr/testify/assert"
 )

@@ -12,8 +12,8 @@ import (
 	"context"
 	"testing"
 
-	"cvm-reverse-proxy/internal/cloud/cloudprovider"
-	"cvm-reverse-proxy/internal/license"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/cloudprovider"
+	"github.com/flashbots/cvm-reverse-proxy/internal/license"
 
 	"github.com/stretchr/testify/assert"
 )

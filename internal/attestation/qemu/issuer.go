@@ -10,9 +10,9 @@ import (
 	"context"
 	"io"
 
-	"cvm-reverse-proxy/internal/attestation"
-	"cvm-reverse-proxy/internal/attestation/variant"
-	"cvm-reverse-proxy/internal/attestation/vtpm"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/vtpm"
 
 	tpmclient "github.com/google/go-tpm-tools/client"
 )

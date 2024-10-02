@@ -17,9 +17,9 @@ import (
 	"sort"
 	"strings"
 
-	"cvm-reverse-proxy/internal/compatibility"
-	"cvm-reverse-proxy/internal/constants"
-	"cvm-reverse-proxy/internal/versions/components"
+	"github.com/flashbots/cvm-reverse-proxy/internal/compatibility"
+	"github.com/flashbots/cvm-reverse-proxy/internal/constants"
+	"github.com/flashbots/cvm-reverse-proxy/internal/versions/components"
 
 	"golang.org/x/mod/semver"
 )

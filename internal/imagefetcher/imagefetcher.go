@@ -20,12 +20,12 @@ import (
 	"regexp"
 	"strings"
 
-	"cvm-reverse-proxy/internal/api/fetcher"
-	"cvm-reverse-proxy/internal/api/versionsapi"
-	"cvm-reverse-proxy/internal/attestation/variant"
-	"cvm-reverse-proxy/internal/cloud/cloudprovider"
-	"cvm-reverse-proxy/internal/mpimage"
-	"cvm-reverse-proxy/internal/semver"
+	"github.com/flashbots/cvm-reverse-proxy/internal/api/fetcher"
+	"github.com/flashbots/cvm-reverse-proxy/internal/api/versionsapi"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/cloudprovider"
+	"github.com/flashbots/cvm-reverse-proxy/internal/mpimage"
+	"github.com/flashbots/cvm-reverse-proxy/internal/semver"
 
 	"github.com/spf13/afero"
 )

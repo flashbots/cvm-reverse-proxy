@@ -11,8 +11,8 @@ import (
 	"context"
 	"net"
 
-	"cvm-reverse-proxy/internal/atls"
-	"cvm-reverse-proxy/internal/grpc/atlscredentials"
+	"github.com/flashbots/cvm-reverse-proxy/internal/atls"
+	"github.com/flashbots/cvm-reverse-proxy/internal/grpc/atlscredentials"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
