@@ -8,7 +8,6 @@ This application provides a reverse proxy with TLS termination, supporting confi
 
 - Client-side TLS termination with confidentialVM attestation verification.
 - Server-side TLS termination with confidentialVM attestation verification.
-- Mutual attestations between client and server.
 - Reverse proxy functionality to forward requests between client and server.
 
 Both the client-side and the server-side TLS termination can be separately configured to provide attestations and verify attestations.
