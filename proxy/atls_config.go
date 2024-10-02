@@ -1,10 +1,11 @@
 package proxy
 
 import (
+	"context"
 	"crypto/x509/pkix"
 	"encoding/json"
 	"errors"
-	"log"
+	"fmt"
 	"log/slog"
 	"os"
 
@@ -46,7 +47,7 @@ func CreateAttestationIssuer(log *slog.Logger, attestationType AttestationType) 
 	}
 }
 
-func CreateAttestationValidators(attestationType AttestationType, jsonMeasurementsPath string) ([]atls.Validator, error) {
+func CreateAttestationValidators(log *slog.Logger, attestationType AttestationType, jsonMeasurementsPath string) ([]atls.Validator, error) {
 	if attestationType == AttestationNone {
 		return nil, nil
 	}
@@ -68,7 +69,7 @@ func CreateAttestationValidators(attestationType AttestationType, jsonMeasuremen
 		for _, measurement := range parsedMeasurements {
 			attConfig := config.DefaultForAzureTDX()
 			attConfig.SetMeasurements(measurement)
-			validators = append(validators, azure_tdx.NewValidator(attConfig, AttestationLogger{}))
+			validators = append(validators, azure_tdx.NewValidator(attConfig, AttestationLogger{Log: log}))
 		}
 		return []atls.Validator{NewMultiValidator(validators)}, nil
 	default:
@@ -94,12 +95,14 @@ func ExtractMeasurementsFromExtension(ext *pkix.Extension, v variant.Variant) (m
 	}
 }
 
-type AttestationLogger struct{}
+type AttestationLogger struct {
+	Log *slog.Logger
+}
 
 func (w AttestationLogger) Info(format string, args ...any) {
-	log.Printf(format, args...)
+	w.Log.Log(context.TODO(), slog.LevelInfo, fmt.Sprintf(format, args...))
 }
 
 func (w AttestationLogger) Warn(format string, args ...any) {
-	log.Printf(format, args...)
+	w.Log.Log(context.TODO(), slog.LevelWarn, fmt.Sprintf(format, args...))
 }

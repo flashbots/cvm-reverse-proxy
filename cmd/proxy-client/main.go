@@ -8,6 +8,7 @@ import (
 	"cvm-reverse-proxy/common"
 	"cvm-reverse-proxy/internal/atls"
 	"cvm-reverse-proxy/proxy"
+
 	"github.com/urfave/cli/v2" // imports as package "cli"
 )
 
@@ -93,7 +94,7 @@ func run_client(cCtx *cli.Context) error {
 		return err
 	}
 
-	validators, err := proxy.CreateAttestationValidators(serverAttestationType, serverMeasurements)
+	validators, err := proxy.CreateAttestationValidators(log, serverAttestationType, serverMeasurements)
 	if err != nil {
 		log.Error("could not create attestation validators", "err", err)
 		return err
