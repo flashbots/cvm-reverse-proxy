@@ -1,3 +1,4 @@
+// Package proxy contains the core proxy functionality and aTLS configuration
 package proxy
 
 import (

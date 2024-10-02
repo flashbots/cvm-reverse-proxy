@@ -23,20 +23,19 @@ build-proxy-server:
 
 .PHONY: test
 test:
-	go test ./...
+	go test ./cmd/... ./common/... ./proxy/...
 
 .PHONY: test-race
 test-race:
-	go test -race ./...
+	go test -race ./cmd/... ./common/... ./proxy/...
 
 .PHONY: lint
 lint:
 	gofmt -d -s cmd common proxy
 	gofumpt -d -extra cmd common proxy
 	go vet ./cmd/... ./common/... ./proxy/...
-	# staticcheck ./... // complains about 1.22.4
-	golangci-lint run --exclude-dirs internal
-	# nilaway ./cmd/... ./common/... ./proxy/... // incorrect findings
+	staticcheck ./cmd/... ./common/... ./proxy/...
+	# golangci-lint run --exclude-dirs internal --exclude-dirs-use-default=false
 
 .PHONY: fmt
 fmt:
