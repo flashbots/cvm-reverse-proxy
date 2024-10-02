@@ -7,7 +7,7 @@ import (
 	"cvm-reverse-proxy/internal/atls"
 )
 
-// Validator for Azure confidential VM attestation using TDX which accepts multiple measurements
+// MultiValidator is a validator for Azure confidential VM attestation using TDX which accepts multiple measurements
 type MultiValidator struct {
 	oid        asn1.ObjectIdentifier
 	validators []atls.Validator
