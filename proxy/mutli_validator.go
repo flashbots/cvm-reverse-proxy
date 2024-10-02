@@ -31,7 +31,7 @@ func (v *MultiValidator) OID() asn1.ObjectIdentifier {
 	return v.oid
 }
 
-func (v *MultiValidator) Validate(ctx context.Context, attDocRaw []byte, nonce []byte) (userData []byte, err error) {
+func (v *MultiValidator) Validate(ctx context.Context, attDocRaw, nonce []byte) (userData []byte, err error) {
 	for _, validator := range v.validators {
 		if userData, err = validator.Validate(ctx, attDocRaw, nonce); err == nil {
 			return

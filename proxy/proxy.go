@@ -3,8 +3,6 @@ package proxy
 import (
 	"crypto/tls"
 	"crypto/x509/pkix"
-	"cvm-reverse-proxy/internal/atls"
-	"cvm-reverse-proxy/internal/attestation/variant"
 	"encoding/asn1"
 	"encoding/json"
 	"errors"
@@ -12,6 +10,9 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"strings"
+
+	"cvm-reverse-proxy/internal/atls"
+	"cvm-reverse-proxy/internal/attestation/variant"
 )
 
 type Proxy struct {
