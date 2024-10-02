@@ -18,9 +18,9 @@ import (
 	"errors"
 	"fmt"
 
-	"cvm-reverse-proxy/internal/crypto"
-	kmsInterface "cvm-reverse-proxy/internal/kms/kms"
-	"cvm-reverse-proxy/internal/kms/storage"
+	"github.com/flashbots/cvm-reverse-proxy/internal/crypto"
+	kmsInterface "github.com/flashbots/cvm-reverse-proxy/internal/kms/kms"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/storage"
 
 	wrapping "github.com/hashicorp/go-kms-wrapping/v2"
 )

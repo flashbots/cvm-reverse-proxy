@@ -11,8 +11,8 @@ import (
 	"fmt"
 	"strings"
 
-	"cvm-reverse-proxy/internal/constants"
-	"cvm-reverse-proxy/internal/versions/components"
+	"github.com/flashbots/cvm-reverse-proxy/internal/constants"
+	"github.com/flashbots/cvm-reverse-proxy/internal/versions/components"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

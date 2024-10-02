@@ -14,10 +14,10 @@ import (
 	"testing"
 	"time"
 
-	"cvm-reverse-proxy/internal/kms/kms/azure"
-	"cvm-reverse-proxy/internal/kms/storage/azureblob"
-	"cvm-reverse-proxy/internal/kms/storage/memfs"
-	"cvm-reverse-proxy/internal/kms/uri"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/kms/azure"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/storage/azureblob"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/storage/memfs"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/uri"
 
 	"github.com/stretchr/testify/require"
 )

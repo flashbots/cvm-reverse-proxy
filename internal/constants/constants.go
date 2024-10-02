@@ -14,7 +14,7 @@ import (
 	"fmt"
 	"time"
 
-	"cvm-reverse-proxy/internal/semver"
+	"github.com/flashbots/cvm-reverse-proxy/internal/semver"
 )
 
 const (

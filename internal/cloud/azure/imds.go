@@ -15,8 +15,8 @@ import (
 	"net/http"
 	"time"
 
-	"cvm-reverse-proxy/internal/cloud"
-	"cvm-reverse-proxy/internal/role"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud"
+	"github.com/flashbots/cvm-reverse-proxy/internal/role"
 )
 
 // subset of azure imds API: https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service?tabs=linux

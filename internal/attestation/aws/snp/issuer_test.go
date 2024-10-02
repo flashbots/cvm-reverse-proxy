@@ -10,7 +10,7 @@ import (
 	"os"
 	"testing"
 
-	"cvm-reverse-proxy/internal/attestation/simulator"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/simulator"
 
 	tpmclient "github.com/google/go-tpm-tools/client"
 	"github.com/stretchr/testify/assert"

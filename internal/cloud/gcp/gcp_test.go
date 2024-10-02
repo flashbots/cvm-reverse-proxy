@@ -11,9 +11,9 @@ import (
 	"errors"
 	"testing"
 
-	"cvm-reverse-proxy/internal/cloud"
-	"cvm-reverse-proxy/internal/cloud/metadata"
-	"cvm-reverse-proxy/internal/role"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/metadata"
+	"github.com/flashbots/cvm-reverse-proxy/internal/role"
 
 	"cloud.google.com/go/compute/apiv1/computepb"
 	gax "github.com/googleapis/gax-go/v2"

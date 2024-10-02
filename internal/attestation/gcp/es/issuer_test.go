@@ -13,7 +13,7 @@ import (
 	"io"
 	"testing"
 
-	"cvm-reverse-proxy/internal/attestation/gcp"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/gcp"
 
 	"github.com/google/go-tpm-tools/proto/attest"
 	"github.com/stretchr/testify/assert"

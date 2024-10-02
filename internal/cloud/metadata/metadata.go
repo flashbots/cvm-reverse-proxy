@@ -9,7 +9,7 @@ package metadata
 import (
 	"context"
 
-	"cvm-reverse-proxy/internal/role"
+	"github.com/flashbots/cvm-reverse-proxy/internal/role"
 )
 
 // InstanceMetadata describes metadata of a peer.

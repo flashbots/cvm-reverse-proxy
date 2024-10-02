@@ -9,8 +9,8 @@ package versionsapi
 import (
 	"context"
 
-	"cvm-reverse-proxy/internal/api/fetcher"
-	"cvm-reverse-proxy/internal/constants"
+	"github.com/flashbots/cvm-reverse-proxy/internal/api/fetcher"
+	"github.com/flashbots/cvm-reverse-proxy/internal/constants"
 )
 
 // Fetcher fetches version API resources without authentication.

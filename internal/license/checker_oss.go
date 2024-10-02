@@ -11,7 +11,7 @@ package license
 import (
 	"context"
 
-	"cvm-reverse-proxy/internal/cloud/cloudprovider"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/cloudprovider"
 )
 
 // Checker checks the Constellation license.

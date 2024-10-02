@@ -19,12 +19,12 @@ import (
 	"testing"
 	"time"
 
-	"cvm-reverse-proxy/internal/attestation/measurements"
-	"cvm-reverse-proxy/internal/attestation/simulator"
-	"cvm-reverse-proxy/internal/attestation/vtpm"
-	"cvm-reverse-proxy/internal/config"
-	"cvm-reverse-proxy/internal/crypto"
-	"cvm-reverse-proxy/internal/logger"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/measurements"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/simulator"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/vtpm"
+	"github.com/flashbots/cvm-reverse-proxy/internal/config"
+	"github.com/flashbots/cvm-reverse-proxy/internal/crypto"
+	"github.com/flashbots/cvm-reverse-proxy/internal/logger"
 
 	tpmclient "github.com/google/go-tpm-tools/client"
 	"github.com/google/go-tpm-tools/proto/attest"

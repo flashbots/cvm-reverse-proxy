@@ -18,8 +18,8 @@ import (
 	"net/url"
 	"strconv"
 
-	"cvm-reverse-proxy/internal/cloud/metadata"
-	"cvm-reverse-proxy/internal/constants"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/metadata"
+	"github.com/flashbots/cvm-reverse-proxy/internal/constants"
 )
 
 const qemuMetadataEndpoint = "10.42.0.1:8080"

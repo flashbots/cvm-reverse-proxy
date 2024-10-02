@@ -15,8 +15,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"cvm-reverse-proxy/internal/cloud"
-	"cvm-reverse-proxy/internal/role"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud"
+	"github.com/flashbots/cvm-reverse-proxy/internal/role"
 
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc/test/bufconn"

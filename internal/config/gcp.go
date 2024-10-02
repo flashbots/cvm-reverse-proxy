@@ -10,10 +10,10 @@ import (
 	"context"
 	"fmt"
 
-	"cvm-reverse-proxy/internal/api/attestationconfigapi"
-	"cvm-reverse-proxy/internal/attestation/measurements"
-	"cvm-reverse-proxy/internal/attestation/variant"
-	"cvm-reverse-proxy/internal/cloud/cloudprovider"
+	"github.com/flashbots/cvm-reverse-proxy/internal/api/attestationconfigapi"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/measurements"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/cloudprovider"
 )
 
 var _ svnResolveMarshaller = &GCPSEVSNP{}

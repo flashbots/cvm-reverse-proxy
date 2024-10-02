@@ -7,7 +7,7 @@ package client
 import (
 	"testing"
 
-	"cvm-reverse-proxy/internal/api/attestationconfigapi"
+	"github.com/flashbots/cvm-reverse-proxy/internal/api/attestationconfigapi"
 
 	"github.com/stretchr/testify/assert"
 )

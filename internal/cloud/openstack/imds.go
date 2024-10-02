@@ -15,8 +15,8 @@ import (
 	"net/http"
 	"time"
 
-	"cvm-reverse-proxy/internal/cloud"
-	"cvm-reverse-proxy/internal/role"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud"
+	"github.com/flashbots/cvm-reverse-proxy/internal/role"
 )
 
 // documentation of OpenStack Metadata Service: https://docs.openstack.org/nova/rocky/user/metadata-service.html

@@ -10,8 +10,8 @@ package nodestate
 import (
 	"fmt"
 
-	"cvm-reverse-proxy/internal/file"
-	"cvm-reverse-proxy/internal/role"
+	"github.com/flashbots/cvm-reverse-proxy/internal/file"
+	"github.com/flashbots/cvm-reverse-proxy/internal/role"
 )
 
 const nodeStatePath = "/run/state/constellation/node_state.json"

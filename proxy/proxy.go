@@ -11,8 +11,8 @@ import (
 	"net/url"
 	"strings"
 
-	"cvm-reverse-proxy/internal/atls"
-	"cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/atls"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
 )
 
 type Proxy struct {

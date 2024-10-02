@@ -20,17 +20,17 @@ import (
 	"github.com/go-playground/validator/v10"
 	"golang.org/x/mod/semver"
 
-	"cvm-reverse-proxy/internal/api/versionsapi"
-	"cvm-reverse-proxy/internal/attestation/measurements"
-	"cvm-reverse-proxy/internal/attestation/variant"
-	"cvm-reverse-proxy/internal/cloud/cloudprovider"
-	"cvm-reverse-proxy/internal/compatibility"
-	"cvm-reverse-proxy/internal/config/disktypes"
-	"cvm-reverse-proxy/internal/config/instancetypes"
-	"cvm-reverse-proxy/internal/constants"
-	"cvm-reverse-proxy/internal/role"
-	consemver "cvm-reverse-proxy/internal/semver"
-	"cvm-reverse-proxy/internal/versions"
+	"github.com/flashbots/cvm-reverse-proxy/internal/api/versionsapi"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/measurements"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/cloudprovider"
+	"github.com/flashbots/cvm-reverse-proxy/internal/compatibility"
+	"github.com/flashbots/cvm-reverse-proxy/internal/config/disktypes"
+	"github.com/flashbots/cvm-reverse-proxy/internal/config/instancetypes"
+	"github.com/flashbots/cvm-reverse-proxy/internal/constants"
+	"github.com/flashbots/cvm-reverse-proxy/internal/role"
+	consemver "github.com/flashbots/cvm-reverse-proxy/internal/semver"
+	"github.com/flashbots/cvm-reverse-proxy/internal/versions"
 )
 
 // ValidationError occurs when the validation of a config fails.

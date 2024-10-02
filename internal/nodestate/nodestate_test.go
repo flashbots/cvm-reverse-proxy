@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"cvm-reverse-proxy/internal/file"
-	"cvm-reverse-proxy/internal/role"
+	"github.com/flashbots/cvm-reverse-proxy/internal/file"
+	"github.com/flashbots/cvm-reverse-proxy/internal/role"
 
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"

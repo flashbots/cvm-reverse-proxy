@@ -24,8 +24,8 @@ import (
 	tpmServer "github.com/google/go-tpm-tools/server"
 	"github.com/google/go-tpm/legacy/tpm2"
 
-	"cvm-reverse-proxy/internal/attestation"
-	"cvm-reverse-proxy/internal/attestation/measurements"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/measurements"
 )
 
 var (

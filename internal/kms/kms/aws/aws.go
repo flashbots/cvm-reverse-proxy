@@ -12,9 +12,9 @@ import (
 	"errors"
 	"fmt"
 
-	kmsInterface "cvm-reverse-proxy/internal/kms/kms"
-	"cvm-reverse-proxy/internal/kms/kms/internal"
-	"cvm-reverse-proxy/internal/kms/uri"
+	kmsInterface "github.com/flashbots/cvm-reverse-proxy/internal/kms/kms"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/kms/internal"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/uri"
 
 	wrapping "github.com/hashicorp/go-kms-wrapping/v2"
 	awskms "github.com/hashicorp/go-kms-wrapping/wrappers/awskms/v2"

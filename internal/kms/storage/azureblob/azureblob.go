@@ -13,9 +13,9 @@ import (
 	"fmt"
 	"io"
 
-	"cvm-reverse-proxy/internal/kms/config"
-	"cvm-reverse-proxy/internal/kms/storage"
-	"cvm-reverse-proxy/internal/kms/uri"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/config"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/storage"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/uri"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"

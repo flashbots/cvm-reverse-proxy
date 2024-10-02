@@ -15,7 +15,7 @@ import (
 	"net"
 	"testing"
 
-	"cvm-reverse-proxy/internal/atls"
+	"github.com/flashbots/cvm-reverse-proxy/internal/atls"
 
 	"github.com/edgelesssys/constellation/v2/bootstrapper/initproto"
 	"github.com/stretchr/testify/assert"

@@ -23,13 +23,13 @@ import (
 	"strconv"
 	"strings"
 
-	"cvm-reverse-proxy/internal/api/versionsapi"
-	"cvm-reverse-proxy/internal/attestation/measurements"
-	"cvm-reverse-proxy/internal/attestation/variant"
-	"cvm-reverse-proxy/internal/cloud/cloudprovider"
-	"cvm-reverse-proxy/internal/constants"
-	"cvm-reverse-proxy/internal/sigstore"
-	"cvm-reverse-proxy/internal/sigstore/keyselect"
+	"github.com/flashbots/cvm-reverse-proxy/internal/api/versionsapi"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/measurements"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/cloudprovider"
+	"github.com/flashbots/cvm-reverse-proxy/internal/constants"
+	"github.com/flashbots/cvm-reverse-proxy/internal/sigstore"
+	"github.com/flashbots/cvm-reverse-proxy/internal/sigstore/keyselect"
 
 	"golang.org/x/tools/go/ast/astutil"
 )

@@ -18,15 +18,15 @@ import (
 	"path"
 	"strings"
 
-	"cvm-reverse-proxy/internal/api/attestationconfigapi"
-	apiclient "cvm-reverse-proxy/internal/api/client"
-	"cvm-reverse-proxy/internal/attestation/variant"
-	"cvm-reverse-proxy/internal/sigstore"
+	"github.com/flashbots/cvm-reverse-proxy/internal/api/attestationconfigapi"
+	apiclient "github.com/flashbots/cvm-reverse-proxy/internal/api/client"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/sigstore"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go/aws"
 
-	"cvm-reverse-proxy/internal/staticupload"
+	"github.com/flashbots/cvm-reverse-proxy/internal/staticupload"
 )
 
 // VersionFormat is the format of the version name in the S3 bucket.

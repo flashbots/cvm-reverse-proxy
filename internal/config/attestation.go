@@ -13,8 +13,8 @@ import (
 	"encoding/pem"
 	"fmt"
 
-	"cvm-reverse-proxy/internal/attestation/measurements"
-	"cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/measurements"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
 )
 
 const (

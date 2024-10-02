@@ -10,10 +10,10 @@ import (
 	"context"
 	"fmt"
 
-	apifetcher "cvm-reverse-proxy/internal/api/fetcher"
-	"cvm-reverse-proxy/internal/attestation/variant"
-	"cvm-reverse-proxy/internal/constants"
-	"cvm-reverse-proxy/internal/sigstore"
+	apifetcher "github.com/flashbots/cvm-reverse-proxy/internal/api/fetcher"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/constants"
+	"github.com/flashbots/cvm-reverse-proxy/internal/sigstore"
 )
 
 const cosignPublicKey = constants.CosignPublicKeyReleases

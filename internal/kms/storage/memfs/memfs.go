@@ -11,7 +11,7 @@ package memfs
 import (
 	"context"
 
-	"cvm-reverse-proxy/internal/kms/storage"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/storage"
 )
 
 // Storage is the standard implementation of the Storage interface, storing keys in memory only.

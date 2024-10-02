@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/asn1"
 
-	"cvm-reverse-proxy/internal/atls"
+	"github.com/flashbots/cvm-reverse-proxy/internal/atls"
 )
 
 // MultiValidator is a validator for Azure confidential VM attestation using TDX which accepts multiple measurements

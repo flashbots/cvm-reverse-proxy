@@ -17,7 +17,7 @@ import (
 	"testing"
 	"time"
 
-	"cvm-reverse-proxy/internal/role"
+	"github.com/flashbots/cvm-reverse-proxy/internal/role"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

@@ -12,8 +12,8 @@ import (
 	"errors"
 	"io"
 
-	"cvm-reverse-proxy/internal/kms/storage"
-	"cvm-reverse-proxy/internal/kms/uri"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/storage"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/uri"
 
 	gcstorage "cloud.google.com/go/storage"
 	"google.golang.org/api/option"

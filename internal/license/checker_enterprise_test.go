@@ -15,7 +15,7 @@ import (
 	"net/http"
 	"testing"
 
-	"cvm-reverse-proxy/internal/cloud/cloudprovider"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/cloudprovider"
 
 	"github.com/stretchr/testify/assert"
 )

@@ -13,9 +13,9 @@ import (
 	"errors"
 	"testing"
 
-	"cvm-reverse-proxy/internal/attestation/gcp"
-	"cvm-reverse-proxy/internal/attestation/variant"
-	"cvm-reverse-proxy/internal/attestation/vtpm"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/gcp"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/vtpm"
 
 	"cloud.google.com/go/compute/apiv1/computepb"
 	"github.com/google/go-tpm-tools/proto/attest"

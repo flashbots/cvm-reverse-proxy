@@ -10,11 +10,11 @@ import (
 	"log/slog"
 	"os"
 
-	"cvm-reverse-proxy/internal/atls"
-	azure_tdx "cvm-reverse-proxy/internal/attestation/azure/tdx"
-	"cvm-reverse-proxy/internal/attestation/measurements"
-	"cvm-reverse-proxy/internal/attestation/variant"
-	"cvm-reverse-proxy/internal/config"
+	"github.com/flashbots/cvm-reverse-proxy/internal/atls"
+	azure_tdx "github.com/flashbots/cvm-reverse-proxy/internal/attestation/azure/tdx"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/measurements"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/config"
 )
 
 type AttestationType string

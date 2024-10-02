@@ -7,7 +7,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 // Package imageversion contains the pinned container images for the config.
 package imageversion
 
-import "cvm-reverse-proxy/internal/containerimage"
+import "github.com/flashbots/cvm-reverse-proxy/internal/containerimage"
 
 // QEMUMetadata is the image of the QEMU metadata api service.
 func QEMUMetadata() string {

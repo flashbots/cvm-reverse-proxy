@@ -10,7 +10,7 @@ import (
 	"context"
 	"testing"
 
-	"cvm-reverse-proxy/internal/kms/storage"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/storage"
 
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/goleak"

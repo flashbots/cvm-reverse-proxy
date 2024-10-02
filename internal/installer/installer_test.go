@@ -23,7 +23,7 @@ import (
 	"testing"
 	"time"
 
-	"cvm-reverse-proxy/internal/versions/components"
+	"github.com/flashbots/cvm-reverse-proxy/internal/versions/components"
 
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"

@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"io"
 
-	kmsInterface "cvm-reverse-proxy/internal/kms/kms"
-	"cvm-reverse-proxy/internal/kms/kms/internal"
-	"cvm-reverse-proxy/internal/kms/uri"
+	kmsInterface "github.com/flashbots/cvm-reverse-proxy/internal/kms/kms"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/kms/internal"
+	"github.com/flashbots/cvm-reverse-proxy/internal/kms/uri"
 
 	gcpckms "github.com/hashicorp/go-kms-wrapping/wrappers/gcpckms/v2"
 )

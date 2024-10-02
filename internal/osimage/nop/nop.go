@@ -12,8 +12,8 @@ import (
 	"fmt"
 	"log/slog"
 
-	"cvm-reverse-proxy/internal/api/versionsapi"
-	"cvm-reverse-proxy/internal/osimage"
+	"github.com/flashbots/cvm-reverse-proxy/internal/api/versionsapi"
+	"github.com/flashbots/cvm-reverse-proxy/internal/osimage"
 )
 
 // Uploader is a no-op uploader.

@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"os"
 
-	"cvm-reverse-proxy/common"
-	"cvm-reverse-proxy/internal/atls"
-	"cvm-reverse-proxy/proxy"
+	"github.com/flashbots/cvm-reverse-proxy/common"
+	"github.com/flashbots/cvm-reverse-proxy/internal/atls"
+	"github.com/flashbots/cvm-reverse-proxy/proxy"
 
 	"github.com/urfave/cli/v2" // imports as package "cli"
 )

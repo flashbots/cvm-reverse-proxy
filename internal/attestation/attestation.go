@@ -32,7 +32,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 
-	"cvm-reverse-proxy/internal/crypto"
+	"github.com/flashbots/cvm-reverse-proxy/internal/crypto"
 )
 
 const (

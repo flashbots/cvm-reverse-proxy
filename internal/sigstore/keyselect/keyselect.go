@@ -12,8 +12,8 @@ package keyselect
 import (
 	"fmt"
 
-	"cvm-reverse-proxy/internal/api/versionsapi"
-	"cvm-reverse-proxy/internal/constants"
+	"github.com/flashbots/cvm-reverse-proxy/internal/api/versionsapi"
+	"github.com/flashbots/cvm-reverse-proxy/internal/constants"
 )
 
 // CosignPublicKeyForVersion returns the public key for the given version.

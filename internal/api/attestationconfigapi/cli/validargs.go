@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"strings"
 
-	"cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
 
 	"github.com/spf13/cobra"
 )

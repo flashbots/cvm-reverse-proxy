@@ -9,8 +9,8 @@ package measurements
 import (
 	"fmt"
 
-	"cvm-reverse-proxy/internal/attestation/variant"
-	"cvm-reverse-proxy/internal/cloud/cloudprovider"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/cloudprovider"
 )
 
 var measurementOverridesForCSP = map[string]measurementOverride{

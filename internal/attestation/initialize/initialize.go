@@ -13,8 +13,8 @@ import (
 	"errors"
 	"io"
 
-	"cvm-reverse-proxy/internal/attestation/measurements"
-	"cvm-reverse-proxy/internal/attestation/tdx"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/measurements"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/tdx"
 
 	tdxapi "github.com/edgelesssys/go-tdx-qpl/tdx"
 	"github.com/google/go-tpm/legacy/tpm2"

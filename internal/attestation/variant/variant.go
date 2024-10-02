@@ -36,7 +36,7 @@ import (
 	"fmt"
 	"sort"
 
-	"cvm-reverse-proxy/internal/cloud/cloudprovider"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/cloudprovider"
 )
 
 const (

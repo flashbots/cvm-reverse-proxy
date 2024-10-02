@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"cvm-reverse-proxy/internal/attestation/snp/testdata"
-	"cvm-reverse-proxy/internal/logger"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/snp/testdata"
+	"github.com/flashbots/cvm-reverse-proxy/internal/logger"
 
 	"github.com/stretchr/testify/assert"
 )
