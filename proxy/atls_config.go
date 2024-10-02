@@ -77,10 +77,6 @@ func CreateAttestationValidators(log *slog.Logger, attestationType AttestationTy
 	}
 }
 
-func ExtractExtensionATLSVariant(ext *pkix.Extension) (variant.Variant, error) {
-	return variant.FromString(ext.Id.String())
-}
-
 func ExtractMeasurementsFromExtension(ext *pkix.Extension, v variant.Variant) (map[uint32][]byte, error) {
 	switch v {
 	case variant.AzureTDX{}:

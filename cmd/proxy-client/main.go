@@ -106,10 +106,10 @@ func run_client(cCtx *cli.Context) error {
 		return err
 	}
 
-	proxy := proxy.NewProxy(targetAddr).WithTransport(&http.Transport{TLSClientConfig: tlsConfig})
+	proxyHandler := proxy.NewProxy(targetAddr, validators).WithTransport(&http.Transport{TLSClientConfig: tlsConfig})
 
 	log.With("listenAddr", listenAddr).Info("about to start proxy")
-	err = http.ListenAndServe(listenAddr, proxy)
+	err = http.ListenAndServe(listenAddr, proxyHandler)
 	if err != nil {
 		log.Error("stopping proxy", "server error", err)
 		return err
