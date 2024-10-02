@@ -35,6 +35,8 @@ func NewProxy(targetUrl string, validators []atls.Validator) *Proxy {
 	}
 
 	proxy := &Proxy{target: target, proxy: httpproxy, validatorOIDs: validatorOIDs}
+
+	// Forwards validated measurement to the *client*
 	httpproxy.ModifyResponse = func(res *http.Response) error {
 		for headerKey := range res.Header {
 			if strings.HasPrefix("x-flashbots-cert-extensions", strings.ToLower(headerKey)) {
@@ -61,12 +63,7 @@ func (p *Proxy) WithTransport(transport *http.Transport) *Proxy {
 func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	r.Host = p.target.Host
 
-	if r.Header.Get("X-Forwarded-For") != "" {
-		http.Error(w, "unexpected X-Forwarded-For header passed", http.StatusForbidden)
-		return
-	}
-
-	r.Header.Set("X-Forwarded-For", r.RemoteAddr) // Note: not very reliable. Maybe we should set and check X-Real-IP. Also, X-Forwarded-For might have already been set.
+	// Note: the reverse proxy adds X-Forwarded-For header!
 
 	for headerKey := range r.Header {
 		if strings.HasPrefix("x-flashbots-cert-extensions", strings.ToLower(headerKey)) {
@@ -76,6 +73,7 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.TLS != nil {
+		// Forwards validated measurement to the *proxied-to service*
 		err, errStatus := p.copyMeasurementsToHeader(r.TLS, &r.Header)
 		if err != nil {
 			http.Error(w, err.Error(), errStatus)
@@ -106,7 +104,6 @@ func (p *Proxy) copyMeasurementsToHeader(conn *tls.ConnectionState, header *http
 		return nil, 0
 	}
 
-	// Only one item
 	atlsVariant, err := variant.FromOID(ATLSExtension.Id)
 	if err != nil {
 		return errors.New("could not get ATLS variant back from a matched extension"), http.StatusTeapot
