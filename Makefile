@@ -76,3 +76,12 @@ cover-html: ## Run tests with coverage and open the HTML report
 	go test -coverprofile=/tmp/go-sim-lb.cover.tmp ./...
 	go tool cover -html=/tmp/go-sim-lb.cover.tmp
 	unlink /tmp/go-sim-lb.cover.tmp
+
+.PHONY: docker-images
+docker-images: ## Build the Docker images
+	DOCKER_BUILDKIT=1 docker build \
+		--platform linux/amd64 \
+		--build-arg VERSION=${VERSION} \
+		--file proxy-server.dockerfile \
+		--tag cvm-proxy-server \
+	.
