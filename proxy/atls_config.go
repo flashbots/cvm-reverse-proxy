@@ -80,7 +80,6 @@ func CreateAttestationValidators(log *slog.Logger, attestationType AttestationTy
 func ExtractMeasurementsFromExtension(ext *pkix.Extension, v variant.Variant) (map[uint32][]byte, error) {
 	switch v {
 	case variant.AzureTDX{}:
-		// TODO: make sure that all extensions had their quotes validated at this point!
 		measurements, err := azure_tdx.ParseAzureTDXAttestationMeasurements(ext.Value)
 		if err != nil {
 			return nil, errors.New("could not parse measurements from raw attestations document")
