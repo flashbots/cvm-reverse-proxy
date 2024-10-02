@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"strings"
 
 	"cvm-reverse-proxy/internal/atls"
 	"cvm-reverse-proxy/internal/attestation/variant"
@@ -21,6 +20,11 @@ type Proxy struct {
 
 	validatorOIDs []asn1.ObjectIdentifier
 }
+
+const (
+	AttestationTypeHeader string = "X-Flashbots-Ext-OID"
+	MeasurementHeader     string = "X-Flashbots-Measurements"
+)
 
 func NewProxy(targetURL string, validators []atls.Validator) *Proxy {
 	target, err := url.Parse(targetURL)
@@ -39,10 +43,11 @@ func NewProxy(targetURL string, validators []atls.Validator) *Proxy {
 
 	// Forwards validated measurement to the *client*
 	httpproxy.ModifyResponse = func(res *http.Response) error {
-		for headerKey := range res.Header {
-			if strings.HasPrefix("x-flashbots-cert-extensions", strings.ToLower(headerKey)) {
-				return errors.New("unexpected X-Flashbots-Cert-Extensions header passed")
-			}
+		if res.Header.Get(MeasurementHeader) != "" {
+			return errors.New("unexpected measurement header passed")
+		}
+		if res.Header.Get(AttestationTypeHeader) != "" {
+			return errors.New("unexpected attestation type header passed")
 		}
 
 		if res.TLS != nil {
@@ -66,11 +71,11 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Note: the reverse proxy adds X-Forwarded-For header!
 
-	for headerKey := range r.Header {
-		if strings.HasPrefix("x-flashbots-cert-extensions", strings.ToLower(headerKey)) {
-			http.Error(w, "unexpected X-Flashbots-Cert-Extensions header passed", http.StatusForbidden)
-			return
-		}
+	if r.Header.Get(MeasurementHeader) != "" {
+		http.Error(w, "unexpected measurement header passed", http.StatusForbidden)
+	}
+	if r.Header.Get(AttestationTypeHeader) != "" {
+		http.Error(w, "unexpected attestation type header passed", http.StatusForbidden)
 	}
 
 	if r.TLS != nil {
@@ -120,6 +125,8 @@ func (p *Proxy) copyMeasurementsToHeader(conn *tls.ConnectionState, header *http
 		return http.StatusInternalServerError, errors.New("could not marshal measurement extracted from tls extension")
 	}
 
-	header.Set("X-Flashbots-Cert-Extensions-"+ATLSExtension.Id.String(), string(marshaledPcrs))
+	header.Set(AttestationTypeHeader, ATLSExtension.Id.String())
+	header.Set(MeasurementHeader, string(marshaledPcrs))
+
 	return 0, nil
 }
