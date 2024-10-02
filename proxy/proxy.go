@@ -23,7 +23,7 @@ type Proxy struct {
 
 const (
 	AttestationTypeHeader string = "X-Flashbots-Ext-OID"
-	MeasurementHeader     string = "X-Flashbots-Measurements"
+	MeasurementHeader     string = "X-Flashbots-Measurement"
 )
 
 func NewProxy(targetURL string, validators []atls.Validator) *Proxy {
