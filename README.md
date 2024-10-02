@@ -25,7 +25,7 @@ Server
 - TCP/HTTP server that performs mutual attestation, that is it both provides its own attestation, and verifies the client. The *client's* measurement is forwarded as a header.
 
 Client
-- Client making a request, verifying server aTLS (supporting one or multiple whitelisted measurements). The *sever's* measurement is returned as a header.
+- Client making a request, verifying server aTLS (supporting one or multiple whitelisted measurements). The *server's* measurement is returned as a header.
 - Client making a request with a client-side aTLS cert.
 - Client making a request mutual attestation, both verifying server aTLS and providing the client-side aTLS handshake. The *sever's* measurement is returned as a header.
 
