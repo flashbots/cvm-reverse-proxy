@@ -107,7 +107,7 @@ func (p *Proxy) copyMeasurementsToHeader(conn *tls.ConnectionState, header *http
 	}
 
 	// Only one item
-	atlsVariant, err := variant.FromString(ATLSExtension.Id.String())
+	atlsVariant, err := variant.FromOID(ATLSExtension.Id)
 	if err != nil {
 		return errors.New("could not get ATLS variant back from a matched extension"), http.StatusTeapot
 	}
