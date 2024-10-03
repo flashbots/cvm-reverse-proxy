@@ -22,7 +22,7 @@ type Proxy struct {
 }
 
 const (
-	AttestationTypeHeader string = "X-Flashbots-Ext-OID"
+	AttestationTypeHeader string = "X-Flashbots-Attestation-Type"
 	MeasurementHeader     string = "X-Flashbots-Measurement"
 )
 
@@ -125,7 +125,7 @@ func (p *Proxy) copyMeasurementsToHeader(conn *tls.ConnectionState, header *http
 		return http.StatusInternalServerError, errors.New("could not marshal measurement extracted from tls extension")
 	}
 
-	header.Set(AttestationTypeHeader, ATLSExtension.Id.String())
+	header.Set(AttestationTypeHeader, atlsVariant.String())
 	header.Set(MeasurementHeader, string(marshaledPcrs))
 
 	return 0, nil
