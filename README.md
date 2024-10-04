@@ -20,12 +20,14 @@ Both the client-side and the server-side TLS termination can be separately confi
 ## Modes of operation
 
 Server
+- TCP/HTTP server with regular TLS on the server side, to allow the client to verify the server's TLS certificate.
 - TCP/HTTP server with aTLS on the server side, to allow client verify the server measurement.
-- TCP/HTTP server that verifies the client (via client-side aTLS certificate). The measurement is passed along to the proxy target as header.
+- TCP/HTTP server that verifies the client (via client-side aTLS certificate). The measurement is passed along to the proxy target as header. Valid for both server-side TLS and aTLS.
 - TCP/HTTP server that performs mutual attestation, that is it both provides its own attestation, and verifies the client. The *client's* measurement is forwarded as a header.
 
 Client
-- Client making a request, verifying server aTLS (supporting one or multiple whitelisted measurements). The *server's* measurement is returned as a header.
+- Client making a request, verifying server's TLS certificate.
+- Client making a request, verifying server aTLS certificate (supporting one or multiple whitelisted measurements). The *server's* measurement is returned as a header.
 - Client making a request with a client-side aTLS cert.
 - Client making a request mutual attestation, both verifying server aTLS and providing the client-side aTLS handshake. The *sever's* measurement is returned as a header.
 
@@ -38,6 +40,8 @@ Client
 - `--listen-addr`: address to listen on (default: "127.0.0.1:8080")
 - `--target-addr`: address to proxy requests to (default: "https://localhost:80")
 - `--server-attestation-type`: type of attestation to present (none, azure-tdx) (default: "azure-tdx")
+- `--tls-certificate`: Certificate to present (PEM). Only valid for --server-attestation-type=none and with --tls-private-key.
+- `--tls-private-key`: "Private key for the certificate (PEM). Only valid with --tls-certificate.
 - `--client-attestation-type`: type of attestation to expect and verify (none, azure-tdx) (default: "none")
 - `--client-measurements`: optional path to JSON measurements enforced on the client
 - `--log-json`: log in JSON format (default: false)
@@ -57,9 +61,10 @@ make build-proxy-server
 sudo ./build/proxy-server --listen-addr=<listen-addr> --target-addr=<target-addr> [--server-attestation-type=<server-attestation-type>] [--client-attestation-type=<client-attestation-type>] [--client-measurements=<client-measurements>]
 ```
 
-By default the server will present Azure TDX attestation, and you can modify that via the `--server-attestation-type` flag.
+By default the server will present Azure TDX attestation, and you can modify that via the `--server-attestation-type` flag.  
+The server can be made to present a regular TLS certificate through `--tls-certificate` and `--tls-private-key` flags instead of aTLS one.  
 
-By default the server will not verify client attestations, you can change that via `--client-attestation-type` and `--client-measurements` flags.
+By default the server will not verify client attestations, you can change that via `--client-attestation-type` and `--client-measurements` flags. Valid for both aTLS and regular TLS.
 
 
 This repository contains a [dummy http server](./cmd/dummy-server/main.go) that you can use for testing the server. Simply run `go run ./cmd/dummy-server/main.go` and point your `--target-addr=http://127.0.0.1:8085`. You can also use the sample [measurements.json](./measurements.json).
@@ -72,6 +77,8 @@ This repository contains a [dummy http server](./cmd/dummy-server/main.go) that 
 - `--target-addr`: address to proxy requests to (default: "https://localhost:80")
 - `--server-attestation-type`: type of attestation to expect and verify (none, azure-tdx) (default: "azure-tdx")
 - `--server-measurements`: optional path to JSON measurements enforced on the server
+- `--verify-tls`: verify server's TLS certificate instead of server's attestation. Only valid for server-attestation-type=none.
+- `--tls-ca-certificate`: additional CA certificate to verify against (PEM) [default=no additional TLS certs]. Only valid with --verify-tls.
 - `--client-attestation-type`: type of attestation to present (none, azure-tdx) (default: "none")
 - `--log-json`: log in JSON format (default: false)
 - `--log-debug`: log debug messages (default: false)
@@ -90,9 +97,10 @@ make build-proxy-client
 ./build/proxy-client --listen-addr=<listen-addr> --target-addr=<target-addr> [--server-measurements=<server-measurements-file>] [--server-attestation-type=<server-attestation-type>] [--client-attestation-type=<client-attestation-type>]
 ```
 
-By default the client will expect the server to present an Azure TDX attestation, and you can modify that via the `--server-attestation-type` and  `--server-measurements` flags.
+By default the client will expect the server to present an Azure TDX attestation, and you can modify that via the `--server-attestation-type` and  `--server-measurements` flags.  
+The server can also be a regular TLS server, which you can configure with the `--verify-tls` flag, which is only valid in combination with `--server-attestation-type=none`. Non-standard CA for the server can also be configured with `--tls-ca-certificate`.  
 
-By default the client will not present client attestations, you can change that via `--client-attestation-type` flag.
+By default the client will not present client attestations, you can change that via `--client-attestation-type` flag. Valid for both aTLS and TLS server proxies.
 
 This repository contains a sample [measurements.json](./measurements.json) file that you can use. The client will (correctly) complain about unexpected measurements that you can then correct.
 

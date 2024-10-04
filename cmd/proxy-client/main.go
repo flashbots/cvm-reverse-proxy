@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/x509"
+	"errors"
 	"log"
 	"net/http"
 	"os"
@@ -8,7 +10,6 @@ import (
 	"github.com/flashbots/cvm-reverse-proxy/common"
 	"github.com/flashbots/cvm-reverse-proxy/internal/atls"
 	"github.com/flashbots/cvm-reverse-proxy/proxy"
-
 	"github.com/urfave/cli/v2" // imports as package "cli"
 )
 
@@ -31,6 +32,15 @@ var flags []cli.Flag = []cli.Flag{
 	&cli.StringFlag{
 		Name:  "server-measurements",
 		Usage: "optional path to JSON measurements enforced on the server",
+	},
+	&cli.BoolFlag{
+		Name:  "verify-tls",
+		Value: false,
+		Usage: "verify server's TLS certificate instead of server's attestation. Only valid for server-attestation-type=none.",
+	},
+	&cli.StringFlag{
+		Name:  "tls-ca-certificate",
+		Usage: "additional CA certificate to verify against (PEM) [default=no additional TLS certs]. Only valid with --verify-tls.",
 	},
 	&cli.StringFlag{
 		Name:  "client-attestation-type",
@@ -69,12 +79,19 @@ func runClient(cCtx *cli.Context) error {
 	logJSON := cCtx.Bool("log-json")
 	logDebug := cCtx.Bool("log-debug")
 
+	verifyTLS := cCtx.Bool("verify-tls")
+
 	log := common.SetupLogger(&common.LoggingOpts{
 		Debug:   logDebug,
 		JSON:    logJSON,
 		Service: "proxy-client",
 		Version: common.Version,
 	})
+
+	if cCtx.String("server-attestation-type") != "none" && verifyTLS {
+		log.Error("invalid combination of --verify-tls and --server-attestation-type passed (only 'none' is allowed)")
+		return errors.New("invalid combination of --verify-tls and --server-attestation-type passed (only 'none' is allowed)")
+	}
 
 	clientAttestationType, err := proxy.ParseAttestationType(cCtx.String("client-attestation-type"))
 	if err != nil {
@@ -104,6 +121,33 @@ func runClient(cCtx *cli.Context) error {
 	if err != nil {
 		log.Error("could not create atls config", "err", err)
 		return err
+	}
+
+	if verifyTLS {
+		tlsConfig.InsecureSkipVerify = false
+		tlsConfig.ServerName = ""
+	}
+
+	if additionalTLSCA := cCtx.String("tls-ca-certificate"); additionalTLSCA != "" {
+		if !verifyTLS {
+			log.Error("--tls-ca-certificate specified but --verify-tls is not, refusing to continue")
+			return errors.New("--tls-ca-certificate specified but --verify-tls is not, refusing to continue")
+		}
+
+		certData, err := os.ReadFile(additionalTLSCA)
+		if err != nil {
+			log.Error("could not read tls ca certificate data", "err", err)
+			return err
+		}
+
+		roots := x509.NewCertPool()
+		ok := roots.AppendCertsFromPEM(certData)
+		if !ok {
+			log.Error("invalid certificate received", "cert", string(certData))
+			return errors.New("invalid certificate")
+		}
+
+		tlsConfig.RootCAs = roots
 	}
 
 	proxyHandler := proxy.NewProxy(targetAddr, validators).WithTransport(&http.Transport{TLSClientConfig: tlsConfig})

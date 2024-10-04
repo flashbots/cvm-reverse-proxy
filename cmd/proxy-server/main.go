@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"log"
 	"net/http"
 	"os"
@@ -13,7 +14,6 @@ import (
 	"github.com/flashbots/cvm-reverse-proxy/common"
 	"github.com/flashbots/cvm-reverse-proxy/internal/atls"
 	"github.com/flashbots/cvm-reverse-proxy/proxy"
-
 	"github.com/urfave/cli/v2" // imports as package "cli"
 )
 
@@ -32,6 +32,14 @@ var flags []cli.Flag = []cli.Flag{
 		Name:  "server-attestation-type",
 		Value: string(proxy.AttestationAzureTDX),
 		Usage: "type of attestation to present (" + proxy.AvailableAttestationTypes + ")",
+	},
+	&cli.StringFlag{
+		Name:  "tls-certificate",
+		Usage: "Certificate to present (PEM). Only valid for --server-attestation-type=none and with --tls-private-key.",
+	},
+	&cli.StringFlag{
+		Name:  "tls-private-key",
+		Usage: "Private key for the certificate (PEM). Only valid with --tls-certificate.",
 	},
 	&cli.StringFlag{
 		Name:  "client-attestation-type",
@@ -73,6 +81,10 @@ func runServer(cCtx *cli.Context) error {
 	clientMeasurements := cCtx.String("client-measurements")
 	logJSON := cCtx.Bool("log-json")
 	logDebug := cCtx.Bool("log-debug")
+	serverAttestationTypeFlag := cCtx.String("server-attestation-type")
+
+	certFile := cCtx.String("tls-certificate")
+	keyFile := cCtx.String("tls-private-key")
 
 	log := common.SetupLogger(&common.LoggingOpts{
 		Debug:   logDebug,
@@ -81,7 +93,18 @@ func runServer(cCtx *cli.Context) error {
 		Version: common.Version,
 	})
 
-	serverAttestationType, err := proxy.ParseAttestationType(cCtx.String("server-attestation-type"))
+	useRegularTLS := certFile != "" || keyFile != ""
+	if serverAttestationTypeFlag != "none" && useRegularTLS {
+		log.Error("invalid combination of --tls-certificate, --tls-private-key and --server-attestation-type flags passed (only 'none' is allowed)")
+		return errors.New("invalid combination of --tls-certificate, --tls-private-key and --server-attestation-type flags passed (only 'none' is allowed)")
+	}
+
+	if useRegularTLS && (certFile == "" || keyFile == "") {
+		log.Error("not all of --tls-certificate and --tls-private-key specified")
+		return errors.New("not all of --tls-certificate and --tls-private-key specified")
+	}
+
+	serverAttestationType, err := proxy.ParseAttestationType(serverAttestationTypeFlag)
 	if err != nil {
 		log.With("attestation-type", cCtx.String("server-attestation-type")).Error("invalid server-attestation-type passed, see --help")
 		return err
@@ -110,6 +133,31 @@ func runServer(cCtx *cli.Context) error {
 	confTLS, err := atls.CreateAttestationServerTLSConfig(issuer, validators)
 	if err != nil {
 		panic(err)
+	}
+
+	if useRegularTLS {
+		cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+		if err != nil {
+			log.Error("could not load tls key pair", "err", err)
+			return err
+		}
+
+		atlsGetConfigForClient := confTLS.GetConfigForClient
+
+		confTLS = &tls.Config{
+			GetConfigForClient: func(clientHello *tls.ClientHelloInfo) (*tls.Config, error) {
+				ogClientConfig, err := atlsGetConfigForClient(clientHello)
+				if err != nil {
+					return ogClientConfig, err
+				}
+
+				// Note: we don't have to copy the certificate because it's always created per request
+				ogClientConfig.Certificates = []tls.Certificate{cert}
+				ogClientConfig.GetCertificate = nil
+				return ogClientConfig, nil
+
+			},
+		}
 	}
 
 	// Create an HTTP server
