@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/x509"
 	"errors"
 	"log"
 	"net/http"
@@ -32,6 +33,10 @@ var flags []cli.Flag = []cli.Flag{
 		Name:  "verify-tls",
 		Value: false,
 		Usage: "verify server's TLS certificate instead of server's attestation. Only valid for server-attestation-type=none.",
+	},
+	&cli.StringFlag{
+		Name:  "tls-ca-certificate",
+		Usage: "Additional CA certificate to verify against (PEM) [default=no additional TLS certs]",
 	},
 	&cli.StringFlag{
 		Name:  "server-measurements",
@@ -74,6 +79,8 @@ func runClient(cCtx *cli.Context) error {
 	logJSON := cCtx.Bool("log-json")
 	logDebug := cCtx.Bool("log-debug")
 
+	verifyTLS := cCtx.Bool("verify-tls")
+
 	log := common.SetupLogger(&common.LoggingOpts{
 		Debug:   logDebug,
 		JSON:    logJSON,
@@ -81,7 +88,7 @@ func runClient(cCtx *cli.Context) error {
 		Version: common.Version,
 	})
 
-	if cCtx.String("server-attestation-type") != "none" && cCtx.Bool("verify-tls") {
+	if cCtx.String("server-attestation-type") != "none" && verifyTLS {
 		log.Error("invalid combination of --verify-tls and --server-attestation-type passed (only 'none' is allowed)")
 		return errors.New("invalid combination of --verify-tls and --server-attestation-type passed (only 'none' is allowed)")
 	}
@@ -116,9 +123,32 @@ func runClient(cCtx *cli.Context) error {
 		return err
 	}
 
-	if cCtx.Bool("verify-tls") {
+	if verifyTLS {
 		tlsConfig.InsecureSkipVerify = false
+		tlsConfig.ServerName = ""
 		tlsConfig.VerifyPeerCertificate = nil // TODO: make sure this is needed
+	}
+
+	if additionalTLSCA := cCtx.String("tls-ca-certificate"); additionalTLSCA != "" {
+		if !verifyTLS {
+			log.Error("--tls-ca-certificate specified but --verify-tls is not, refusing to continue")
+			return errors.New("--tls-ca-certificate specified but --verify-tls is not, refusing to continue")
+		}
+
+		certData, err := os.ReadFile(additionalTLSCA)
+		if err != nil {
+			log.Error("could not read tls ca certificate data", "err", err)
+			return err
+		}
+
+		roots := x509.NewCertPool()
+		ok := roots.AppendCertsFromPEM(certData)
+		if !ok {
+			log.Error("invalid certificate received", "cert", string(certData))
+			return errors.New("invalid certificate")
+		}
+
+		tlsConfig.RootCAs = roots
 	}
 
 	proxyHandler := proxy.NewProxy(targetAddr, validators).WithTransport(&http.Transport{TLSClientConfig: tlsConfig})

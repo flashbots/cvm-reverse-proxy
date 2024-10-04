@@ -142,20 +142,22 @@ func runServer(cCtx *cli.Context) error {
 			return err
 		}
 
-		originalGetConfigForClient := confTLS.GetConfigForClient
-		confTLS.GetConfigForClient = func(clientHello *tls.ClientHelloInfo) (*tls.Config, error) {
-			ogClientConfig, err := originalGetConfigForClient(clientHello)
-			if err != nil {
-				return ogClientConfig, err
-			}
+		atlsGetConfigForClient := confTLS.GetConfigForClient
 
-			// Note: we don't have to copy the certificate because it's always created per request
-			ogClientConfig.Certificates = []tls.Certificate{cert}
-			ogClientConfig.GetClientCertificate = nil
-			ogClientConfig.ServerName = ""
-			return ogClientConfig, nil
+		confTLS = &tls.Config{
+			GetConfigForClient: func(clientHello *tls.ClientHelloInfo) (*tls.Config, error) {
+				ogClientConfig, err := atlsGetConfigForClient(clientHello)
+				if err != nil {
+					return ogClientConfig, err
+				}
+
+				// Note: we don't have to copy the certificate because it's always created per request
+				ogClientConfig.Certificates = []tls.Certificate{cert}
+				ogClientConfig.GetCertificate = nil
+				return ogClientConfig, nil
+
+			},
 		}
-
 	}
 
 	// Create an HTTP server
