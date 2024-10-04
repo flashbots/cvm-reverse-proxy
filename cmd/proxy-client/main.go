@@ -29,6 +29,10 @@ var flags []cli.Flag = []cli.Flag{
 		Value: string(proxy.AttestationAzureTDX),
 		Usage: "type of attestation to expect and verify (" + proxy.AvailableAttestationTypes + ")",
 	},
+	&cli.StringFlag{
+		Name:  "server-measurements",
+		Usage: "optional path to JSON measurements enforced on the server",
+	},
 	&cli.BoolFlag{
 		Name:  "verify-tls",
 		Value: false,
@@ -36,11 +40,7 @@ var flags []cli.Flag = []cli.Flag{
 	},
 	&cli.StringFlag{
 		Name:  "tls-ca-certificate",
-		Usage: "Additional CA certificate to verify against (PEM) [default=no additional TLS certs]",
-	},
-	&cli.StringFlag{
-		Name:  "server-measurements",
-		Usage: "optional path to JSON measurements enforced on the server",
+		Usage: "additional CA certificate to verify against (PEM) [default=no additional TLS certs]. Only valid with --verify-tls.",
 	},
 	&cli.StringFlag{
 		Name:  "client-attestation-type",
@@ -126,7 +126,6 @@ func runClient(cCtx *cli.Context) error {
 	if verifyTLS {
 		tlsConfig.InsecureSkipVerify = false
 		tlsConfig.ServerName = ""
-		tlsConfig.VerifyPeerCertificate = nil // TODO: make sure this is needed
 	}
 
 	if additionalTLSCA := cCtx.String("tls-ca-certificate"); additionalTLSCA != "" {

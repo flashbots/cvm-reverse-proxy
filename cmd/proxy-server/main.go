@@ -34,17 +34,17 @@ var flags []cli.Flag = []cli.Flag{
 		Usage: "type of attestation to present (" + proxy.AvailableAttestationTypes + ")",
 	},
 	&cli.StringFlag{
-		Name:  "client-attestation-type",
-		Value: string(proxy.AttestationNone),
-		Usage: "type of attestation to expect and verify (" + proxy.AvailableAttestationTypes + ")",
-	},
-	&cli.StringFlag{
 		Name:  "tls-certificate",
-		Usage: "Certificate to present (PEM)",
+		Usage: "Certificate to present (PEM). Only valid for --server-attestation-type=none and with --tls-private-key.",
 	},
 	&cli.StringFlag{
 		Name:  "tls-private-key",
-		Usage: "Private key for the certificate (PEM)",
+		Usage: "Private key for the certificate (PEM). Only valid with --tls-certificate.",
+	},
+	&cli.StringFlag{
+		Name:  "client-attestation-type",
+		Value: string(proxy.AttestationNone),
+		Usage: "type of attestation to expect and verify (" + proxy.AvailableAttestationTypes + ")",
 	},
 	&cli.StringFlag{
 		Name:  "client-measurements",
