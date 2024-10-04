@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"net/http"
 	"os"
@@ -8,7 +9,6 @@ import (
 	"github.com/flashbots/cvm-reverse-proxy/common"
 	"github.com/flashbots/cvm-reverse-proxy/internal/atls"
 	"github.com/flashbots/cvm-reverse-proxy/proxy"
-
 	"github.com/urfave/cli/v2" // imports as package "cli"
 )
 
@@ -27,6 +27,11 @@ var flags []cli.Flag = []cli.Flag{
 		Name:  "server-attestation-type",
 		Value: string(proxy.AttestationAzureTDX),
 		Usage: "type of attestation to expect and verify (" + proxy.AvailableAttestationTypes + ")",
+	},
+	&cli.BoolFlag{
+		Name:  "verify-tls",
+		Value: false,
+		Usage: "verify server's TLS certificate instead of server's attestation. Only valid for server-attestation-type=none.",
 	},
 	&cli.StringFlag{
 		Name:  "server-measurements",
@@ -76,6 +81,11 @@ func runClient(cCtx *cli.Context) error {
 		Version: common.Version,
 	})
 
+	if cCtx.String("server-attestation-type") != "none" && cCtx.Bool("verify-tls") {
+		log.Error("invalid combination of --verify-tls and --server-attestation-type passed (only 'none' is allowed)")
+		return errors.New("invalid combination of --verify-tls and --server-attestation-type passed (only 'none' is allowed)")
+	}
+
 	clientAttestationType, err := proxy.ParseAttestationType(cCtx.String("client-attestation-type"))
 	if err != nil {
 		log.With("attestation-type", cCtx.String("client-attestation-type")).Error("invalid client-attestation-type passed, see --help")
@@ -104,6 +114,11 @@ func runClient(cCtx *cli.Context) error {
 	if err != nil {
 		log.Error("could not create atls config", "err", err)
 		return err
+	}
+
+	if cCtx.Bool("verify-tls") {
+		tlsConfig.InsecureSkipVerify = false
+		tlsConfig.VerifyPeerCertificate = nil // TODO: make sure this is needed
 	}
 
 	proxyHandler := proxy.NewProxy(targetAddr, validators).WithTransport(&http.Transport{TLSClientConfig: tlsConfig})
