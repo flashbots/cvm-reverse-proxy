@@ -19,46 +19,55 @@ import (
 
 var flags []cli.Flag = []cli.Flag{
 	&cli.StringFlag{
-		Name:  "listen-addr",
-		Value: "127.0.0.1:8080",
-		Usage: "address to listen on",
+		Name:    "listen-addr",
+		EnvVars: []string{"LISTEN_ADDR"},
+		Value:   "127.0.0.1:8080",
+		Usage:   "address to listen on",
 	},
 	&cli.StringFlag{
-		Name:  "target-addr",
-		Value: "https://localhost:80",
-		Usage: "address to proxy requests to",
+		Name:    "target-addr",
+		EnvVars: []string{"TARGET_ADDR"},
+		Value:   "https://localhost:80",
+		Usage:   "address to proxy requests to",
 	},
 	&cli.StringFlag{
-		Name:  "server-attestation-type",
-		Value: string(proxy.AttestationAzureTDX),
-		Usage: "type of attestation to present (" + proxy.AvailableAttestationTypes + ")",
+		Name:    "server-attestation-type",
+		EnvVars: []string{"SERVER_ATTESTATION_TYPE"},
+		Value:   string(proxy.AttestationAzureTDX),
+		Usage:   "type of attestation to present (" + proxy.AvailableAttestationTypes + ")",
 	},
 	&cli.StringFlag{
-		Name:  "tls-certificate",
-		Usage: "Certificate to present (PEM). Only valid for --server-attestation-type=none and with --tls-private-key.",
+		Name:    "tls-certificate",
+		EnvVars: []string{"TLS_CERTIFICATE"},
+		Usage:   "Certificate to present (PEM). Only valid for --server-attestation-type=none and with --tls-private-key.",
 	},
 	&cli.StringFlag{
-		Name:  "tls-private-key",
-		Usage: "Private key for the certificate (PEM). Only valid with --tls-certificate.",
+		Name:    "tls-private-key",
+		EnvVars: []string{"TLS_PRIVATE_KEY"},
+		Usage:   "Private key for the certificate (PEM). Only valid with --tls-certificate.",
 	},
 	&cli.StringFlag{
-		Name:  "client-attestation-type",
-		Value: string(proxy.AttestationNone),
-		Usage: "type of attestation to expect and verify (" + proxy.AvailableAttestationTypes + ")",
+		Name:    "client-attestation-type",
+		EnvVars: []string{"CLIENT_ATTESTATION_TYPE"},
+		Value:   string(proxy.AttestationNone),
+		Usage:   "type of attestation to expect and verify (" + proxy.AvailableAttestationTypes + ")",
 	},
 	&cli.StringFlag{
-		Name:  "client-measurements",
-		Usage: "optional path to JSON measurements enforced on the client",
+		Name:    "client-measurements",
+		EnvVars: []string{"CLIENT_MEASUREMENTS"},
+		Usage:   "optional path to JSON measurements enforced on the client",
 	},
 	&cli.BoolFlag{
-		Name:  "log-json",
-		Value: false,
-		Usage: "log in JSON format",
+		Name:    "log-json",
+		EnvVars: []string{"LOG_JSON"},
+		Value:   false,
+		Usage:   "log in JSON format",
 	},
 	&cli.BoolFlag{
-		Name:  "log-debug",
-		Value: false,
-		Usage: "log debug messages",
+		Name:    "log-debug",
+		EnvVars: []string{"LOG_DEBUG"},
+		Value:   false,
+		Usage:   "log debug messages",
 	},
 }
 
@@ -155,7 +164,6 @@ func runServer(cCtx *cli.Context) error {
 				ogClientConfig.Certificates = []tls.Certificate{cert}
 				ogClientConfig.GetCertificate = nil
 				return ogClientConfig, nil
-
 			},
 		}
 	}
@@ -188,7 +196,7 @@ func runServer(cCtx *cli.Context) error {
 		}
 	}()
 
-	log.With("listenAddr", listenAddr).Info("about to start proxy")
+	log.With("listenAddr", listenAddr).Info("Starting proxy server")
 	err = server.Serve(tlsListener)
 	if err != nil {
 		log.Error("stopping proxy", "server error", err)
