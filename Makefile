@@ -26,12 +26,12 @@ build: clean build-proxy-client build-proxy-server ## Build the proxy client and
 .PHONY: build-proxy-client
 build-proxy-client: ## Build the proxy client
 	@mkdir -p ./build
-	go build -trimpath -ldflags "-X cvm-reverse-proxy/common.Version=${VERSION}" -v -o ./build/proxy-client cmd/proxy-client/main.go
+	go build -trimpath -ldflags "-X github.com/flashbots/cvm-reverse-proxy/common.Version=${VERSION}" -v -o ./build/proxy-client cmd/proxy-client/main.go
 
 .PHONY: build-proxy-server
 build-proxy-server: ## Build the proxy server
 	@mkdir -p ./build
-	go build -trimpath -ldflags "-X cvm-reverse-proxy/common.Version=${VERSION}" -v -o ./build/proxy-server cmd/proxy-server/main.go
+	go build -trimpath -ldflags "-X github.com/flashbots/cvm-reverse-proxy/common.Version=${VERSION}" -v -o ./build/proxy-server cmd/proxy-server/main.go
 
 ##@ Test & Development
 

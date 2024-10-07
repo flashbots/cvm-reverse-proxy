@@ -9,7 +9,7 @@ ADD . /build/
 RUN --mount=type=cache,target=/root/.cache/go-build CGO_ENABLED=0 GOOS=linux \
     go build \
         -trimpath \
-        -ldflags "-s -X main.version=${VERSION}" \
+        -ldflags "-s -X github.com/flashbots/cvm-reverse-proxy/common.Version=${VERSION}" \
         -v \
         -o proxy-server \
     cmd/proxy-server/main.go

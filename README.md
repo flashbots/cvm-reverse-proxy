@@ -52,22 +52,31 @@ Client
 ### Build the server
 
 ```bash
+# Build the binary
 make build-proxy-server
+
+# Build the Docker image
+make docker-images
 ```
 
 ### Run the server
 
 ```bash
+# Run the binary
 sudo ./build/proxy-server --listen-addr=<listen-addr> --target-addr=<target-addr> [--server-attestation-type=<server-attestation-type>] [--client-attestation-type=<client-attestation-type>] [--client-measurements=<client-measurements>]
+
+# Run the Docker image
+docker run -p 8080:8080 -e LOG_JSON=1 cvm-proxy-server
 ```
 
-By default the server will present Azure TDX attestation, and you can modify that via the `--server-attestation-type` flag.  
-The server can be made to present a regular TLS certificate through `--tls-certificate` and `--tls-private-key` flags instead of aTLS one.  
+By default the server will present Azure TDX attestation, and you can modify that via the `--server-attestation-type` flag.
+The server can be made to present a regular TLS certificate through `--tls-certificate` and `--tls-private-key` flags instead of aTLS one.
 
 By default the server will not verify client attestations, you can change that via `--client-attestation-type` and `--client-measurements` flags. Valid for both aTLS and regular TLS.
 
 
 This repository contains a [dummy http server](./cmd/dummy-server/main.go) that you can use for testing the server. Simply run `go run ./cmd/dummy-server/main.go` and point your `--target-addr=http://127.0.0.1:8085`. You can also use the sample [measurements.json](./measurements.json).
+
 
 ## proxy-client
 
@@ -97,8 +106,8 @@ make build-proxy-client
 ./build/proxy-client --listen-addr=<listen-addr> --target-addr=<target-addr> [--server-measurements=<server-measurements-file>] [--server-attestation-type=<server-attestation-type>] [--client-attestation-type=<client-attestation-type>]
 ```
 
-By default the client will expect the server to present an Azure TDX attestation, and you can modify that via the `--server-attestation-type` and  `--server-measurements` flags.  
-The server can also be a regular TLS server, which you can configure with the `--verify-tls` flag, which is only valid in combination with `--server-attestation-type=none`. Non-standard CA for the server can also be configured with `--tls-ca-certificate`.  
+By default the client will expect the server to present an Azure TDX attestation, and you can modify that via the `--server-attestation-type` and  `--server-measurements` flags.
+The server can also be a regular TLS server, which you can configure with the `--verify-tls` flag, which is only valid in combination with `--server-attestation-type=none`. Non-standard CA for the server can also be configured with `--tls-ca-certificate`.
 
 By default the client will not present client attestations, you can change that via `--client-attestation-type` flag. Valid for both aTLS and TLS server proxies.
 
@@ -107,11 +116,11 @@ This repository contains a sample [measurements.json](./measurements.json) file 
 
 ## Measurements
 
-Attestation verification requires the expected measurements which you pass through the `--{client, server}-measurements` flag.  
-The measurements are expected to be a JSON map, and multiple valid measurements can be provided. The verifier will attempt to verify with each of the provided measurements, and if any succeeds, the attestation is assumed valid.  
+Attestation verification requires the expected measurements which you pass through the `--{client, server}-measurements` flag.
+The measurements are expected to be a JSON map, and multiple valid measurements can be provided. The verifier will attempt to verify with each of the provided measurements, and if any succeeds, the attestation is assumed valid.
 
-The (single) validated measurement is json-marshalled and forwarded (returned in the case of client) as "X-Flashbots-Measurement" header, and the type of attestation as "X-Flashbots-Attestation-Type" header. For mapping attestation types to OIDs and issuers, see [internal/attestation/variant/variant.go](./internal/attestation/variant/variant.go).  
-To only validate and forward the measurement (as opposed to also authorizing the measurement against an expected one), simply provide an empty expected measurements object.  
+The (single) validated measurement is json-marshalled and forwarded (returned in the case of client) as "X-Flashbots-Measurement" header, and the type of attestation as "X-Flashbots-Attestation-Type" header. For mapping attestation types to OIDs and issuers, see [internal/attestation/variant/variant.go](./internal/attestation/variant/variant.go).
+To only validate and forward the measurement (as opposed to also authorizing the measurement against an expected one), simply provide an empty expected measurements object.
 
 ---
 
