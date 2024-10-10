@@ -40,8 +40,8 @@ Client
 - `--listen-addr`: address to listen on (default: "127.0.0.1:8080")
 - `--target-addr`: address to proxy requests to (default: "https://localhost:80")
 - `--server-attestation-type`: type of attestation to present (none, azure-tdx) (default: "azure-tdx")
-- `--tls-certificate`: Certificate to present (PEM). Only valid for --server-attestation-type=none and with --tls-private-key.
-- `--tls-private-key`: "Private key for the certificate (PEM). Only valid with --tls-certificate.
+- `--tls-certificate-path`: Path to certificate (PEM file) to present. Only valid for --server-attestation-type=none and with `--tls-private-key-path`.
+- `--tls-private-key-path`: Path to private key file for the certificate (PEM). Only valid with --tls-certificate-path.
 - `--client-attestation-type`: type of attestation to expect and verify (none, azure-tdx) (default: "none")
 - `--client-measurements`: optional path to JSON measurements enforced on the client
 - `--log-json`: log in JSON format (default: false)
@@ -70,7 +70,7 @@ docker run -p 8080:8080 -e LOG_JSON=1 cvm-proxy-server
 ```
 
 By default the server will present Azure TDX attestation, and you can modify that via the `--server-attestation-type` flag.
-The server can be made to present a regular TLS certificate through `--tls-certificate` and `--tls-private-key` flags instead of aTLS one.
+The server can be made to present a regular TLS certificate through `--tls-certificate-path` and `--tls-private-key-path` flags instead of aTLS one.
 
 By default the server will not verify client attestations, you can change that via `--client-attestation-type` and `--client-measurements` flags. Valid for both aTLS and regular TLS.
 

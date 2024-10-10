@@ -43,14 +43,14 @@ var flags []cli.Flag = []cli.Flag{
 		Usage:   "type of attestation to present (" + proxy.AvailableAttestationTypes + ")",
 	},
 	&cli.StringFlag{
-		Name:    "tls-certificate",
-		EnvVars: []string{"TLS_CERTIFICATE"},
-		Usage:   "Path to TLS certificate (PEM). Only valid for --server-attestation-type=none and with --tls-private-key.",
+		Name:    "tls-certificate-path",
+		EnvVars: []string{"TLS_CERTIFICATE_PATH"},
+		Usage:   "Path to TLS certificate file (PEM). Only valid for --server-attestation-type=none and with --tls-private-key-path",
 	},
 	&cli.StringFlag{
-		Name:    "tls-private-key",
-		EnvVars: []string{"TLS_PRIVATE_KEY"},
-		Usage:   "Path to private key for the certificate. Only valid with --tls-certificate.",
+		Name:    "tls-private-key-path",
+		EnvVars: []string{"TLS_PRIVATE_KEY_PATH"},
+		Usage:   "Path to private key file for the certificate. Only valid with --tls-certificate-path",
 	},
 	&cli.StringFlag{
 		Name:    "client-attestation-type",
@@ -116,13 +116,11 @@ func runServer(cCtx *cli.Context) error {
 
 	useRegularTLS := certFile != "" || keyFile != ""
 	if serverAttestationTypeFlag != "none" && useRegularTLS {
-		log.Error("invalid combination of --tls-certificate, --tls-private-key and --server-attestation-type flags passed (only 'none' is allowed)")
-		return errors.New("invalid combination of --tls-certificate, --tls-private-key and --server-attestation-type flags passed (only 'none' is allowed)")
+		return errors.New("invalid combination of --tls-certificate-path, --tls-private-key-path and --server-attestation-type flags passed (only 'none' is allowed)")
 	}
 
 	if useRegularTLS && (certFile == "" || keyFile == "") {
-		log.Error("not all of --tls-certificate and --tls-private-key specified")
-		return errors.New("not all of --tls-certificate and --tls-private-key specified")
+		return errors.New("not all of --tls-certificate-path and --tls-private-key-path specified")
 	}
 
 	serverAttestationType, err := proxy.ParseAttestationType(serverAttestationTypeFlag)
