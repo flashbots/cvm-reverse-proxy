@@ -6,9 +6,11 @@ import (
 	"encoding/asn1"
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"time"
 
 	"github.com/flashbots/cvm-reverse-proxy/internal/atls"
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
@@ -17,6 +19,7 @@ import (
 type Proxy struct {
 	target *url.URL
 	proxy  *httputil.ReverseProxy
+	log    *slog.Logger
 
 	validatorOIDs []asn1.ObjectIdentifier
 }
@@ -26,7 +29,7 @@ const (
 	MeasurementHeader     string = "X-Flashbots-Measurement"
 )
 
-func NewProxy(targetURL string, validators []atls.Validator) *Proxy {
+func NewProxy(log *slog.Logger, targetURL string, validators []atls.Validator) *Proxy {
 	target, err := url.Parse(targetURL)
 	if err != nil {
 		panic(err)
@@ -39,7 +42,12 @@ func NewProxy(targetURL string, validators []atls.Validator) *Proxy {
 		validatorOIDs = append(validatorOIDs, validator.OID())
 	}
 
-	proxy := &Proxy{target: target, proxy: httpproxy, validatorOIDs: validatorOIDs}
+	proxy := &Proxy{
+		log:           log,
+		target:        target,
+		proxy:         httpproxy,
+		validatorOIDs: validatorOIDs,
+	}
 
 	// Forwards validated measurement to the *client*
 	httpproxy.ModifyResponse = func(res *http.Response) error {
@@ -69,8 +77,9 @@ func (p *Proxy) WithTransport(transport *http.Transport) *Proxy {
 func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	r.Host = p.target.Host
 
-	// Note: the reverse proxy adds X-Forwarded-For header!
+	p.log.Debug("[proxy-request] request received")
 
+	// Note: the reverse proxy adds X-Forwarded-For header!
 	if r.Header.Get(MeasurementHeader) != "" {
 		http.Error(w, "unexpected measurement header passed", http.StatusForbidden)
 	}
@@ -79,6 +88,8 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.TLS != nil {
+		p.log.Debug("[proxy-request] adding measurement headers")
+
 		// Forwards validated measurement to the *proxied-to service*
 		errStatus, err := p.copyMeasurementsToHeader(r.TLS, &r.Header)
 		if err != nil {
@@ -87,10 +98,16 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	p.log.Debug("[proxy-request] forwarding to target")
+	timeStarted := time.Now()
+
 	p.proxy.ServeHTTP(w, r)
+
+	duration := time.Since(timeStarted).String()
+	p.log.With("duration", duration).Info("[proxy-request] proxying complete")
 }
 
-func (p *Proxy) copyMeasurementsToHeader(conn *tls.ConnectionState, header *http.Header) (int, error) {
+func (p *Proxy) getMeasurementsFromTLS(conn *tls.ConnectionState) (atlsVariant variant.Variant, measurements map[uint32][]byte, err error) {
 	// In verifyEmbeddedReport which is used to validate the extensions, only the first matching extension is validated! Refuse to accept multiple
 	var ATLSExtension *pkix.Extension = nil
 	for _, cert := range conn.PeerCertificates {
@@ -98,7 +115,7 @@ func (p *Proxy) copyMeasurementsToHeader(conn *tls.ConnectionState, header *http
 			for _, validatorOID := range p.validatorOIDs {
 				if ext.Id.Equal(validatorOID) {
 					if ATLSExtension != nil {
-						return http.StatusBadRequest, errors.New("more than one ATLS extension provided, refusing to continue")
+						return nil, nil, errors.New("more than one ATLS extension provided, refusing to continue")
 					}
 					ATLSExtension = &ext
 				}
@@ -107,17 +124,29 @@ func (p *Proxy) copyMeasurementsToHeader(conn *tls.ConnectionState, header *http
 	}
 
 	if ATLSExtension == nil {
+		return nil, nil, nil
+	}
+
+	atlsVariant, err = variant.FromOID(ATLSExtension.Id)
+	if err != nil {
+		return nil, nil, errors.New("could not get ATLS variant back from a matched extension")
+	}
+
+	measurements, err = ExtractMeasurementsFromExtension(ATLSExtension, atlsVariant)
+	if err != nil {
+		return nil, nil, errors.New("could not extract measurement from tls extension")
+	}
+
+	return atlsVariant, measurements, nil
+}
+
+func (p *Proxy) copyMeasurementsToHeader(conn *tls.ConnectionState, header *http.Header) (int, error) {
+	atlsVariant, measurements, err := p.getMeasurementsFromTLS(conn)
+	if err != nil {
+		return http.StatusTeapot, err
+	} else if measurements == nil {
+		p.log.Debug("[proxy-request: add-headers] no measurements, not adding headers")
 		return 0, nil
-	}
-
-	atlsVariant, err := variant.FromOID(ATLSExtension.Id)
-	if err != nil {
-		return http.StatusTeapot, errors.New("could not get ATLS variant back from a matched extension")
-	}
-
-	measurements, err := ExtractMeasurementsFromExtension(ATLSExtension, atlsVariant)
-	if err != nil {
-		return http.StatusTeapot, errors.New("could not extract measurement from tls extension")
 	}
 
 	marshaledPcrs, err := json.Marshal(measurements)
@@ -128,5 +157,6 @@ func (p *Proxy) copyMeasurementsToHeader(conn *tls.ConnectionState, header *http
 	header.Set(AttestationTypeHeader, atlsVariant.String())
 	header.Set(MeasurementHeader, string(marshaledPcrs))
 
+	p.log.With(AttestationTypeHeader, atlsVariant.String()).With(MeasurementHeader, string(marshaledPcrs)).Debug("[proxy-request: add-headers] meaasurement headers added")
 	return 0, nil
 }
