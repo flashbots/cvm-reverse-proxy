@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"crypto/x509/pkix"
 	"encoding/asn1"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"log/slog"
@@ -141,15 +142,20 @@ func (p *Proxy) getMeasurementsFromTLS(conn *tls.ConnectionState) (atlsVariant v
 }
 
 func (p *Proxy) copyMeasurementsToHeader(conn *tls.ConnectionState, header *http.Header) (int, error) {
-	atlsVariant, measurements, err := p.getMeasurementsFromTLS(conn)
+	atlsVariant, extractedMeasurements, err := p.getMeasurementsFromTLS(conn)
 	if err != nil {
 		return http.StatusTeapot, err
-	} else if measurements == nil {
+	} else if extractedMeasurements == nil {
 		p.log.Debug("[proxy-request: add-headers] no measurements, not adding headers")
 		return 0, nil
 	}
 
-	marshaledPcrs, err := json.Marshal(measurements)
+	measurementsInHeaderFormat := make(map[uint32]string, len(extractedMeasurements))
+	for pcr, value := range extractedMeasurements {
+		measurementsInHeaderFormat[pcr] = hex.EncodeToString(value)
+	}
+
+	marshaledPcrs, err := json.Marshal(measurementsInHeaderFormat)
 	if err != nil {
 		return http.StatusInternalServerError, errors.New("could not marshal measurement extracted from tls extension")
 	}
