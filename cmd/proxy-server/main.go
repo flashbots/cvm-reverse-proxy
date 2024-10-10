@@ -14,6 +14,7 @@ import (
 	"github.com/flashbots/cvm-reverse-proxy/common"
 	"github.com/flashbots/cvm-reverse-proxy/internal/atls"
 	"github.com/flashbots/cvm-reverse-proxy/proxy"
+	"github.com/flashbots/cvm-reverse-proxy/tdx"
 	"github.com/urfave/cli/v2" // imports as package "cli"
 )
 
@@ -75,6 +76,12 @@ var flags []cli.Flag = []cli.Flag{
 		Value:   true,
 		Usage:   "log debug messages",
 	},
+	&cli.BoolFlag{
+		Name:    "log-dcap-quote",
+		EnvVars: []string{"LOG_DCAP_QUOTE"},
+		Value:   false,
+		Usage:   "log dcap quotes to folder quotes/",
+	},
 }
 
 var log *slog.Logger
@@ -102,6 +109,8 @@ func runServer(cCtx *cli.Context) error {
 	clientMeasurements := cCtx.String("client-measurements")
 	logJSON := cCtx.Bool("log-json")
 	logDebug := cCtx.Bool("log-debug")
+	tdx.SetLogDcapQuote(cCtx.Bool("log-dcap-quote"))
+
 	serverAttestationTypeFlag := cCtx.String("server-attestation-type")
 
 	certFile := cCtx.String("tls-certificate")
