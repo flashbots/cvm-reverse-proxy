@@ -57,6 +57,11 @@ func (v *Validator) Validate(ctx context.Context, attDocRaw []byte, nonce []byte
 		return nil, fmt.Errorf("unmarshaling attestation document: %w", err)
 	}
 
+	err = writeRawQuoteToDisk(attDoc.RawQuote, false)
+	if err != nil {
+		return nil, fmt.Errorf("writing quote to disk: %w", err)
+	}
+
 	// TCP Level
 	options := &verify.Options{CheckRevocations: true, GetCollateral: true}
 	if err := verify.RawTdxQuote(attDoc.RawQuote, options); err != nil {

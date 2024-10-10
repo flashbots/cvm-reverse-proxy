@@ -46,6 +46,7 @@ Client
 - `--client-measurements`: optional path to JSON measurements enforced on the client
 - `--log-json`: log in JSON format (default: false)
 - `--log-debug`: log debug messages (default: false)
+- `--log-dcap-quote`: log dcap quotes to folder quotes/ (default: false)
 - `--help, -h`: show help
 
 
@@ -91,6 +92,7 @@ This repository contains a [dummy http server](./cmd/dummy-server/main.go) that 
 - `--client-attestation-type`: type of attestation to present (none, azure-tdx) (default: "none")
 - `--log-json`: log in JSON format (default: false)
 - `--log-debug`: log debug messages (default: false)
+- `--log-dcap-quote`: log dcap quotes to folder quotes/ (default: false)
 - `--help, -h`: show help
 
 
@@ -121,6 +123,16 @@ The measurements are expected to be a JSON map, and multiple valid measurements 
 
 The (single) validated measurement is json-marshalled and forwarded (returned in the case of client) as "X-Flashbots-Measurement" header, and the type of attestation as "X-Flashbots-Attestation-Type" header. For mapping attestation types to OIDs and issuers, see [internal/attestation/variant/variant.go](./internal/attestation/variant/variant.go).
 To only validate and forward the measurement (as opposed to also authorizing the measurement against an expected one), simply provide an empty expected measurements object.
+
+### Debugging DCAP quote isses
+
+If logging dcap quotes to disk is enabled, issues with the respective quotes can be investigated using [github.com/google/go-tdx-guest](https://github.com/google/go-tdx-guest)'s check tool
+```
+git clone https://github.com/google/go-tdx-guest
+cd go-tdx-guest
+go build tools/check/check.go
+./check -verbosity 2 -get_collateral true -in quotes/quote_received_20241010_121042.dat
+```
 
 ---
 

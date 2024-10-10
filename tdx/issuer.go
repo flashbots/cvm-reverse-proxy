@@ -10,12 +10,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
+	"time"
 
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation"
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
 
 	"github.com/google/go-tdx-guest/client"
 )
+
+var logDcapQuote bool
 
 type tdxAttestationDocument struct {
         // RawQuote is the raw TDX quote.
@@ -41,6 +45,16 @@ func NewIssuer(log attestation.Logger) *Issuer {
 	}
 }
 
+func SetLogDcapQuote(logQuote bool) {
+	logDcapQuote = logQuote
+	if logDcapQuote {
+		// Create local folder "quotes" if it doesn't exist
+		if _, err := os.Stat("quotes"); os.IsNotExist(err) {
+			os.Mkdir("quotes", os.ModePerm)
+		}
+	}
+}
+
 // Issue issues a TDX attestation document.
 func (i *Issuer) Issue(_ context.Context, userData []byte, nonce []byte) (attDoc []byte, err error) {
 	i.log.Info("Issuing attestation statement")
@@ -63,6 +77,11 @@ func (i *Issuer) Issue(_ context.Context, userData []byte, nonce []byte) (attDoc
 		return nil, fmt.Errorf("generating quote: %w", err)
 	}
 
+	err = writeRawQuoteToDisk(quote, true)
+	if err != nil {
+		return nil, fmt.Errorf("writing quote to disk: %w", err)
+	}
+
 	rawAttDoc, err := json.Marshal(tdxAttestationDocument{
 		RawQuote: quote,
 		UserData: userData,
@@ -72,4 +91,30 @@ func (i *Issuer) Issue(_ context.Context, userData []byte, nonce []byte) (attDoc
 	}
 
 	return rawAttDoc, nil
+}
+
+func writeRawQuoteToDisk(RawQuote []byte, isIssued bool) error {
+	if !logDcapQuote {
+		return nil
+	}
+
+	timestamp := time.Now().Format("20060102_150405")
+	quoteType := "issued"
+	if !isIssued {
+		quoteType = "received"
+	}
+
+	fileName := fmt.Sprintf("quotes/quote_%s_%s.dat", quoteType, timestamp)
+	file, err := os.Create(fileName)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = file.Write(RawQuote)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
