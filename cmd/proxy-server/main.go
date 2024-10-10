@@ -4,7 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -25,6 +25,12 @@ var flags []cli.Flag = []cli.Flag{
 		Usage:   "address to listen on",
 	},
 	&cli.StringFlag{
+		Name:    "listen-addr-healthcheck",
+		EnvVars: []string{"LISTEN_ADDR_HEALTHCHECK"},
+		Value:   "",
+		Usage:   "address to listen on for health checks",
+	},
+	&cli.StringFlag{
 		Name:    "target-addr",
 		EnvVars: []string{"TARGET_ADDR"},
 		Value:   "https://localhost:80",
@@ -37,14 +43,14 @@ var flags []cli.Flag = []cli.Flag{
 		Usage:   "type of attestation to present (" + proxy.AvailableAttestationTypes + ")",
 	},
 	&cli.StringFlag{
-		Name:    "tls-certificate",
-		EnvVars: []string{"TLS_CERTIFICATE"},
-		Usage:   "Certificate to present (PEM). Only valid for --server-attestation-type=none and with --tls-private-key.",
+		Name:    "tls-certificate-path",
+		EnvVars: []string{"TLS_CERTIFICATE_PATH"},
+		Usage:   "Path to TLS certificate file (PEM). Only valid for --server-attestation-type=none and with --tls-private-key-path",
 	},
 	&cli.StringFlag{
-		Name:    "tls-private-key",
-		EnvVars: []string{"TLS_PRIVATE_KEY"},
-		Usage:   "Private key for the certificate (PEM). Only valid with --tls-certificate.",
+		Name:    "tls-private-key-path",
+		EnvVars: []string{"TLS_PRIVATE_KEY_PATH"},
+		Usage:   "Path to private key file for the certificate. Only valid with --tls-certificate-path",
 	},
 	&cli.StringFlag{
 		Name:    "client-attestation-type",
@@ -71,6 +77,8 @@ var flags []cli.Flag = []cli.Flag{
 	},
 }
 
+var log *slog.Logger
+
 func main() {
 	app := &cli.App{
 		Name:   "proxy-server",
@@ -80,7 +88,11 @@ func main() {
 	}
 
 	if err := app.Run(os.Args); err != nil {
-		log.Fatal(err)
+		if log != nil {
+			log.Error("error running app", "err", err)
+		} else {
+			panic(err)
+		}
 	}
 }
 
@@ -95,7 +107,7 @@ func runServer(cCtx *cli.Context) error {
 	certFile := cCtx.String("tls-certificate")
 	keyFile := cCtx.String("tls-private-key")
 
-	log := common.SetupLogger(&common.LoggingOpts{
+	log = common.SetupLogger(&common.LoggingOpts{
 		Debug:   logDebug,
 		JSON:    logJSON,
 		Service: "proxy-server",
@@ -104,13 +116,11 @@ func runServer(cCtx *cli.Context) error {
 
 	useRegularTLS := certFile != "" || keyFile != ""
 	if serverAttestationTypeFlag != "none" && useRegularTLS {
-		log.Error("invalid combination of --tls-certificate, --tls-private-key and --server-attestation-type flags passed (only 'none' is allowed)")
-		return errors.New("invalid combination of --tls-certificate, --tls-private-key and --server-attestation-type flags passed (only 'none' is allowed)")
+		return errors.New("invalid combination of --tls-certificate-path, --tls-private-key-path and --server-attestation-type flags passed (only 'none' is allowed)")
 	}
 
 	if useRegularTLS && (certFile == "" || keyFile == "") {
-		log.Error("not all of --tls-certificate and --tls-private-key specified")
-		return errors.New("not all of --tls-certificate and --tls-private-key specified")
+		return errors.New("not all of --tls-certificate-path and --tls-private-key-path specified")
 	}
 
 	serverAttestationType, err := proxy.ParseAttestationType(serverAttestationTypeFlag)
@@ -196,6 +206,12 @@ func runServer(cCtx *cli.Context) error {
 		}
 	}()
 
+	// Start the health check server
+	listenAddrHealthCheck := cCtx.String("listen-addr-healthcheck")
+	if listenAddrHealthCheck != "" {
+		go startHealthCheckServer(listenAddrHealthCheck)
+	}
+
 	log.With("listenAddr", listenAddr).Info("Starting proxy server")
 	err = server.Serve(tlsListener)
 	if err != nil {
@@ -204,4 +220,18 @@ func runServer(cCtx *cli.Context) error {
 	}
 
 	return nil
+}
+
+func startHealthCheckServer(listenAddr string) {
+	log.With("healthCheckListenAddr", listenAddr).Info("Starting health check server")
+	healthCheckServer := &http.Server{
+		Addr: listenAddr,
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		}),
+	}
+	err := healthCheckServer.ListenAndServe()
+	if err != nil {
+		log.Error("could not start health check server", "err", err)
+	}
 }
