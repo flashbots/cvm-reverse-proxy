@@ -72,7 +72,7 @@ var flags []cli.Flag = []cli.Flag{
 	&cli.BoolFlag{
 		Name:    "log-debug",
 		EnvVars: []string{"LOG_DEBUG"},
-		Value:   false,
+		Value:   true,
 		Usage:   "log debug messages",
 	},
 }
@@ -147,7 +147,7 @@ func runServer(cCtx *cli.Context) error {
 		return err
 	}
 
-	proxyHandler := proxy.NewProxy(targetAddr, validators)
+	proxyHandler := proxy.NewProxy(log, targetAddr, validators)
 
 	confTLS, err := atls.CreateAttestationServerTLSConfig(issuer, validators)
 	if err != nil {

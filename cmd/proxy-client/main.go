@@ -54,7 +54,7 @@ var flags []cli.Flag = []cli.Flag{
 	},
 	&cli.BoolFlag{
 		Name:  "log-debug",
-		Value: false,
+		Value: true,
 		Usage: "log debug messages",
 	},
 }
@@ -150,7 +150,7 @@ func runClient(cCtx *cli.Context) error {
 		tlsConfig.RootCAs = roots
 	}
 
-	proxyHandler := proxy.NewProxy(targetAddr, validators).WithTransport(&http.Transport{TLSClientConfig: tlsConfig})
+	proxyHandler := proxy.NewProxy(log, targetAddr, validators).WithTransport(&http.Transport{TLSClientConfig: tlsConfig})
 
 	log.With("listenAddr", listenAddr).Info("Starting proxy client")
 	err = http.ListenAndServe(listenAddr, proxyHandler)
