@@ -150,9 +150,9 @@ func (p *Proxy) copyMeasurementsToHeader(conn *tls.ConnectionState, header *http
 		return 0, nil
 	}
 
-	measurementsInHeaderFormat := make(map[string]string, len(extractedMeasurements))
+	measurementsInHeaderFormat := make(map[uint32]string, len(extractedMeasurements))
 	for pcr, value := range extractedMeasurements {
-		measurementsInHeaderFormat[string(pcr)] = hex.EncodeToString(value)
+		measurementsInHeaderFormat[pcr] = hex.EncodeToString(value)
 	}
 
 	marshaledPcrs, err := json.Marshal(measurementsInHeaderFormat)
