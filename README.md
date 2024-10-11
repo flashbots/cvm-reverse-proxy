@@ -124,7 +124,7 @@ The measurements are expected to be a JSON map, and multiple valid measurements 
 The (single) validated measurement is json-marshalled and forwarded (returned in the case of client) as "X-Flashbots-Measurement" header, and the type of attestation as "X-Flashbots-Attestation-Type" header. For mapping attestation types to OIDs and issuers, see [internal/attestation/variant/variant.go](./internal/attestation/variant/variant.go).
 To only validate and forward the measurement (as opposed to also authorizing the measurement against an expected one), simply provide an empty expected measurements object.
 
-### Debugging DCAP quote isses
+### Debugging DCAP quote issues
 
 If logging dcap quotes to disk is enabled, issues with the respective quotes can be investigated using [github.com/google/go-tdx-guest](https://github.com/google/go-tdx-guest)'s check tool
 ```
