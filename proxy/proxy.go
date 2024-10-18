@@ -163,6 +163,6 @@ func (p *Proxy) copyMeasurementsToHeader(conn *tls.ConnectionState, header *http
 	header.Set(AttestationTypeHeader, atlsVariant.String())
 	header.Set(MeasurementHeader, string(marshaledPcrs))
 
-	p.log.With(AttestationTypeHeader, atlsVariant.String()).With(MeasurementHeader, string(marshaledPcrs)).Debug("[proxy-request: add-headers] meaasurement headers added")
+	p.log.With(AttestationTypeHeader, atlsVariant.String()).With(MeasurementHeader, string(marshaledPcrs)).Debug("[proxy-request: add-headers] measurement headers added")
 	return 0, nil
 }
