@@ -41,8 +41,8 @@ package common
 //       }
 //   }
 //
-// The v2 data schema is an improvement because the structure enables
-// additional data fields besides the raw measurements.
+// The v2 data schema is an improvement because it allows additional data fields
+// besides the raw measurements.
 //
 
 import (
@@ -53,8 +53,8 @@ import (
 	"strings"
 )
 
-// ExpectedMeasurements is a struct that represents a list of expected measurements.
-// It can also take a list of measurements and see if it matches a known one.
+// ExpectedMeasurements is a struct that represents a list of expected measurements,
+// and allows checking if given measurements matches a known one.
 type ExpectedMeasurements struct {
 	Measurements []MeasurementsContainer
 }
@@ -68,6 +68,8 @@ type MeasurementsContainer struct {
 	AttestationType string                      `json:"attestation_type"`
 	Measurements    map[string]MeasurementEntry `json:"measurements"`
 }
+
+type LegacyMeasurementsContainer map[string]map[string]MeasurementEntry
 
 // NewExpectedMeasurementsFromFile returns an ExpectedMeasurements instance,
 // with the measurements loaded from a file or URL.
@@ -93,7 +95,23 @@ func NewExpectedMeasurementsFromFile(path string) (m *ExpectedMeasurements, err 
 	}
 
 	m = &ExpectedMeasurements{}
+
+	// Try to load v2 data schema
 	err = json.Unmarshal(data, &m.Measurements)
+	// If loading v2 format fails, try to load the legacy v1 data schema
+	if err != nil {
+		var legacyData LegacyMeasurementsContainer
+		err = json.Unmarshal(data, &legacyData)
+		for measurementID, measurements := range legacyData {
+			container := MeasurementsContainer{
+				MeasurementID:   measurementID,
+				AttestationType: "azure-tdx",
+				Measurements:    measurements,
+			}
+			m.Measurements = append(m.Measurements, container)
+		}
+	}
+
 	return m, err
 }
 
