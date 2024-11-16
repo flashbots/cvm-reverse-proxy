@@ -19,7 +19,6 @@ package main
 
 import (
 	"encoding/asn1"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -169,17 +168,17 @@ func runClient(cCtx *cli.Context) (err error) {
 		return err
 	}
 
-	measurementsInHeaderFormat := make(map[string]string, len(extractedMeasurements))
-	for pcr, value := range extractedMeasurements {
-		measurementsInHeaderFormat[fmt.Sprint(pcr)] = hex.EncodeToString(value)
+	printableMeasurements := make(map[uint32]string)
+	for k, v := range extractedMeasurements {
+		printableMeasurements[k] = fmt.Sprintf("%x", v)
 	}
 
-	marshaledPcrs, err := json.MarshalIndent(measurementsInHeaderFormat, "", "    ")
+	marshaledPcrs, err := json.MarshalIndent(printableMeasurements, "", "    ")
 	if err != nil {
 		return errors.New("could not marshal measurement extracted from tls extension")
 	}
 
-	log.Info(fmt.Sprintf("Measurements for %s with %d entries:", atlsVariant.String(), len(measurementsInHeaderFormat)))
+	log.Info(fmt.Sprintf("Measurements for %s with %d entries:", atlsVariant.String(), len(extractedMeasurements)))
 	fmt.Println(string(marshaledPcrs))
 	if outMeasurements != "" {
 		if err := os.WriteFile(outMeasurements, marshaledPcrs, 0o644); err != nil {
@@ -189,11 +188,11 @@ func runClient(cCtx *cli.Context) (err error) {
 
 	// Compare against expected measurements
 	if expectedMeasurements != nil {
-		found, name := expectedMeasurements.Contains(measurementsInHeaderFormat)
+		found, foundMeasurement := expectedMeasurements.Contains(extractedMeasurements)
 		if found {
-			log.Info("Measurements match expected measurements for " + name)
+			log.Info("Measurements match expected measurements for " + foundMeasurement.MeasurementID + " ✅")
 		} else {
-			log.Error("Measurements do not match expected measurements! ⚠️")
+			log.Error("Measurements do not match expected measurements! ❌")
 		}
 	}
 

@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/flashbots/cvm-reverse-proxy/common"
 	"github.com/flashbots/cvm-reverse-proxy/internal/atls"
 	azure_tdx "github.com/flashbots/cvm-reverse-proxy/internal/attestation/azure/tdx"
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/measurements"
@@ -65,7 +66,7 @@ func CreateAttestationValidators(log *slog.Logger, attestationType AttestationTy
 		return nil, err
 	}
 
-	parsedMeasurements := make(map[string]measurements.M)
+	var parsedMeasurements []common.MeasurementsContainer
 	err = json.Unmarshal(jsonMeasurements, &parsedMeasurements)
 	if err != nil {
 		return nil, err
@@ -76,7 +77,7 @@ func CreateAttestationValidators(log *slog.Logger, attestationType AttestationTy
 		validators := []atls.Validator{}
 		for _, measurement := range parsedMeasurements {
 			attConfig := config.DefaultForAzureTDX()
-			attConfig.SetMeasurements(measurement)
+			attConfig.SetMeasurements(measurement.Measurements)
 			validators = append(validators, azure_tdx.NewValidator(attConfig, AttestationLogger{Log: log}))
 		}
 		return []atls.Validator{NewMultiValidator(validators)}, nil
@@ -84,7 +85,7 @@ func CreateAttestationValidators(log *slog.Logger, attestationType AttestationTy
 		validators := []atls.Validator{}
 		for _, measurement := range parsedMeasurements {
 			attConfig := &config.QEMUTDX{Measurements: measurements.DefaultsFor(cloudprovider.QEMU, variant.QEMUTDX{})}
-			attConfig.SetMeasurements(measurement)
+			attConfig.SetMeasurements(measurement.Measurements)
 			validators = append(validators, dcap_tdx.NewValidator(attConfig, AttestationLogger{Log: log}))
 		}
 		return []atls.Validator{NewMultiValidator(validators)}, nil
