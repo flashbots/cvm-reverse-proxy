@@ -14,6 +14,8 @@ package main
 //
 //   go run cmd/get-measurements/main.go --addr=https://instance_ip:port --out-measurements=measurements.json --out-response=response.txt
 //
+// You can also compare the resulting measurements with a list of expected measurements.
+//
 
 import (
 	"encoding/asn1"
@@ -50,6 +52,11 @@ var flags []cli.Flag = []cli.Flag{
 		Value: "",
 		Usage: "Output file for the response payload",
 	},
+	&cli.StringFlag{
+		Name:  "expected-measurements",
+		Value: "",
+		Usage: "File or URL with known measurements (to compare against)",
+	},
 	&cli.BoolFlag{
 		Name:  "log-debug",
 		Value: false,
@@ -75,6 +82,7 @@ func runClient(cCtx *cli.Context) (err error) {
 	addr := cCtx.String("addr")
 	outMeasurements := cCtx.String("out-measurements")
 	outResponse := cCtx.String("out-response")
+	expectedMeasurementsPath := cCtx.String("expected-measurements")
 
 	// Setup logging
 	log := common.SetupLogger(&common.LoggingOpts{
@@ -84,8 +92,19 @@ func runClient(cCtx *cli.Context) (err error) {
 		Version: common.Version,
 	})
 
+	// Sanity-check addr
 	if !strings.HasPrefix(addr, "https://") {
 		return errors.New("address needs to start with https://")
+	}
+
+	// Load expected measurements from file or URL (if provided)
+	var expectedMeasurements *common.ExpectedMeasurements
+	if expectedMeasurementsPath != "" {
+		log.Info("Loading expected measurements from " + expectedMeasurementsPath + " ...")
+		expectedMeasurements, err = common.NewExpectedMeasurementsFromFile(expectedMeasurementsPath)
+		if err != nil {
+			return err
+		}
 	}
 
 	log.Info("Getting verified measurements from " + addr + " ...")
@@ -127,9 +146,9 @@ func runClient(cCtx *cli.Context) (err error) {
 		return err
 	}
 
-	measurementsInHeaderFormat := make(map[uint32]string, len(extractedMeasurements))
+	measurementsInHeaderFormat := make(map[string]string, len(extractedMeasurements))
 	for pcr, value := range extractedMeasurements {
-		measurementsInHeaderFormat[pcr] = hex.EncodeToString(value)
+		measurementsInHeaderFormat[fmt.Sprint(pcr)] = hex.EncodeToString(value)
 	}
 
 	marshaledPcrs, err := json.MarshalIndent(measurementsInHeaderFormat, "", "    ")
@@ -141,8 +160,18 @@ func runClient(cCtx *cli.Context) (err error) {
 	log.Info(fmt.Sprintf("Measurements for %s with %d entries:", atlsVariant.String(), len(measurementsInHeaderFormat)))
 	fmt.Println(string(marshaledPcrs))
 	if outMeasurements != "" {
-		if err := os.WriteFile(outMeasurements, marshaledPcrs, 0644); err != nil {
+		if err := os.WriteFile(outMeasurements, marshaledPcrs, 0o644); err != nil {
 			return err
+		}
+	}
+
+	// Compare against expected measurements
+	if expectedMeasurements != nil {
+		found, name := expectedMeasurements.Contains(measurementsInHeaderFormat)
+		if found {
+			log.Info("Measurements match expected measurements for " + name)
+		} else {
+			log.Error("Measurements do not match expected measurements! ⚠️")
 		}
 	}
 
@@ -155,7 +184,7 @@ func runClient(cCtx *cli.Context) (err error) {
 	log.Info(fmt.Sprintf("Response body with %d bytes:", len(msg)))
 	fmt.Println(string(msg))
 	if outResponse != "" {
-		if err := os.WriteFile(outResponse, msg, 0644); err != nil {
+		if err := os.WriteFile(outResponse, msg, 0o644); err != nil {
 			return err
 		}
 	}
