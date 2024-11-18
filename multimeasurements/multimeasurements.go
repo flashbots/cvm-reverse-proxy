@@ -16,8 +16,8 @@ import (
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/measurements"
 )
 
-// MultiMeasurements is holds several known measurements, and can check if a
-// given measurements matches a known one.
+// MultiMeasurements holds several known measurements, and can check if
+// given measurements match known ones.
 type MultiMeasurements struct {
 	Measurements []MeasurementsContainer
 }

@@ -16,7 +16,7 @@ package main
 //
 // You can also compare the resulting measurements with a list of expected measurements:
 //
-//   go run cmd/get-measurements/main.go --addr=https://instance_ip:port --expected-measurements measurements.json
+//   go run cmd/get-measurements/main.go --addr=https://instance_ip:port --expected-measurements=measurements.json
 //
 
 import (
