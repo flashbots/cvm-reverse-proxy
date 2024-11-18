@@ -4,7 +4,7 @@ package main
 // Make a HTTP GET request over a TEE-attested connection (to a server with aTLS support),
 // and print the verified measurements and the response payload.
 //
-// Currently only works for Azure TDX but should be easy to expand.
+// Currently only works for Azure TDX but is straight-forward to expand.
 //
 // Usage:
 //
@@ -89,21 +89,15 @@ func runClient(cCtx *cli.Context) (err error) {
 	}
 
 	log.Info("Getting verified measurements from " + addr + " ...")
+
 	// Prepare aTLS stuff
-	serverAttestationType := proxy.AttestationAzureTDX
-	issuer, err := proxy.CreateAttestationIssuer(log, serverAttestationType)
+	issuer, err := proxy.CreateAttestationIssuer(log, proxy.AttestationAzureTDX)
 	if err != nil {
 		log.Error("could not create attestation issuer", "err", err)
 		return err
 	}
 
-	validators, err := proxy.CreateAttestationValidators(log, serverAttestationType, "measurements-empty.json")
-	if err != nil {
-		log.Error("could not create attestation validators", "err", err)
-		return err
-	}
-
-	tlsConfig, err := atls.CreateAttestationClientTLSConfig(issuer, validators)
+	tlsConfig, err := atls.CreateAttestationClientTLSConfig(issuer, []atls.Validator{})
 	if err != nil {
 		log.Error("could not create atls config", "err", err)
 		return err
@@ -120,7 +114,6 @@ func runClient(cCtx *cli.Context) (err error) {
 	certs := resp.TLS.PeerCertificates
 
 	// Extract the aTLS variant and measurements from the TLS connection
-	// certs := conn.ConnectionState().PeerCertificates
 	atlsVariant, extractedMeasurements, err := proxy.GetMeasurementsFromTLS(certs, []asn1.ObjectIdentifier{variant.AzureTDX{}.OID()})
 	if err != nil {
 		log.Error("Error in getMeasurementsFromTLS", "err", err)
