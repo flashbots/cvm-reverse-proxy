@@ -478,11 +478,16 @@ func TestGetSelectedMeasurements(t *testing.T) {
 
 type testAttestationLogger struct {
 	infos    []string
+	debugs   []string
 	warnings []string
 }
 
 func (w *testAttestationLogger) Info(format string, args ...any) {
 	w.infos = append(w.infos, fmt.Sprintf(format, args...))
+}
+
+func (w *testAttestationLogger) Debug(format string, args ...any) {
+	w.debugs = append(w.debugs, fmt.Sprintf(format, args...))
 }
 
 func (w *testAttestationLogger) Warn(format string, args ...any) {

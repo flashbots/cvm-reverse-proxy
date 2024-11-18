@@ -224,7 +224,7 @@ func (v *Validator) Validate(ctx context.Context, attDocRaw []byte, nonce []byte
 	if err := json.Unmarshal(attDocRaw, &attDoc); err != nil {
 		return nil, fmt.Errorf("unmarshaling TPM attestation document: %w", err)
 	}
-	v.log.Warn(fmt.Sprintf("Attestation document: %s", string(attDocRaw)))
+	v.log.Debug(fmt.Sprintf("Attestation document: %s", string(attDocRaw)))
 
 	extraData := attestation.MakeExtraData(attDoc.UserData, nonce)
 

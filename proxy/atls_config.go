@@ -120,6 +120,10 @@ func (w AttestationLogger) Info(format string, args ...any) {
 	w.Log.Log(context.TODO(), slog.LevelInfo, fmt.Sprintf(format, args...))
 }
 
+func (w AttestationLogger) Debug(format string, args ...any) {
+	w.Log.Log(context.TODO(), slog.LevelDebug, fmt.Sprintf(format, args...))
+}
+
 func (w AttestationLogger) Warn(format string, args ...any) {
 	w.Log.Log(context.TODO(), slog.LevelWarn, fmt.Sprintf(format, args...))
 }
