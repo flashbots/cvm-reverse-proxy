@@ -1,26 +1,9 @@
-package common
-
+// Package multimeasurements contains a helper to load a file with multiple measurements
+// and compare provided measurements against them.
 //
-// Helper to load expected measurements from a file or URL, and compare
-// provided measurements against them.
-//
-// Compatible with measurements data schema v2 (see measurements.json)
-// as well as the legacy v1 schema.
-//
-//   [
-//       {
-//           "measurement_id": "cvm-image-azure-tdx.rootfs-20241107200854.wic.vhd",
-//           "attestation_type": "azure-tdx",
-//           "measurements": {
-//               "4": {
-//                   "expected": "1b8cd655f5ebdf50bedabfb5db6b896a0a7c56de54f318103a2de1e7cea57b6b"
-//               },
-//               ...
-//           }
-//       },
-//       ...
-//   ]
-//
+// Compatible with measurements data schema v2 (see measurements.json) as well as the
+// legacy v1 schema.
+package multimeasurements
 
 import (
 	"bytes"
@@ -33,9 +16,9 @@ import (
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/measurements"
 )
 
-// ExpectedMeasurements is a struct that represents a list of expected measurements,
-// and allows checking if given measurements matches a known one.
-type ExpectedMeasurements struct {
+// MultiMeasurements is holds several known measurements, and can check if a
+// given measurements matches a known one.
+type MultiMeasurements struct {
 	Measurements []MeasurementsContainer
 }
 
@@ -45,11 +28,11 @@ type MeasurementsContainer struct {
 	Measurements    measurements.M `json:"measurements"`
 }
 
-type LegacyMeasurementsContainer map[string]measurements.M
+type LegacyMultiMeasurements map[string]measurements.M
 
-// NewExpectedMeasurementsFromFile returns an ExpectedMeasurements instance,
-// with the measurements loaded from a file or URL.
-func NewExpectedMeasurementsFromFile(path string) (m *ExpectedMeasurements, err error) {
+// New returns a MultiMeasurements instance, with the measurements
+// loaded from a file or URL.
+func New(path string) (m *MultiMeasurements, err error) {
 	var data []byte
 	if strings.HasPrefix(path, "http") {
 		// load from URL
@@ -70,11 +53,11 @@ func NewExpectedMeasurementsFromFile(path string) (m *ExpectedMeasurements, err 
 		}
 	}
 
-	m = &ExpectedMeasurements{}
+	m = &MultiMeasurements{}
 
 	// Try to load the v2 data schema, if that fails fall back to legacy v1 schema
 	if err = json.Unmarshal(data, &m.Measurements); err != nil {
-		var legacyData LegacyMeasurementsContainer
+		var legacyData LegacyMultiMeasurements
 		err = json.Unmarshal(data, &legacyData)
 		for measurementID, measurements := range legacyData {
 			container := MeasurementsContainer{
@@ -91,7 +74,7 @@ func NewExpectedMeasurementsFromFile(path string) (m *ExpectedMeasurements, err 
 
 // Contains checks if the provided measurements match one of the known measurements. Any keys in the provided
 // measurements which are not in the known measurements are ignored.
-func (m *ExpectedMeasurements) Contains(measurements map[uint32][]byte) (found bool, foundMeasurement *MeasurementsContainer) {
+func (m *MultiMeasurements) Contains(measurements map[uint32][]byte) (found bool, foundMeasurement *MeasurementsContainer) {
 	// For every known container, all known measurements match (and additional ones are ignored)
 	for _, container := range m.Measurements {
 		allMatch := true

@@ -10,13 +10,13 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/flashbots/cvm-reverse-proxy/common"
 	"github.com/flashbots/cvm-reverse-proxy/internal/atls"
 	azure_tdx "github.com/flashbots/cvm-reverse-proxy/internal/attestation/azure/tdx"
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/measurements"
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
 	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/cloudprovider"
 	"github.com/flashbots/cvm-reverse-proxy/internal/config"
+	"github.com/flashbots/cvm-reverse-proxy/multimeasurements"
 	dcap_tdx "github.com/flashbots/cvm-reverse-proxy/tdx"
 )
 
@@ -66,7 +66,7 @@ func CreateAttestationValidators(log *slog.Logger, attestationType AttestationTy
 		return nil, err
 	}
 
-	var parsedMeasurements []common.MeasurementsContainer
+	var parsedMeasurements []multimeasurements.MeasurementsContainer
 	err = json.Unmarshal(jsonMeasurements, &parsedMeasurements)
 	if err != nil {
 		return nil, err
