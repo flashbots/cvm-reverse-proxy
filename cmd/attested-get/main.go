@@ -8,11 +8,11 @@ package main
 //
 // Usage:
 //
-//   go run cmd/get-measurements/main.go --addr=https://instance_ip:port
+//   go run cmd/attested-get/main.go --addr=https://instance_ip:port
 //
 // Can also save the verified measurements and the response body to files:
 //
-//   go run cmd/get-measurements/main.go --addr=https://instance_ip:port --out-measurements=measurements.json --out-response=response.txt
+//   go run cmd/attested-get/main.go --addr=https://instance_ip:port --out-measurements=measurements.json --out-response=response.txt
 //
 
 import (
@@ -59,7 +59,7 @@ var flags []cli.Flag = []cli.Flag{
 
 func main() {
 	app := &cli.App{
-		Name:   "get-measurements",
+		Name:   "attested-get",
 		Usage:  "Get verified measurements",
 		Flags:  flags,
 		Action: runClient,
@@ -80,7 +80,7 @@ func runClient(cCtx *cli.Context) (err error) {
 	log := common.SetupLogger(&common.LoggingOpts{
 		Debug:   logDebug,
 		JSON:    false,
-		Service: "get-measurements",
+		Service: "attested-get",
 		Version: common.Version,
 	})
 
