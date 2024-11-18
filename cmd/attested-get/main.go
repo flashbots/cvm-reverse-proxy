@@ -29,10 +29,14 @@ import (
 
 	"github.com/flashbots/cvm-reverse-proxy/common"
 	"github.com/flashbots/cvm-reverse-proxy/internal/atls"
+<<<<<<< HEAD
 	azure_tdx "github.com/flashbots/cvm-reverse-proxy/internal/attestation/azure/tdx"
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/measurements"
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
 	"github.com/flashbots/cvm-reverse-proxy/internal/config"
+=======
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
+>>>>>>> e8bf2544 (rename to attested-get)
 	"github.com/flashbots/cvm-reverse-proxy/proxy"
 	"github.com/urfave/cli/v2" // imports as package "cli"
 )
@@ -53,11 +57,14 @@ var flags []cli.Flag = []cli.Flag{
 		Value: "",
 		Usage: "Output file for the response payload",
 	},
+<<<<<<< HEAD
 	&cli.StringFlag{
 		Name:  "attestation-type", // TODO: Add support for other attestation types
 		Value: string(proxy.AttestationAzureTDX),
 		Usage: "type of attestation to present (currently only azure-tdx)",
 	},
+=======
+>>>>>>> e8bf2544 (rename to attested-get)
 	&cli.BoolFlag{
 		Name:  "log-debug",
 		Value: false,
