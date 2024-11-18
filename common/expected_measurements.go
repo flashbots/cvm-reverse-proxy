@@ -4,8 +4,8 @@ package common
 // Helper to load expected measurements from a file or URL, and compare
 // provided measurements against them.
 //
-// Internally this uses the measurements data schema v2 (as served by
-// https://measurements.builder.flashbots.net):
+// Compatible with measurements data schema v2 (see measurements.json)
+// as well as the legacy v1 schema.
 //
 //   [
 //       {
@@ -45,6 +45,8 @@ type MeasurementsContainer struct {
 	Measurements    measurements.M `json:"measurements"`
 }
 
+type LegacyMeasurementsContainer map[string]measurements.M
+
 // NewExpectedMeasurementsFromFile returns an ExpectedMeasurements instance,
 // with the measurements loaded from a file or URL.
 func NewExpectedMeasurementsFromFile(path string) (m *ExpectedMeasurements, err error) {
@@ -69,7 +71,21 @@ func NewExpectedMeasurementsFromFile(path string) (m *ExpectedMeasurements, err 
 	}
 
 	m = &ExpectedMeasurements{}
-	err = json.Unmarshal(data, &m.Measurements)
+
+	// Try to load the v2 data schema, if that fails fall back to legacy v1 schema
+	if err = json.Unmarshal(data, &m.Measurements); err != nil {
+		var legacyData LegacyMeasurementsContainer
+		err = json.Unmarshal(data, &legacyData)
+		for measurementID, measurements := range legacyData {
+			container := MeasurementsContainer{
+				MeasurementID:   measurementID,
+				AttestationType: "azure-tdx",
+				Measurements:    measurements,
+			}
+			m.Measurements = append(m.Measurements, container)
+		}
+	}
+
 	return m, err
 }
 
