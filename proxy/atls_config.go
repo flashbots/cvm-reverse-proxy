@@ -12,11 +12,11 @@ import (
 
 	"github.com/flashbots/cvm-reverse-proxy/internal/atls"
 	azure_tdx "github.com/flashbots/cvm-reverse-proxy/internal/attestation/azure/tdx"
-	dcap_tdx "github.com/flashbots/cvm-reverse-proxy/tdx"
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/measurements"
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
 	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/cloudprovider"
 	"github.com/flashbots/cvm-reverse-proxy/internal/config"
+	dcap_tdx "github.com/flashbots/cvm-reverse-proxy/tdx"
 )
 
 type AttestationType string

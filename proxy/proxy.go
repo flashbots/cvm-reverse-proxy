@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/asn1"
 	"encoding/hex"
@@ -108,12 +109,12 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	p.log.With("duration", duration).Info("[proxy-request] proxying complete")
 }
 
-func (p *Proxy) getMeasurementsFromTLS(conn *tls.ConnectionState) (atlsVariant variant.Variant, measurements map[uint32][]byte, err error) {
+func GetMeasurementsFromTLS(certs []*x509.Certificate, validatorOIDs []asn1.ObjectIdentifier) (atlsVariant variant.Variant, measurements map[uint32][]byte, err error) {
 	// In verifyEmbeddedReport which is used to validate the extensions, only the first matching extension is validated! Refuse to accept multiple
 	var ATLSExtension *pkix.Extension = nil
-	for _, cert := range conn.PeerCertificates {
+	for _, cert := range certs {
 		for _, ext := range cert.Extensions {
-			for _, validatorOID := range p.validatorOIDs {
+			for _, validatorOID := range validatorOIDs {
 				if ext.Id.Equal(validatorOID) {
 					if ATLSExtension != nil {
 						return nil, nil, errors.New("more than one ATLS extension provided, refusing to continue")
@@ -142,7 +143,8 @@ func (p *Proxy) getMeasurementsFromTLS(conn *tls.ConnectionState) (atlsVariant v
 }
 
 func (p *Proxy) copyMeasurementsToHeader(conn *tls.ConnectionState, header *http.Header) (int, error) {
-	atlsVariant, extractedMeasurements, err := p.getMeasurementsFromTLS(conn)
+	certs := conn.PeerCertificates
+	atlsVariant, extractedMeasurements, err := GetMeasurementsFromTLS(certs, p.validatorOIDs)
 	if err != nil {
 		return http.StatusTeapot, err
 	} else if extractedMeasurements == nil {
