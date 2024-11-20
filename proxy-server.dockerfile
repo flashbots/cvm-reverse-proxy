@@ -18,7 +18,7 @@ FROM alpine:latest
 WORKDIR /app
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /build/proxy-server /app/proxy-server
-RUN echo "{\"azure-tdx\": {}}" > /app/measurements-empty.json
+RUN echo "[{}]" > /app/measurements-empty.json
 ENV LISTEN_ADDR=":8080"
 EXPOSE 8080
 CMD ["/app/proxy-server"]
