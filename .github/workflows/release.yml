@@ -54,4 +54,4 @@ jobs:
             --cache-repo ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache \
             --build-arg BINARY=${{ matrix.binary }} \
             --destination ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.binary }}:${{ steps.meta.outputs.version }} \
-            ${{ join(steps.meta.outputs.tags-csv | split(',') | map(format('--destination %s', @)), ' ') }}
+            ${{ steps.meta.outputs.tags }}
