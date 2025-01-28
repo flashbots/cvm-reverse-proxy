@@ -109,7 +109,7 @@ func runClient(cCtx *cli.Context) (err error) {
 	}
 
 	// Create validators based on the attestation type
-	attestationType, err := proxy.ParseAttestationType(attestationTypeStr)
+	attestationType, err := proxy.ParseAttestationType(log, attestationTypeStr)
 	if err != nil {
 		log.With("attestation-type", attestationType).Error("invalid attestation-type passed, see --help")
 		return err

@@ -23,12 +23,13 @@ import (
 type AttestationType string
 
 const (
+	AttestationAuto     AttestationType = "auto"
 	AttestationNone     AttestationType = "none"
 	AttestationAzureTDX AttestationType = "azure-tdx"
 	AttestationDCAPTDX  AttestationType = "dcap-tdx"
 )
 
-const AvailableAttestationTypes string = "none, azure-tdx, dcap-tdx"
+const AvailableAttestationTypes string = "auto, none, azure-tdx, dcap-tdx"
 
 // DetectAttestationType determines the attestation type based on environment
 func DetectAttestationType() AttestationType {
@@ -49,8 +50,12 @@ func DetectAttestationType() AttestationType {
     return AttestationNone
 }
 
-func ParseAttestationType(attestationType string) (AttestationType, error) {
+func ParseAttestationType(log *slog.Logger, attestationType string) (AttestationType, error) {
 	switch attestationType {
+	case string(AttestationAuto):
+		detectedType := DetectAttestationType()
+		log.With("detected_attestation", detectedType).Info("Auto-detected attestation type")
+		return detectedType, nil
 	case string(AttestationNone):
 		return AttestationNone, nil
 	case string(AttestationAzureTDX):
@@ -75,8 +80,8 @@ func CreateAttestationIssuer(log *slog.Logger, attestationType AttestationType) 
 	}
 }
 
-func CreateAttestationValidators(log *slog.Logger, attestationType AttestationType, jsonMeasurementsPath string) ([]atls.Validator, error) {
-	if attestationType == AttestationNone {
+func CreateAttestationValidatorsFromFile(log *slog.Logger, jsonMeasurementsPath string) ([]atls.Validator, error) {
+	if jsonMeasurementsPath == "" {
 		return nil, nil
 	}
 
@@ -91,26 +96,42 @@ func CreateAttestationValidators(log *slog.Logger, attestationType AttestationTy
 		return nil, err
 	}
 
-	switch attestationType {
-	case AttestationAzureTDX:
-		validators := []atls.Validator{}
-		for _, measurement := range parsedMeasurements {
+	// Group validators by attestation type
+	validatorsByType := make(map[AttestationType][]atls.Validator)
+
+	for _, measurement := range parsedMeasurements {
+		attestationType, err := ParseAttestationType(log, measurement.AttestationType)
+		if err != nil {
+			return nil, fmt.Errorf("invalid attestation type %s in measurements file", measurement.AttestationType)
+		}
+
+		switch attestationType {
+		case AttestationAzureTDX:
 			attConfig := config.DefaultForAzureTDX()
 			attConfig.SetMeasurements(measurement.Measurements)
-			validators = append(validators, azure_tdx.NewValidator(attConfig, AttestationLogger{Log: log}))
-		}
-		return []atls.Validator{NewMultiValidator(validators)}, nil
-	case AttestationDCAPTDX:
-		validators := []atls.Validator{}
-		for _, measurement := range parsedMeasurements {
+			validatorsByType[attestationType] = append(
+				validatorsByType[attestationType],
+				azure_tdx.NewValidator(attConfig, AttestationLogger{Log: log}),
+			)
+		case AttestationDCAPTDX:
 			attConfig := &config.QEMUTDX{Measurements: measurements.DefaultsFor(cloudprovider.QEMU, variant.QEMUTDX{})}
 			attConfig.SetMeasurements(measurement.Measurements)
-			validators = append(validators, dcap_tdx.NewValidator(attConfig, AttestationLogger{Log: log}))
+			validatorsByType[attestationType] = append(
+				validatorsByType[attestationType],
+				dcap_tdx.NewValidator(attConfig, AttestationLogger{Log: log}),
+			)
+		default:
+			return nil, fmt.Errorf("unsupported attestation type %s in measurements file", measurement.AttestationType)
 		}
-		return []atls.Validator{NewMultiValidator(validators)}, nil
-	default:
-		return nil, errors.New("invalid attestation-type passed in")
 	}
+
+	// Create a MultiValidator for each attestation type
+	var validators []atls.Validator
+		for _, typeValidators := range validatorsByType {
+		validators = append(validators, NewMultiValidator(typeValidators))
+	}
+
+	return validators, nil
 }
 
 func ExtractMeasurementsFromExtension(ext *pkix.Extension, v variant.Variant) (map[uint32][]byte, error) {

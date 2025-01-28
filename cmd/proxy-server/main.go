@@ -40,7 +40,7 @@ var flags []cli.Flag = []cli.Flag{
 	&cli.StringFlag{
 		Name:    "server-attestation-type",
 		EnvVars: []string{"SERVER_ATTESTATION_TYPE"},
-		Value:   "",
+		Value:   "auto",
 		Usage:   "type of attestation to present (" + proxy.AvailableAttestationTypes + "). If not set, automatically detected.",
 	},
 	&cli.StringFlag{
@@ -52,12 +52,6 @@ var flags []cli.Flag = []cli.Flag{
 		Name:    "tls-private-key-path",
 		EnvVars: []string{"TLS_PRIVATE_KEY_PATH"},
 		Usage:   "Path to private key file for the certificate. Only valid with --tls-certificate-path",
-	},
-	&cli.StringFlag{
-		Name:    "client-attestation-type",
-		EnvVars: []string{"CLIENT_ATTESTATION_TYPE"},
-		Value:   string(proxy.AttestationNone),
-		Usage:   "type of attestation to expect and verify (" + proxy.AvailableAttestationTypes + ")",
 	},
 	&cli.StringFlag{
 		Name:    "client-measurements",
@@ -133,27 +127,15 @@ func runServer(cCtx *cli.Context) error {
 	}
 
 	// Auto-detect server attestation type if not specified
-	serverAttestationType, err := proxy.ParseAttestationType(cCtx.String("server-attestation-type"))
+	serverAttestationType, err := proxy.ParseAttestationType(log, cCtx.String("server-attestation-type"))
 	if err != nil {
-		// If parsing fails and no type was specified, use auto-detection
-		if cCtx.String("server-attestation-type") == "" {
-			serverAttestationType = proxy.DetectAttestationType()
-			log.With("detected_attestation", serverAttestationType).Info("Auto-detected server attestation type")
-		} else {
-			log.With("attestation-type", cCtx.String("server-attestation-type")).Error("invalid server-attestation-type passed, see --help")
-			return err
-		}
-	}
-
-	clientAttestationType, err := proxy.ParseAttestationType(cCtx.String("client-attestation-type"))
-	if err != nil {
-		log.With("attestation-type", cCtx.String("client-attestation-type")).Error("invalid client-attestation-type passed, see --help")
+		log.With("attestation-type", cCtx.String("server-attestation-type")).Error("invalid server-attestation-type passed, see --help")
 		return err
 	}
 
-	validators, err := proxy.CreateAttestationValidators(log, clientAttestationType, clientMeasurements)
+	validators, err := proxy.CreateAttestationValidatorsFromFile(log, clientMeasurements)
 	if err != nil {
-		log.Error("could not create attestation validators", "err", err)
+		log.Error("could not create attestation validators from file", "err", err)
 		return err
 	}
 
