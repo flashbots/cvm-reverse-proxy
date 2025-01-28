@@ -1,0 +1,57 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  KANIKO_VERSION: gcr.io/kaniko-project/executor@sha256:9e69fd4330ec887829c780f5126dd80edc663df6def362cd22e79bcdf00ac53f
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        binary: [proxy-client, proxy-server]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdf50867830130cc04c4d1bb9de141d
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.binary }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+
+      - name: Build and Push with Kaniko
+        run: |
+          mkdir -p /home/runner/.docker
+
+          echo '{"auths":{"${{ env.REGISTRY }}":{"auth":"'$(echo -n "${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}" | base64)'"}}}'> /home/runner/.docker/config.json
+
+          docker run \
+            -v ${{ github.workspace }}:/workspace \
+            -v /home/runner/.docker/config.json:/kaniko/.docker/config.json \
+            ${{ env.KANIKO_VERSION }} \
+            --context /workspace \
+            --dockerfile /workspace/Dockerfile \
+            --reproducible \
+            --cache=true \
+            --cache-repo ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-cache \
+            --build-arg BINARY=${{ matrix.binary }} \
+            --destination ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.binary }}:${{ steps.meta.outputs.version }} \
+            ${{ join(steps.meta.outputs.tags-csv | split(',') | map(format('--destination %s', @)), ' ') }}
