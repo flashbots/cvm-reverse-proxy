@@ -40,8 +40,8 @@ var flags []cli.Flag = []cli.Flag{
 	&cli.StringFlag{
 		Name:    "server-attestation-type",
 		EnvVars: []string{"SERVER_ATTESTATION_TYPE"},
-		Value:   string(proxy.AttestationAzureTDX),
-		Usage:   "type of attestation to present (" + proxy.AvailableAttestationTypes + ")",
+		Value:   "",
+		Usage:   "type of attestation to present (" + proxy.AvailableAttestationTypes + "). If not set, automatically detected.",
 	},
 	&cli.StringFlag{
 		Name:    "tls-certificate-path",
@@ -132,10 +132,17 @@ func runServer(cCtx *cli.Context) error {
 		return errors.New("not all of --tls-certificate-path and --tls-private-key-path specified")
 	}
 
-	serverAttestationType, err := proxy.ParseAttestationType(serverAttestationTypeFlag)
+	// Auto-detect server attestation type if not specified
+	serverAttestationType, err := proxy.ParseAttestationType(cCtx.String("server-attestation-type"))
 	if err != nil {
-		log.With("attestation-type", cCtx.String("server-attestation-type")).Error("invalid server-attestation-type passed, see --help")
-		return err
+		// If parsing fails and no type was specified, use auto-detection
+		if cCtx.String("server-attestation-type") == "" {
+			serverAttestationType = proxy.DetectAttestationType()
+			log.With("detected_attestation", serverAttestationType).Info("Auto-detected server attestation type")
+		} else {
+			log.With("attestation-type", cCtx.String("server-attestation-type")).Error("invalid server-attestation-type passed, see --help")
+			return err
+		}
 	}
 
 	clientAttestationType, err := proxy.ParseAttestationType(cCtx.String("client-attestation-type"))

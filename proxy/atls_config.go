@@ -30,6 +30,25 @@ const (
 
 const AvailableAttestationTypes string = "none, azure-tdx, dcap-tdx"
 
+// DetectAttestationType determines the attestation type based on environment
+func DetectAttestationType() AttestationType {
+    // Check for TDX device files - these indicate DCAP TDX
+    _, tdxErr1 := os.Stat("/dev/tdx-guest")
+    _, tdxErr2 := os.Stat("/dev/tdx_guest")
+    if tdxErr1 == nil || tdxErr2 == nil {
+        return AttestationDCAPTDX
+    }
+
+    // Try Azure TDX attestation - if it works, we're in Azure TDX
+    issuer := azure_tdx.NewIssuer(nil) // nil logger for detection
+    _, err := issuer.Issue(context.Background(), []byte("test"), []byte("test"))
+    if err == nil {
+        return AttestationAzureTDX
+    }
+
+    return AttestationNone
+}
+
 func ParseAttestationType(attestationType string) (AttestationType, error) {
 	switch attestationType {
 	case string(AttestationNone):

@@ -45,8 +45,8 @@ var flags []cli.Flag = []cli.Flag{
 	},
 	&cli.StringFlag{
 		Name:  "client-attestation-type",
-		Value: string(proxy.AttestationNone),
-		Usage: "type of attestation to present (" + proxy.AvailableAttestationTypes + ")",
+		Value: "",
+		Usage: "type of attestation to present (" + proxy.AvailableAttestationTypes + "). If not set, automatically detected.",
 	},
 	&cli.BoolFlag{
 		Name:  "log-json",
@@ -101,10 +101,17 @@ func runClient(cCtx *cli.Context) error {
 		return errors.New("invalid combination of --verify-tls and --server-attestation-type passed (only 'none' is allowed)")
 	}
 
+	// Auto-detect client attestation type if not specified
 	clientAttestationType, err := proxy.ParseAttestationType(cCtx.String("client-attestation-type"))
 	if err != nil {
-		log.With("attestation-type", cCtx.String("client-attestation-type")).Error("invalid client-attestation-type passed, see --help")
-		return err
+		// If parsing fails and no type was specified, use auto-detection
+		if cCtx.String("client-attestation-type") == "" {
+			clientAttestationType = proxy.DetectAttestationType()
+			log.With("detected_attestation", clientAttestationType).Info("Auto-detected client attestation type")
+		} else {
+			log.With("attestation-type", cCtx.String("client-attestation-type")).Error("invalid client-attestation-type passed, see --help")
+			return err
+		}
 	}
 
 	serverAttestationType, err := proxy.ParseAttestationType(cCtx.String("server-attestation-type"))
