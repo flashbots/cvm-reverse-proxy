@@ -10,13 +10,24 @@ package main
 //
 //   go run cmd/attested-get/main.go --addr=https://instance_ip:port
 //
-// Can also save the verified measurements and the response body to files:
+// Save the verified measurements and the response body to files:
 //
-//   go run cmd/attested-get/main.go --addr=https://instance_ip:port --out-measurements=measurements.json --out-response=response.txt
+//   go run cmd/attested-get/main.go \
+// 		--addr=https://instance_ip:port \
+// 		--out-measurements=measurements.json \
+// 		--out-response=response.txt
 //
-// You can also compare the resulting measurements with a list of expected measurements:
+// Compare the resulting measurements with a list of expected measurements:
 //
-//   go run cmd/get-measurements/main.go --addr=https://instance_ip:port --expected-measurements=measurements.json
+//   go run cmd/attested-get/main.go \
+// 		--addr=https://instance_ip:port \
+// 		--expected-measurements=measurements.json
+//
+// Also works with an URL for expected measurements:
+//
+//   go run cmd/attested-get/main.go \
+//		--addr=https://buildernet-01-euw.builder.flashbots.net:7936/cert \
+// 		--expected-measurements=https://measurements.builder.flashbots.net
 //
 
 import (
@@ -133,6 +144,7 @@ func runClient(cCtx *cli.Context) (err error) {
 	if expectedMeasurementsPath != "" {
 		log.Info("Loading expected measurements from " + expectedMeasurementsPath + " ...")
 		expectedMeasurements, err = multimeasurements.New(expectedMeasurementsPath)
+		log.With("measurements", expectedMeasurements.Count()).Info("Measurements loaded")
 		if err != nil {
 			return err
 		}
