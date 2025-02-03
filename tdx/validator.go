@@ -98,16 +98,20 @@ func (v *Validator) Validate(ctx context.Context, attDocRaw []byte, nonce []byte
 				MrOwner:       hexToBytes("000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
 				MrOwnerConfig: hexToBytes("000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
 				ReportData:    extraData,
-				MrTd:          v.expected[0].Expected,
-				Rtmrs:         [][]byte{
-							v.expected[1].Expected,
-							v.expected[2].Expected,
-							v.expected[3].Expected,
-							v.expected[4].Expected,
-				},
 			},
 		},
 	}
+
+        // Only add measurement validation if we have valid measurements
+        if v.expected != nil {
+                config.Policy.TdQuoteBodyPolicy.MrTd = v.expected[0].Expected
+                config.Policy.TdQuoteBodyPolicy.Rtmrs = [][]byte{
+                        v.expected[1].Expected,
+                        v.expected[2].Expected,
+                        v.expected[3].Expected,
+                        v.expected[4].Expected,
+                }
+        }
 
 	// config.Policy.TdQuoteBodyPolicy.MinimumTeeTcbSvn="" // skipping MinimumTeeTcbSvn as this is part of tcbinfo
 	// considering skipping MRSEAM, the tdx module can only be provided by intel and there's already trust here. Also the TDX module svn is part of the tcbinfo check
