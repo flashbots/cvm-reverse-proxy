@@ -92,3 +92,7 @@ func (m *MultiMeasurements) Contains(measurements map[uint32][]byte) (found bool
 
 	return false, nil
 }
+
+func (m *MultiMeasurements) Count() (n uint32) {
+	return uint32(len(m.Measurements))
+}
