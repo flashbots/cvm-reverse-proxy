@@ -54,12 +54,6 @@ var flags []cli.Flag = []cli.Flag{
 		Usage:   "Path to private key file for the certificate. Only valid with --tls-certificate-path",
 	},
 	&cli.StringFlag{
-		Name:    "client-attestation-type",
-		EnvVars: []string{"CLIENT_ATTESTATION_TYPE"},
-		Value:   string(proxy.AttestationNone),
-		Usage:   "type of attestation to expect and verify (" + proxy.AvailableAttestationTypes + ")",
-	},
-	&cli.StringFlag{
 		Name:    "client-measurements",
 		EnvVars: []string{"CLIENT_MEASUREMENTS"},
 		Usage:   "optional path to JSON measurements enforced on the client",
@@ -138,15 +132,9 @@ func runServer(cCtx *cli.Context) error {
 		return err
 	}
 
-	clientAttestationType, err := proxy.ParseAttestationType(cCtx.String("client-attestation-type"))
+	validators, err := proxy.CreateAttestationValidatorsFromFile(log, clientMeasurements)
 	if err != nil {
-		log.With("attestation-type", cCtx.String("client-attestation-type")).Error("invalid client-attestation-type passed, see --help")
-		return err
-	}
-
-	validators, err := proxy.CreateAttestationValidators(log, clientAttestationType, clientMeasurements)
-	if err != nil {
-		log.Error("could not create attestation validators", "err", err)
+		log.Error("could not create attestation validators from file", "err", err)
 		return err
 	}
 
