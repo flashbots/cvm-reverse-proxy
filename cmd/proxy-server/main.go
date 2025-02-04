@@ -40,8 +40,8 @@ var flags []cli.Flag = []cli.Flag{
 	&cli.StringFlag{
 		Name:    "server-attestation-type",
 		EnvVars: []string{"SERVER_ATTESTATION_TYPE"},
-		Value:   "auto",
-		Usage:   "type of attestation to present (" + proxy.AvailableAttestationTypes + "). If not set, automatically detected.",
+		Value:   string(proxy.AttestationAuto),
+		Usage:   "type of attestation to present (" + proxy.AvailableAttestationTypes + "). Defaults to automatic detection.",
 	},
 	&cli.StringFlag{
 		Name:    "tls-certificate-path",
