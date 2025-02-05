@@ -39,10 +39,10 @@ Client
 
 - `--listen-addr`: address to listen on (default: "127.0.0.1:8080")
 - `--target-addr`: address to proxy requests to (default: "https://localhost:80")
-- `--server-attestation-type`: type of attestation to present (none, auto, dcap-tdx, azure-tdx) (default: "none")
+- `--server-attestation-type`: type of attestation to present (none, auto, dcap-tdx, azure-tdx) (default: "auto")
 - `--tls-certificate-path`: Path to certificate (PEM file) to present. Only valid for --server-attestation-type=none and with `--tls-private-key-path`.
 - `--tls-private-key-path`: Path to private key file for the certificate (PEM). Only valid with --tls-certificate-path.
-- `--client-attestation-type`: type of attestation to expect and verify (none, azure-tdx) (default: "none")
+- `--client-attestation-type`: type of attestation to expect and verify (none, dcap-tdx, azure-tdx) (default: "none")
 - `--client-measurements`: optional path to JSON measurements enforced on the client
 - `--log-json`: log in JSON format (default: false)
 - `--log-debug`: log debug messages (default: false)
