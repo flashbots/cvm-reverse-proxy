@@ -103,7 +103,7 @@ func CreateAttestationValidatorsFromFile(log *slog.Logger, jsonMeasurementsPath 
 
 	// Create a MultiValidator for each attestation type
 	var validators []atls.Validator
-		for _, typeValidators := range validatorsByType {
+	for _, typeValidators := range validatorsByType {
 		validators = append(validators, NewMultiValidator(typeValidators))
 	}
 
