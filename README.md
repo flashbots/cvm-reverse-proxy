@@ -39,10 +39,10 @@ Client
 
 - `--listen-addr`: address to listen on (default: "127.0.0.1:8080")
 - `--target-addr`: address to proxy requests to (default: "https://localhost:80")
-- `--server-attestation-type`: type of attestation to present (none, azure-tdx) (default: "azure-tdx")
+- `--server-attestation-type`: type of attestation to present (none, auto, dcap-tdx, azure-tdx) (default: "auto")
 - `--tls-certificate-path`: Path to certificate (PEM file) to present. Only valid for --server-attestation-type=none and with `--tls-private-key-path`.
 - `--tls-private-key-path`: Path to private key file for the certificate (PEM). Only valid with --tls-certificate-path.
-- `--client-attestation-type`: type of attestation to expect and verify (none, azure-tdx) (default: "none")
+- `--client-attestation-type`: type of attestation to expect and verify (none, dcap-tdx, azure-tdx) (default: "none")
 - `--client-measurements`: optional path to JSON measurements enforced on the client
 - `--log-json`: log in JSON format (default: false)
 - `--log-debug`: log debug messages (default: false)
@@ -70,7 +70,7 @@ sudo ./build/proxy-server --listen-addr=<listen-addr> --target-addr=<target-addr
 docker run -p 8080:8080 -e LOG_JSON=1 cvm-proxy-server
 ```
 
-By default the server will present Azure TDX attestation, and you can modify that via the `--server-attestation-type` flag.
+By default the server will determine the attestation issuer automatically, and you can modify that via the `--server-attestation-type` flag.
 The server can be made to present a regular TLS certificate through `--tls-certificate-path` and `--tls-private-key-path` flags instead of aTLS one.
 
 By default the server will not verify client attestations, you can change that via `--client-attestation-type` and `--client-measurements` flags. Valid for both aTLS and regular TLS.
@@ -89,7 +89,7 @@ This repository contains a [dummy http server](./cmd/dummy-server/main.go) that 
 - `--server-measurements`: optional path to JSON measurements enforced on the server
 - `--verify-tls`: verify server's TLS certificate instead of server's attestation. Only valid for server-attestation-type=none.
 - `--tls-ca-certificate`: additional CA certificate to verify against (PEM) [default=no additional TLS certs]. Only valid with --verify-tls.
-- `--client-attestation-type`: type of attestation to present (none, azure-tdx) (default: "none")
+- `--client-attestation-type`: type of attestation to present (none, auto, dcap-tdx, azure-tdx) (default: "none")
 - `--log-json`: log in JSON format (default: false)
 - `--log-debug`: log debug messages (default: false)
 - `--log-dcap-quote`: log dcap quotes to folder quotes/ (default: false)
@@ -111,7 +111,7 @@ make build-proxy-client
 By default the client will expect the server to present an Azure TDX attestation, and you can modify that via the `--server-attestation-type` and  `--server-measurements` flags.
 The server can also be a regular TLS server, which you can configure with the `--verify-tls` flag, which is only valid in combination with `--server-attestation-type=none`. Non-standard CA for the server can also be configured with `--tls-ca-certificate`.
 
-By default the client will not present client attestations, you can change that via `--client-attestation-type` flag. Valid for both aTLS and TLS server proxies.
+By default the client will not present client attestations, you can change that via `--client-attestation-type` flag. If this is set to "auto", it will try to determine the attestation issuer automatically. Valid for both aTLS and TLS server proxies.
 
 This repository contains a sample [measurements.json](./measurements.json) file that you can use. The client will (correctly) complain about unexpected measurements that you can then correct.
 

@@ -46,7 +46,7 @@ var flags []cli.Flag = []cli.Flag{
 	&cli.StringFlag{
 		Name:  "client-attestation-type",
 		Value: string(proxy.AttestationNone),
-		Usage: "type of attestation to present (" + proxy.AvailableAttestationTypes + ")",
+		Usage: "type of attestation to present (" + proxy.AvailableAttestationTypes + ").",
 	},
 	&cli.BoolFlag{
 		Name:  "log-json",
