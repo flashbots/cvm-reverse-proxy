@@ -54,6 +54,10 @@ var flags []cli.Flag = []cli.Flag{
 		Usage:   "Path to private key file for the certificate. Only valid with --tls-certificate-path",
 	},
 	&cli.StringFlag{
+		Name:    "client-attestation-type",
+		Usage:   "Deprecated and not used. Client attestation types are set via the measurements file.",
+	},
+	&cli.StringFlag{
 		Name:    "client-measurements",
 		EnvVars: []string{"CLIENT_MEASUREMENTS"},
 		Usage:   "optional path to JSON measurements enforced on the client",
@@ -116,6 +120,10 @@ func runServer(cCtx *cli.Context) error {
 		Service: "proxy-server",
 		Version: common.Version,
 	})
+
+	if cCtx.String("client-attestation-type") != "" {
+		log.Warn("DEPRECATED: --client-attestation-type is deprecated and will be removed in a future version")
+	}
 
 	useRegularTLS := certFile != "" || keyFile != ""
 	if serverAttestationTypeFlag != "none" && useRegularTLS {

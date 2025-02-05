@@ -26,6 +26,10 @@ var flags []cli.Flag = []cli.Flag{
 		Usage: "address to proxy requests to",
 	},
 	&cli.StringFlag{
+		Name:  "server-attestation-type",
+		Usage: "Deprecated and not used. Server attestation types are set via the measurements file.",
+	},
+	&cli.StringFlag{
 		Name:  "server-measurements",
 		Usage: "optional path to JSON measurements enforced on the server",
 	},
@@ -90,6 +94,10 @@ func runClient(cCtx *cli.Context) error {
 		Service: "proxy-client",
 		Version: common.Version,
 	})
+
+	if cCtx.String("server-attestation-type") != "" {
+		log.Warn("DEPRECATED: --server-attestation-type is deprecated and will be removed in a future version")
+	}
 
 	if serverMeasurements != "" && verifyTLS {
 		log.Error("invalid combination of --verify-tls and --server-measurements passed (cannot add server measurements and verify default TLS at the same time)")
