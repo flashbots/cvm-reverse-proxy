@@ -55,9 +55,7 @@ var flags []cli.Flag = []cli.Flag{
 	},
 	&cli.StringFlag{
 		Name:    "client-attestation-type",
-		EnvVars: []string{"CLIENT_ATTESTATION_TYPE"},
-		Value:   string(proxy.AttestationNone),
-		Usage:   "type of attestation to expect and verify (" + proxy.AvailableAttestationTypes + ")",
+		Usage:   "Deprecated and not used. Client attestation types are set via the measurements file.",
 	},
 	&cli.StringFlag{
 		Name:    "client-measurements",
@@ -123,6 +121,10 @@ func runServer(cCtx *cli.Context) error {
 		Version: common.Version,
 	})
 
+	if cCtx.String("client-attestation-type") != "" {
+		log.Warn("DEPRECATED: --client-attestation-type is deprecated and will be removed in a future version")
+	}
+
 	useRegularTLS := certFile != "" || keyFile != ""
 	if serverAttestationTypeFlag != "none" && useRegularTLS {
 		return errors.New("invalid combination of --tls-certificate-path, --tls-private-key-path and --server-attestation-type flags passed (only 'none' is allowed)")
@@ -138,15 +140,9 @@ func runServer(cCtx *cli.Context) error {
 		return err
 	}
 
-	clientAttestationType, err := proxy.ParseAttestationType(cCtx.String("client-attestation-type"))
+	validators, err := proxy.CreateAttestationValidatorsFromFile(log, clientMeasurements)
 	if err != nil {
-		log.With("attestation-type", cCtx.String("client-attestation-type")).Error("invalid client-attestation-type passed, see --help")
-		return err
-	}
-
-	validators, err := proxy.CreateAttestationValidators(log, clientAttestationType, clientMeasurements)
-	if err != nil {
-		log.Error("could not create attestation validators", "err", err)
+		log.Error("could not create attestation validators from file", "err", err)
 		return err
 	}
 

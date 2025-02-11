@@ -27,8 +27,7 @@ var flags []cli.Flag = []cli.Flag{
 	},
 	&cli.StringFlag{
 		Name:  "server-attestation-type",
-		Value: string(proxy.AttestationAzureTDX),
-		Usage: "type of attestation to expect and verify (" + proxy.AvailableAttestationTypes + ")",
+		Usage: "Deprecated and not used. Server attestation types are set via the measurements file.",
 	},
 	&cli.StringFlag{
 		Name:  "server-measurements",
@@ -37,7 +36,7 @@ var flags []cli.Flag = []cli.Flag{
 	&cli.BoolFlag{
 		Name:  "verify-tls",
 		Value: false,
-		Usage: "verify server's TLS certificate instead of server's attestation. Only valid for server-attestation-type=none.",
+		Usage: "verify server's TLS certificate instead of server's attestation. Only valid when not specifying measurements.",
 	},
 	&cli.StringFlag{
 		Name:  "tls-ca-certificate",
@@ -96,20 +95,18 @@ func runClient(cCtx *cli.Context) error {
 		Version: common.Version,
 	})
 
-	if cCtx.String("server-attestation-type") != "none" && verifyTLS {
-		log.Error("invalid combination of --verify-tls and --server-attestation-type passed (only 'none' is allowed)")
-		return errors.New("invalid combination of --verify-tls and --server-attestation-type passed (only 'none' is allowed)")
+	if cCtx.String("server-attestation-type") != "" {
+		log.Warn("DEPRECATED: --server-attestation-type is deprecated and will be removed in a future version")
+	}
+
+	if serverMeasurements != "" && verifyTLS {
+		log.Error("invalid combination of --verify-tls and --server-measurements passed (cannot add server measurements and verify default TLS at the same time)")
+		return errors.New("invalid combination of --verify-tls and --server-measurements passed (cannot add server measurements and verify default TLS at the same time)")
 	}
 
 	clientAttestationType, err := proxy.ParseAttestationType(cCtx.String("client-attestation-type"))
 	if err != nil {
 		log.With("attestation-type", cCtx.String("client-attestation-type")).Error("invalid client-attestation-type passed, see --help")
-		return err
-	}
-
-	serverAttestationType, err := proxy.ParseAttestationType(cCtx.String("server-attestation-type"))
-	if err != nil {
-		log.With("attestation-type", cCtx.String("server-attestation-type")).Error("invalid server-attestation-type passed, see --help")
 		return err
 	}
 
@@ -119,9 +116,9 @@ func runClient(cCtx *cli.Context) error {
 		return err
 	}
 
-	validators, err := proxy.CreateAttestationValidators(log, serverAttestationType, serverMeasurements)
+	validators, err := proxy.CreateAttestationValidatorsFromFile(log, serverMeasurements)
 	if err != nil {
-		log.Error("could not create attestation validators", "err", err)
+		log.Error("could not create attestation validators from file", "err", err)
 		return err
 	}
 
