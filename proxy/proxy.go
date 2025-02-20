@@ -84,9 +84,11 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Note: the reverse proxy adds X-Forwarded-For header!
 	if r.Header.Get(MeasurementHeader) != "" {
 		http.Error(w, "unexpected measurement header passed", http.StatusForbidden)
+		return
 	}
 	if r.Header.Get(AttestationTypeHeader) != "" {
 		http.Error(w, "unexpected attestation type header passed", http.StatusForbidden)
+		return
 	}
 
 	if r.TLS != nil {
