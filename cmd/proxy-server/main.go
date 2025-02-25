@@ -54,8 +54,8 @@ var flags []cli.Flag = []cli.Flag{
 		Usage:   "Path to private key file for the certificate. Only valid with --tls-certificate-path",
 	},
 	&cli.StringFlag{
-		Name:    "client-attestation-type",
-		Usage:   "Deprecated and not used. Client attestation types are set via the measurements file.",
+		Name:  "client-attestation-type",
+		Usage: "Deprecated and not used. Client attestation types are set via the measurements file.",
 	},
 	&cli.StringFlag{
 		Name:    "client-measurements",
@@ -101,18 +101,30 @@ func main() {
 	}
 }
 
+type ServerConfig struct {
+	ListenAddr            string `json:"listen_addr"`
+	ListenAddrHealthcheck string `json:"listen_addr_healthcheck"`
+	TargetAddr            string `json:"target_addr"`
+	ServerAttestationType string `json:"server_attestation_type"`
+	TLSCertificatePath    string `json:"tls_certificate_path"`
+	TLSPrivateKeyPath     string `json:"tls_private_key_path"`
+	ClientMeasurements    string `json:"client_measurements"`
+}
+
 func runServer(cCtx *cli.Context) error {
-	listenAddr := cCtx.String("listen-addr")
-	targetAddr := cCtx.String("target-addr")
-	clientMeasurements := cCtx.String("client-measurements")
+	config := ServerConfig{
+		ListenAddr:            cCtx.String("listen-addr"),
+		ListenAddrHealthcheck: cCtx.String("listen-addr-healthcheck"),
+		TargetAddr:            cCtx.String("target-addr"),
+		ServerAttestationType: cCtx.String("server-attestation-type"),
+		TLSCertificatePath:    cCtx.String("tls-certificate"),
+		TLSPrivateKeyPath:     cCtx.String("tls-private-key"),
+		ClientMeasurements:    cCtx.String("client-measurements"),
+	}
+
 	logJSON := cCtx.Bool("log-json")
 	logDebug := cCtx.Bool("log-debug")
 	tdx.SetLogDcapQuote(cCtx.Bool("log-dcap-quote"))
-
-	serverAttestationTypeFlag := cCtx.String("server-attestation-type")
-
-	certFile := cCtx.String("tls-certificate")
-	keyFile := cCtx.String("tls-private-key")
 
 	log = common.SetupLogger(&common.LoggingOpts{
 		Debug:   logDebug,
@@ -125,22 +137,26 @@ func runServer(cCtx *cli.Context) error {
 		log.Warn("DEPRECATED: --client-attestation-type is deprecated and will be removed in a future version")
 	}
 
-	useRegularTLS := certFile != "" || keyFile != ""
-	if serverAttestationTypeFlag != "none" && useRegularTLS {
+	return runServerFromConfig(log, config)
+}
+
+func runServerFromConfig(log *slog.Logger, config ServerConfig) error {
+	useRegularTLS := config.TLSCertificatePath != "" || config.TLSPrivateKeyPath != ""
+	if config.ServerAttestationType != "none" && useRegularTLS {
 		return errors.New("invalid combination of --tls-certificate-path, --tls-private-key-path and --server-attestation-type flags passed (only 'none' is allowed)")
 	}
 
-	if useRegularTLS && (certFile == "" || keyFile == "") {
+	if useRegularTLS && (config.TLSCertificatePath == "" || config.TLSPrivateKeyPath == "") {
 		return errors.New("not all of --tls-certificate-path and --tls-private-key-path specified")
 	}
 
-	serverAttestationType, err := proxy.ParseAttestationType(serverAttestationTypeFlag)
+	serverAttestationType, err := proxy.ParseAttestationType(config.ServerAttestationType)
 	if err != nil {
-		log.With("attestation-type", cCtx.String("server-attestation-type")).Error("invalid server-attestation-type passed, see --help")
+		log.With("attestation-type", config.ServerAttestationType).Error("invalid server-attestation-type passed, see --help")
 		return err
 	}
 
-	validators, err := proxy.CreateAttestationValidatorsFromFile(log, clientMeasurements)
+	validators, err := proxy.CreateAttestationValidatorsFromFile(log, config.ClientMeasurements)
 	if err != nil {
 		log.Error("could not create attestation validators from file", "err", err)
 		return err
@@ -152,7 +168,8 @@ func runServer(cCtx *cli.Context) error {
 		return err
 	}
 
-	proxyHandler := proxy.NewProxy(log, targetAddr, validators)
+	rproxy := proxy.NewSingleHostReverseProxyFromUrl(log, validators, config.TargetAddr)
+	proxyHandler := proxy.NewProxy(log, rproxy.ServeHTTP, validators)
 
 	confTLS, err := atls.CreateAttestationServerTLSConfig(issuer, validators)
 	if err != nil {
@@ -160,7 +177,7 @@ func runServer(cCtx *cli.Context) error {
 	}
 
 	if useRegularTLS {
-		cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+		cert, err := tls.LoadX509KeyPair(config.TLSCertificatePath, config.TLSPrivateKeyPath)
 		if err != nil {
 			log.Error("could not load tls key pair", "err", err)
 			return err
@@ -185,7 +202,7 @@ func runServer(cCtx *cli.Context) error {
 
 	// Create an HTTP server
 	server := &http.Server{
-		Addr:      listenAddr,
+		Addr:      config.ListenAddr,
 		Handler:   proxyHandler,
 		TLSConfig: confTLS,
 	}
@@ -212,12 +229,11 @@ func runServer(cCtx *cli.Context) error {
 	}()
 
 	// Start the health check server
-	listenAddrHealthCheck := cCtx.String("listen-addr-healthcheck")
-	if listenAddrHealthCheck != "" {
-		go startHealthCheckServer(listenAddrHealthCheck)
+	if config.ListenAddrHealthcheck != "" {
+		go startHealthCheckServer(config.ListenAddrHealthcheck)
 	}
 
-	log.With("listenAddr", listenAddr).Info("Starting proxy server")
+	log.With("listenAddr", config.ListenAddr).Info("Starting proxy server")
 	err = server.Serve(tlsListener)
 	if err != nil {
 		log.Error("stopping proxy", "server error", err)

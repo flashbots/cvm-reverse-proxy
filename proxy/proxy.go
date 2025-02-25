@@ -1,7 +1,6 @@
 package proxy
 
 import (
-	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/asn1"
@@ -18,27 +17,21 @@ import (
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
 )
 
+const (
+	AttestationTypeHeader        string = "X-Flashbots-Attestation-Type"
+	MeasurementHeader            string = "X-Flashbots-Measurement"
+	ProxyTargetURLHeader         string = "X-Flashbots-Proxy-Target-URL"
+	ProxyTargetMeasurementHeader string = "X-Flashbots-Proxy-Target-Measurement"
+)
+
 type Proxy struct {
-	target *url.URL
-	proxy  *httputil.ReverseProxy
-	log    *slog.Logger
+	proxyHandler http.HandlerFunc
+	log          *slog.Logger
 
 	validatorOIDs []asn1.ObjectIdentifier
 }
 
-const (
-	AttestationTypeHeader string = "X-Flashbots-Attestation-Type"
-	MeasurementHeader     string = "X-Flashbots-Measurement"
-)
-
-func NewProxy(log *slog.Logger, targetURL string, validators []atls.Validator) *Proxy {
-	target, err := url.Parse(targetURL)
-	if err != nil {
-		panic(err)
-	}
-
-	httpproxy := httputil.NewSingleHostReverseProxy(target)
-
+func NewProxy(log *slog.Logger, proxyHandler http.HandlerFunc, validators []atls.Validator) *Proxy {
 	var validatorOIDs []asn1.ObjectIdentifier
 	for _, validator := range validators {
 		validatorOIDs = append(validatorOIDs, validator.OID())
@@ -46,39 +39,14 @@ func NewProxy(log *slog.Logger, targetURL string, validators []atls.Validator) *
 
 	proxy := &Proxy{
 		log:           log,
-		target:        target,
-		proxy:         httpproxy,
+		proxyHandler:  proxyHandler,
 		validatorOIDs: validatorOIDs,
-	}
-
-	// Forwards validated measurement to the *client*
-	httpproxy.ModifyResponse = func(res *http.Response) error {
-		if res.Header.Get(MeasurementHeader) != "" {
-			return errors.New("unexpected measurement header passed")
-		}
-		if res.Header.Get(AttestationTypeHeader) != "" {
-			return errors.New("unexpected attestation type header passed")
-		}
-
-		if res.TLS != nil {
-			_, err := proxy.copyMeasurementsToHeader(res.TLS, &res.Header)
-			return err
-		}
-
-		return nil
 	}
 
 	return proxy
 }
 
-func (p *Proxy) WithTransport(transport *http.Transport) *Proxy {
-	p.proxy.Transport = transport
-	return p
-}
-
 func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	r.Host = p.target.Host
-
 	p.log.Debug("[proxy-request] request received")
 
 	// Note: the reverse proxy adds X-Forwarded-For header!
@@ -95,7 +63,7 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		p.log.Debug("[proxy-request] adding measurement headers")
 
 		// Forwards validated measurement to the *proxied-to service*
-		errStatus, err := p.copyMeasurementsToHeader(r.TLS, &r.Header)
+		errStatus, err := copyMeasurementsToHeader(p.log, r.TLS.PeerCertificates, &r.Header, p.validatorOIDs)
 		if err != nil {
 			http.Error(w, err.Error(), errStatus)
 			return
@@ -105,10 +73,96 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	p.log.Debug("[proxy-request] forwarding to target")
 	timeStarted := time.Now()
 
-	p.proxy.ServeHTTP(w, r)
+	p.proxyHandler(w, r)
 
 	duration := time.Since(timeStarted).String()
 	p.log.With("duration", duration).Info("[proxy-request] proxying complete")
+}
+
+type MultiServiceMiddleware struct {
+	Handlers map[ServiceTag]http.HandlerFunc
+}
+
+func NewMultiServiceMiddleware(handlers map[ServiceTag]http.HandlerFunc) *MultiServiceMiddleware {
+	return &MultiServiceMiddleware{Handlers: handlers}
+}
+
+func (mp *MultiServiceMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	measurement := r.Header.Get(ProxyTargetMeasurementHeader)
+	if measurement == "" {
+		http.Error(w, "proxy target measurement header not set", http.StatusBadRequest)
+		return
+	}
+	r.Header.Del(ProxyTargetMeasurementHeader)
+
+	// Assume measurement is the service tag (could also be an id, or a raw measurement)
+	handler, found := mp.Handlers[ServiceTag(measurement)]
+	if !found {
+		http.Error(w, "unknown proxy target measurement", http.StatusBadRequest)
+		return
+	}
+
+	handler(w, r)
+}
+
+func NewSingleHostReverseProxyFromUrl(log *slog.Logger, validators []atls.Validator, targetURL string) *httputil.ReverseProxy {
+	target, err := url.Parse(targetURL)
+	if err != nil {
+		panic(err)
+	}
+
+	rproxy := httputil.NewSingleHostReverseProxy(target)
+
+	defaultDirector := rproxy.Director
+	rproxy.Director = func(r *http.Request) {
+		defaultDirector(r)
+		r.Host = target.Host
+	}
+
+	var validatorOIDs []asn1.ObjectIdentifier
+	for _, validator := range validators {
+		validatorOIDs = append(validatorOIDs, validator.OID())
+	}
+
+	rproxy.ModifyResponse = func(r *http.Response) error { return forwardMeasurementsToClient(log, r, validatorOIDs) }
+
+	return rproxy
+}
+
+func NewDynamicHostReverseProxyFromHeader(log *slog.Logger, validators []atls.Validator, rproxyFactory func(*url.URL) *httputil.ReverseProxy) http.HandlerFunc {
+	var validatorOIDs []asn1.ObjectIdentifier
+	for _, validator := range validators {
+		validatorOIDs = append(validatorOIDs, validator.OID())
+	}
+
+	modifyResponse := func(r *http.Response) error { return forwardMeasurementsToClient(log, r, validatorOIDs) }
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		targetHeader := r.Header.Get(ProxyTargetURLHeader)
+		if targetHeader == "" {
+			http.Error(w, "proxy target header not set", http.StatusBadRequest)
+			return
+		}
+		r.Header.Del(ProxyTargetURLHeader)
+
+		targetURL, err := url.Parse(targetHeader)
+		if err != nil {
+			// TODO: log err
+			http.Error(w, "proxy target header not a valid url", http.StatusBadRequest)
+			return
+		}
+
+		rproxy := rproxyFactory(targetURL)
+
+		defaultDirector := rproxy.Director
+		rproxy.Director = func(r *http.Request) {
+			defaultDirector(r)
+			r.Host = targetURL.Host
+		}
+
+		rproxy.ModifyResponse = modifyResponse
+		rproxy.ServeHTTP(w, r)
+	}
 }
 
 func GetMeasurementsFromTLS(certs []*x509.Certificate, validatorOIDs []asn1.ObjectIdentifier) (atlsVariant variant.Variant, measurements map[uint32][]byte, err error) {
@@ -144,13 +198,12 @@ func GetMeasurementsFromTLS(certs []*x509.Certificate, validatorOIDs []asn1.Obje
 	return atlsVariant, measurements, nil
 }
 
-func (p *Proxy) copyMeasurementsToHeader(conn *tls.ConnectionState, header *http.Header) (int, error) {
-	certs := conn.PeerCertificates
-	atlsVariant, extractedMeasurements, err := GetMeasurementsFromTLS(certs, p.validatorOIDs)
+func copyMeasurementsToHeader(log *slog.Logger, certs []*x509.Certificate, header *http.Header, validatorOIDs []asn1.ObjectIdentifier) (int, error) {
+	atlsVariant, extractedMeasurements, err := GetMeasurementsFromTLS(certs, validatorOIDs)
 	if err != nil {
 		return http.StatusTeapot, err
 	} else if extractedMeasurements == nil {
-		p.log.Debug("[proxy-request: add-headers] no measurements, not adding headers")
+		log.Debug("[proxy-request: add-headers] no measurements, not adding headers")
 		return 0, nil
 	}
 
@@ -167,6 +220,23 @@ func (p *Proxy) copyMeasurementsToHeader(conn *tls.ConnectionState, header *http
 	header.Set(AttestationTypeHeader, atlsVariant.String())
 	header.Set(MeasurementHeader, string(marshaledPcrs))
 
-	p.log.With(AttestationTypeHeader, atlsVariant.String()).With(MeasurementHeader, string(marshaledPcrs)).Debug("[proxy-request: add-headers] measurement headers added")
+	log.With(AttestationTypeHeader, atlsVariant.String()).With(MeasurementHeader, string(marshaledPcrs)).Debug("[proxy-request: add-headers] measurement headers added")
 	return 0, nil
+}
+
+// Forwards validated measurement to the *client*
+func forwardMeasurementsToClient(log *slog.Logger, res *http.Response, validatorOIDs []asn1.ObjectIdentifier) error {
+	if res.Header.Get(MeasurementHeader) != "" {
+		return errors.New("unexpected measurement header passed")
+	}
+	if res.Header.Get(AttestationTypeHeader) != "" {
+		return errors.New("unexpected attestation type header passed")
+	}
+
+	if res.TLS != nil {
+		_, err := copyMeasurementsToHeader(log, res.TLS.PeerCertificates, &res.Header, validatorOIDs)
+		return err
+	}
+
+	return nil
 }
