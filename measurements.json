@@ -1,46 +1,19 @@
 [
     {
-        "measurement_id": "azure-tdx-example-01",
-        "attestation_type": "azure-tdx",
-        "measurements": {
-            "4": {
-                "expected": "ea92ff762767eae6316794f1641c485d4846bc2b9df2eab6ba7f630ce6f4d66f"
-            },
-            "9": {
-                "expected": "c9f429296634072d1063a03fb287bed0b2d177b0a504755ad9194cffd90b2489"
-            },
-            "11": {
-                "expected": "efa43e0beff151b0f251c4abf48152382b1452b4414dbd737b4127de05ca31f7"
-            }
-        }
-    },
-    {
-        "measurement_id": "cvm-image-azure-tdx.rootfs-20241107200854.wic.vhd",
-        "attestation_type": "azure-tdx",
-        "measurements": {
-            "4": {
-                "expected": "1b8cd655f5ebdf50bedabfb5db6b896a0a7c56de54f318103a2de1e7cea57b6b"
-            },
-            "9": {
-                "expected": "992465f922102234c196f596fdaba86ea16eaa4c264dc425ec26bc2d1c364472"
-            }
-        }
-    },
-    {
-        "measurement_id": "dcap-tdx-example-02",
+        "measurement_id": "dcap-tdx-dummy",
         "attestation_type": "dcap-tdx",
         "measurements": {
             "0": {
-                "expected": "5d56080eb9ef8ce0bbaf6bdcdadeeb06e7c5b0a4d1ec16be868a85a953babe0c5e54d01c8e050a54fe1ca078372530d2"
+                "expected": "47a1cc074b914df8596bad0ed13d50d561ad1effc7f7cc530ab86da7ea49ffc03e57e7da829f8cba9c629c3970505323"
             },
             "1": {
-                "expected": "4216e925f796f4e282cfa6e72d4c77a80560987afa29155a61fdc33adb80eab0d4112abd52387e5e25a60deefb8a5287"
+                "expected": "da6e07866635cb34a9ffcdc26ec6622f289e625c42c39b320f29cdf1dc84390b4f89dd0b073be52ac38ca7b0a0f375bb"
             },
             "2": {
-                "expected": "4274fefb79092c164000b571b64ecb432fa2357adb421fd1c77a867168d7d7f7fe82796d1eba092c7bab35cf43f5ec55"
+                "expected": "a7157e7c5f932e9babac9209d4527ec9ed837b8e335a931517677fa746db51ee56062e3324e266e3f39ec26a516f4f71"
             },
             "3": {
-                "expected": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+                "expected": "e63560e50830e22fbc9b06cdce8afe784bf111e4251256cf104050f1347cd4ad9f30da408475066575145da0b098a124"
             },
             "4": {
                 "expected": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"

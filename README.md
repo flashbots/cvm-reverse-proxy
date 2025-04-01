@@ -37,16 +37,18 @@ Client
 
 ### Command line arguments
 
-- `--listen-addr`: address to listen on (default: "127.0.0.1:8080")
-- `--target-addr`: address to proxy requests to (default: "https://localhost:80")
-- `--server-attestation-type`: type of attestation to present (none, auto, dcap-tdx, azure-tdx) (default: "auto")
-- `--tls-certificate-path`: Path to certificate (PEM file) to present. Only valid for --server-attestation-type=none and with `--tls-private-key-path`.
-- `--tls-private-key-path`: Path to private key file for the certificate (PEM). Only valid with --tls-certificate-path.
-- `--client-attestation-type`: type of attestation to expect and verify (none, dcap-tdx, azure-tdx) (default: "none")
-- `--client-measurements`: optional path to JSON measurements enforced on the client
-- `--log-json`: log in JSON format (default: false)
-- `--log-debug`: log debug messages (default: false)
-- `--log-dcap-quote`: log dcap quotes to folder quotes/ (default: false)
+- `--listen-addr value`: address to listen on (default: "127.0.0.1:8080") [$LISTEN_ADDR]
+- `--listen-addr-healthcheck value`: address to listen on for health checks [$LISTEN_ADDR_HEALTHCHECK]
+- `--target-addr value`: address to proxy requests to (default: "https://localhost:80") [$TARGET_ADDR]
+- `--server-attestation-type value`: type of attestation to present (none, auto, azure-tdx, dcap-tdx). Set to 'dummy' to connect to a remote tdx quote provider. Defaults to automatic detection. (default: "auto") [$SERVER_ATTESTATION_TYPE]
+- `--tls-certificate-path value`: Path to TLS certificate file (PEM). Only valid for --server-attestation-type=none and with --tls-private-key-path [$TLS_CERTIFICATE_PATH]
+- `--tls-private-key-path value`: Path to private key file for the certificate. Only valid with --tls-certificate-path [$TLS_PRIVATE_KEY_PATH]
+- `--client-attestation-type value`: Deprecated and not used. Client attestation types are set via the measurements file.
+- `--client-measurements value`: optional path to JSON measurements enforced on the client [$CLIENT_MEASUREMENTS]
+- `--log-json`: log in JSON format (default: false) [$LOG_JSON]
+- `--log-debug`: log debug messages (default: true) [$LOG_DEBUG]
+- `--log-dcap-quote`: log dcap quotes to folder quotes/ (default: false) [$LOG_DCAP_QUOTE]
+- `--dev-dummy-dcap value`: URL of the remote dummy DCAP service. Only with --server-attestation-type dummy. [$DEV_DUMMY_DCAP]
 - `--help, -h`: show help
 
 
@@ -83,16 +85,17 @@ This repository contains a [dummy http server](./cmd/dummy-server/main.go) that 
 
 ### Command line arguments
 
-- `--listen-addr`: address to listen on (default: "127.0.0.1:8080")
-- `--target-addr`: address to proxy requests to (default: "https://localhost:80")
-- `--server-attestation-type`: type of attestation to expect and verify (none, azure-tdx) (default: "azure-tdx")
-- `--server-measurements`: optional path to JSON measurements enforced on the server
-- `--verify-tls`: verify server's TLS certificate instead of server's attestation. Only valid for server-attestation-type=none.
-- `--tls-ca-certificate`: additional CA certificate to verify against (PEM) [default=no additional TLS certs]. Only valid with --verify-tls.
-- `--client-attestation-type`: type of attestation to present (none, auto, dcap-tdx, azure-tdx) (default: "none")
+- `--listen-addr value`: address to listen on (default: "127.0.0.1:8080")
+- `--target-addr value`: address to proxy requests to (default: "https://localhost:80")
+- `--server-attestation-type value`: Deprecated and not used. Server attestation types are set via the measurements file.
+- `--server-measurements value`: optional path to JSON measurements enforced on the server
+- `--verify-tls`: verify server's TLS certificate instead of server's attestation. Only valid when not specifying measurements. (default: false)
+- `--tls-ca-certificate value`: additional CA certificate to verify against (PEM) [default=no additional TLS certs]. Only valid with --verify-tls.
+- `--client-attestation-type value`: type of attestation to present (none, auto, azure-tdx, dcap-tdx). Set to 'dummy' to use remote quote provider. (default: "none")
 - `--log-json`: log in JSON format (default: false)
-- `--log-debug`: log debug messages (default: false)
-- `--log-dcap-quote`: log dcap quotes to folder quotes/ (default: false)
+- `--log-debug`: log debug messages (default: true)
+- `--log-dcap-quote`: log dcap quotes to folder quotes/ (default: false) [$LOG_DCAP_QUOTE]
+- `--dev-dummy-dcap value`: URL of the remote dummy DCAP service. Only with --client-attestation-type dummy. [$DEV_DUMMY_DCAP]
 - `--help, -h`: show help
 
 
@@ -108,7 +111,7 @@ make build-proxy-client
 ./build/proxy-client --listen-addr=<listen-addr> --target-addr=<target-addr> [--server-measurements=<server-measurements-file>] [--server-attestation-type=<server-attestation-type>] [--client-attestation-type=<client-attestation-type>]
 ```
 
-By default the client will expect the server to present an Azure TDX attestation, and you can modify that via the `--server-attestation-type` and  `--server-measurements` flags.
+By default the client will expect the server to present an Azure TDX attestation, and you can modify that via the `--server-attestation-type` and `--server-measurements` flags.
 The server can also be a regular TLS server, which you can configure with the `--verify-tls` flag, which is only valid in combination with `--server-attestation-type=none`. Non-standard CA for the server can also be configured with `--tls-ca-certificate`.
 
 By default the client will not present client attestations, you can change that via `--client-attestation-type` flag. If this is set to "auto", it will try to determine the attestation issuer automatically. Valid for both aTLS and TLS server proxies.
@@ -133,6 +136,10 @@ cd go-tdx-guest
 go build tools/check/check.go
 ./check -verbosity 2 -get_collateral true -in quotes/quote_received_20241010_121042.dat
 ```
+
+### Remote quote issuer
+
+Both the server and the client can be configured to use a remote quote issuer such as [dummy-tdx-dcap](https://github.com/Ruteri/dummy-tdx-dcap), which will provide DCAP TDX attestations. See flags for configuring it.
 
 ---
 
