@@ -149,9 +149,9 @@ func runServer(cCtx *cli.Context) error {
 	var issuer atls.Issuer
 
 	if serverAttestationTypeFlag == "dummy" && devDummyDcapURL == "" {
-		return errors.New("Server attestation type set to dummy but url not provided")
+		return errors.New("server attestation type set to dummy but url not provided")
 	} else if serverAttestationTypeFlag != "dummy" && devDummyDcapURL != "" {
-		return errors.New("Server attestation type not set to dummy but url provided")
+		return errors.New("server attestation type not set to dummy but url provided")
 	} else if serverAttestationTypeFlag == "dummy" && devDummyDcapURL != "" {
 		issuer = tdx.NewRemoteIssuer(tdx.DefaultRemoteQuoteProviderConfig(devDummyDcapURL), log)
 	} else {

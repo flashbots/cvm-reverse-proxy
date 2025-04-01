@@ -114,9 +114,9 @@ func runClient(cCtx *cli.Context) error {
 
 	var issuer atls.Issuer
 	if clientAttestationTypeFlag == "dummy" && devDummyDcapURL == "" {
-		return errors.New("Dummy client attestation type but remote not specified.")
+		return errors.New("dummy client attestation type but remote not specified")
 	} else if clientAttestationTypeFlag != "dummy" && devDummyDcapURL != "" {
-		return errors.New("Remote attestation provider specified, but client attestation type is not dummy.")
+		return errors.New("remote attestation provider specified, but client attestation type is not dummy")
 	} else if clientAttestationTypeFlag == "dummy" && devDummyDcapURL != "" {
 		issuer = tdx.NewRemoteIssuer(tdx.DefaultRemoteQuoteProviderConfig(devDummyDcapURL), log)
 	} else {
