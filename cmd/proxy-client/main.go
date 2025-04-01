@@ -45,7 +45,7 @@ var flags []cli.Flag = []cli.Flag{
 	&cli.StringFlag{
 		Name:  "client-attestation-type",
 		Value: string(proxy.AttestationNone),
-		Usage: "type of attestation to present (" + proxy.AvailableAttestationTypes + ").",
+		Usage: "type of attestation to present (" + proxy.AvailableAttestationTypes + "). Set to 'dummy' to use remote quote provider.",
 	},
 	&cli.BoolFlag{
 		Name:  "log-json",
@@ -62,6 +62,11 @@ var flags []cli.Flag = []cli.Flag{
 		EnvVars: []string{"LOG_DCAP_QUOTE"},
 		Value:   false,
 		Usage:   "log dcap quotes to folder quotes/",
+	},
+	&cli.StringFlag{
+		Name:    "dev-dummy-dcap",
+		EnvVars: []string{"DEV_DUMMY_DCAP"},
+		Usage:   "URL of the remote dummy DCAP service. Only with --client-attestation-type dummy.",
 	},
 }
 
@@ -86,6 +91,9 @@ func runClient(cCtx *cli.Context) error {
 	logDebug := cCtx.Bool("log-debug")
 	tdx.SetLogDcapQuote(cCtx.Bool("log-dcap-quote"))
 
+	clientAttestationTypeFlag := cCtx.String("client-attestation-type")
+	devDummyDcapURL := cCtx.String("dev-dummy-dcap")
+
 	verifyTLS := cCtx.Bool("verify-tls")
 
 	log := common.SetupLogger(&common.LoggingOpts{
@@ -104,16 +112,25 @@ func runClient(cCtx *cli.Context) error {
 		return errors.New("invalid combination of --verify-tls and --server-measurements passed (cannot add server measurements and verify default TLS at the same time)")
 	}
 
-	clientAttestationType, err := proxy.ParseAttestationType(cCtx.String("client-attestation-type"))
-	if err != nil {
-		log.With("attestation-type", cCtx.String("client-attestation-type")).Error("invalid client-attestation-type passed, see --help")
-		return err
-	}
+	var issuer atls.Issuer
+	if clientAttestationTypeFlag == "dummy" && devDummyDcapURL == "" {
+		return errors.New("Dummy client attestation type but remote not specified.")
+	} else if clientAttestationTypeFlag != "dummy" && devDummyDcapURL != "" {
+		return errors.New("Remote attestation provider specified, but client attestation type is not dummy.")
+	} else if clientAttestationTypeFlag == "dummy" && devDummyDcapURL != "" {
+		issuer = tdx.NewRemoteIssuer(tdx.DefaultRemoteQuoteProviderConfig(devDummyDcapURL), log)
+	} else {
+		clientAttestationType, err := proxy.ParseAttestationType(clientAttestationTypeFlag)
+		if err != nil {
+			log.With("attestation-type", cCtx.String("client-attestation-type")).Error("invalid client-attestation-type passed, see --help")
+			return err
+		}
 
-	issuer, err := proxy.CreateAttestationIssuer(log, clientAttestationType)
-	if err != nil {
-		log.Error("could not create attestation issuer", "err", err)
-		return err
+		issuer, err = proxy.CreateAttestationIssuer(log, clientAttestationType)
+		if err != nil {
+			log.Error("could not create attestation issuer", "err", err)
+			return err
+		}
 	}
 
 	validators, err := proxy.CreateAttestationValidatorsFromFile(log, serverMeasurements)
