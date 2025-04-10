@@ -41,7 +41,7 @@ var flags []cli.Flag = []cli.Flag{
 		Name:    "server-attestation-type",
 		EnvVars: []string{"SERVER_ATTESTATION_TYPE"},
 		Value:   string(proxy.AttestationAuto),
-		Usage:   "type of attestation to present (" + proxy.AvailableAttestationTypes + "). Set to 'dummy' to connect to a remote tdx quote provider. Defaults to automatic detection.",
+		Usage:   "type of attestation to present (" + proxy.AvailableAttestationTypes + "). Set to " + string(proxy.AttestationDummy) + " to connect to a remote tdx quote provider. Defaults to automatic detection.",
 	},
 	&cli.StringFlag{
 		Name:    "tls-certificate-path",
@@ -148,11 +148,14 @@ func runServer(cCtx *cli.Context) error {
 
 	var issuer atls.Issuer
 
-	if serverAttestationTypeFlag == "dummy" && devDummyDcapURL == "" {
+	isDummyAttestationType := serverAttestationTypeFlag == string(proxy.AttestationDummy)
+	hasDummyDcapURL := devDummyDcapURL != ""
+
+	if isDummyAttestationType && !hasDummyDcapURL {
 		return errors.New("server attestation type set to dummy but url not provided")
-	} else if serverAttestationTypeFlag != "dummy" && devDummyDcapURL != "" {
+	} else if !isDummyAttestationType && hasDummyDcapURL {
 		return errors.New("server attestation type not set to dummy but url provided")
-	} else if serverAttestationTypeFlag == "dummy" && devDummyDcapURL != "" {
+	} else if isDummyAttestationType && hasDummyDcapURL {
 		issuer = tdx.NewRemoteIssuer(tdx.DefaultRemoteQuoteProviderConfig(devDummyDcapURL), log)
 	} else {
 		serverAttestationType, err := proxy.ParseAttestationType(serverAttestationTypeFlag)

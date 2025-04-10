@@ -45,7 +45,7 @@ var flags []cli.Flag = []cli.Flag{
 	&cli.StringFlag{
 		Name:  "client-attestation-type",
 		Value: string(proxy.AttestationNone),
-		Usage: "type of attestation to present (" + proxy.AvailableAttestationTypes + "). Set to 'dummy' to use remote quote provider.",
+		Usage: "type of attestation to present (" + proxy.AvailableAttestationTypes + "). Set to " + string(proxy.AttestationDummy) + " to use remote quote provider.",
 	},
 	&cli.BoolFlag{
 		Name:  "log-json",
@@ -113,11 +113,15 @@ func runClient(cCtx *cli.Context) error {
 	}
 
 	var issuer atls.Issuer
-	if clientAttestationTypeFlag == "dummy" && devDummyDcapURL == "" {
-		return errors.New("dummy client attestation type but remote not specified")
-	} else if clientAttestationTypeFlag != "dummy" && devDummyDcapURL != "" {
+
+	isDummyAttestationType := clientAttestationTypeFlag == string(proxy.AttestationDummy)
+	hasDummyDcapURL := devDummyDcapURL != ""
+
+	if isDummyAttestationType && !hasDummyDcapURL {
+		return errors.New("dummy client attestation type is dummy but remote not specified")
+	} else if !isDummyAttestationType && hasDummyDcapURL {
 		return errors.New("remote attestation provider specified, but client attestation type is not dummy")
-	} else if clientAttestationTypeFlag == "dummy" && devDummyDcapURL != "" {
+	} else if isDummyAttestationType && hasDummyDcapURL {
 		issuer = tdx.NewRemoteIssuer(tdx.DefaultRemoteQuoteProviderConfig(devDummyDcapURL), log)
 	} else {
 		clientAttestationType, err := proxy.ParseAttestationType(clientAttestationTypeFlag)
