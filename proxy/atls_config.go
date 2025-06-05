@@ -25,6 +25,7 @@ type AttestationType string
 const (
 	AttestationNone     AttestationType = "none"
 	AttestationAuto     AttestationType = "auto"
+	AttestationDummy    AttestationType = "dummy" // Note: not handled in parsers to avoid using it mistakenly
 	AttestationAzureTDX AttestationType = "azure-tdx"
 	AttestationDCAPTDX  AttestationType = "dcap-tdx"
 )
@@ -67,9 +68,9 @@ func DetectAttestationType() AttestationType {
 
 func CreateAttestationIssuer(log *slog.Logger, attestationType AttestationType) (atls.Issuer, error) {
 	if attestationType == AttestationAuto {
-                attestationType = DetectAttestationType()
+		attestationType = DetectAttestationType()
 		log.With("detected_attestation", attestationType).Info("Auto-detected attestation type")
-        }
+	}
 
 	switch attestationType {
 	case AttestationNone:

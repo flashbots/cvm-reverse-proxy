@@ -22,17 +22,17 @@ import (
 var logDcapQuote bool
 
 type tdxAttestationDocument struct {
-        // RawQuote is the raw TDX quote.
-        RawQuote []byte
-        // UserData is the user data that was passed to the enclave and was included in the quote.
-        UserData []byte
+	// RawQuote is the raw TDX quote.
+	RawQuote []byte
+	// UserData is the user data that was passed to the enclave and was included in the quote.
+	UserData []byte
 }
 
 // Issuer is the TDX attestation issuer.
 type Issuer struct {
 	variant.QEMUTDX
 
-	log  attestation.Logger
+	log attestation.Logger
 }
 
 // NewIssuer initializes a new TDX Issuer.
@@ -41,7 +41,7 @@ func NewIssuer(log attestation.Logger) *Issuer {
 		log = attestation.NOPLogger{}
 	}
 	return &Issuer{
-		log:  log,
+		log: log,
 	}
 }
 
@@ -66,8 +66,8 @@ func (i *Issuer) Issue(_ context.Context, userData []byte, nonce []byte) (attDoc
 
 	qp, err := client.GetQuoteProvider()
 	if err != nil {
-                return nil, fmt.Errorf("get quote provider: %w", err)
-        }
+		return nil, fmt.Errorf("get quote provider: %w", err)
+	}
 
 	var checkedUserData [64]byte
 	copy(checkedUserData[:], attestation.MakeExtraData(userData, nonce))

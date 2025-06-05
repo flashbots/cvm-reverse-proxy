@@ -41,7 +41,7 @@ var flags []cli.Flag = []cli.Flag{
 		Name:    "server-attestation-type",
 		EnvVars: []string{"SERVER_ATTESTATION_TYPE"},
 		Value:   string(proxy.AttestationAuto),
-		Usage:   "type of attestation to present (" + proxy.AvailableAttestationTypes + "). Defaults to automatic detection.",
+		Usage:   "type of attestation to present (" + proxy.AvailableAttestationTypes + "). Set to " + string(proxy.AttestationDummy) + " to connect to a remote tdx quote provider. Defaults to automatic detection.",
 	},
 	&cli.StringFlag{
 		Name:    "tls-certificate-path",
@@ -54,8 +54,8 @@ var flags []cli.Flag = []cli.Flag{
 		Usage:   "Path to private key file for the certificate. Only valid with --tls-certificate-path",
 	},
 	&cli.StringFlag{
-		Name:    "client-attestation-type",
-		Usage:   "Deprecated and not used. Client attestation types are set via the measurements file.",
+		Name:  "client-attestation-type",
+		Usage: "Deprecated and not used. Client attestation types are set via the measurements file.",
 	},
 	&cli.StringFlag{
 		Name:    "client-measurements",
@@ -79,6 +79,11 @@ var flags []cli.Flag = []cli.Flag{
 		EnvVars: []string{"LOG_DCAP_QUOTE"},
 		Value:   false,
 		Usage:   "log dcap quotes to folder quotes/",
+	},
+	&cli.StringFlag{
+		Name:    "dev-dummy-dcap",
+		EnvVars: []string{"DEV_DUMMY_DCAP"},
+		Usage:   "URL of the remote dummy DCAP service. Only with --server-attestation-type dummy.",
 	},
 }
 
@@ -110,9 +115,10 @@ func runServer(cCtx *cli.Context) error {
 	tdx.SetLogDcapQuote(cCtx.Bool("log-dcap-quote"))
 
 	serverAttestationTypeFlag := cCtx.String("server-attestation-type")
+	devDummyDcapURL := cCtx.String("dev-dummy-dcap")
 
-	certFile := cCtx.String("tls-certificate")
-	keyFile := cCtx.String("tls-private-key")
+	certFile := cCtx.String("tls-certificate-path")
+	keyFile := cCtx.String("tls-private-key-path")
 
 	log = common.SetupLogger(&common.LoggingOpts{
 		Debug:   logDebug,
@@ -134,22 +140,35 @@ func runServer(cCtx *cli.Context) error {
 		return errors.New("not all of --tls-certificate-path and --tls-private-key-path specified")
 	}
 
-	serverAttestationType, err := proxy.ParseAttestationType(serverAttestationTypeFlag)
-	if err != nil {
-		log.With("attestation-type", cCtx.String("server-attestation-type")).Error("invalid server-attestation-type passed, see --help")
-		return err
-	}
-
 	validators, err := proxy.CreateAttestationValidatorsFromFile(log, clientMeasurements)
 	if err != nil {
 		log.Error("could not create attestation validators from file", "err", err)
 		return err
 	}
 
-	issuer, err := proxy.CreateAttestationIssuer(log, serverAttestationType)
-	if err != nil {
-		log.Error("could not create attestation issuer", "err", err)
-		return err
+	var issuer atls.Issuer
+
+	isDummyAttestationType := serverAttestationTypeFlag == string(proxy.AttestationDummy)
+	hasDummyDcapURL := devDummyDcapURL != ""
+
+	if isDummyAttestationType && !hasDummyDcapURL {
+		return errors.New("server attestation type set to dummy but url not provided")
+	} else if !isDummyAttestationType && hasDummyDcapURL {
+		return errors.New("server attestation type not set to dummy but url provided")
+	} else if isDummyAttestationType && hasDummyDcapURL {
+		issuer = tdx.NewRemoteIssuer(tdx.DefaultRemoteQuoteProviderConfig(devDummyDcapURL), log)
+	} else {
+		serverAttestationType, err := proxy.ParseAttestationType(serverAttestationTypeFlag)
+		if err != nil {
+			log.With("attestation-type", cCtx.String("server-attestation-type")).Error("invalid server-attestation-type passed, see --help")
+			return err
+		}
+
+		issuer, err = proxy.CreateAttestationIssuer(log, serverAttestationType)
+		if err != nil {
+			log.Error("could not create attestation issuer", "err", err)
+			return err
+		}
 	}
 
 	proxyHandler := proxy.NewProxy(log, targetAddr, validators)
@@ -218,6 +237,7 @@ func runServer(cCtx *cli.Context) error {
 	}
 
 	log.With("listenAddr", listenAddr).Info("Starting proxy server")
+
 	err = server.Serve(tlsListener)
 	if err != nil {
 		log.Error("stopping proxy", "server error", err)
