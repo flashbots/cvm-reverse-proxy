@@ -101,12 +101,28 @@ type Variant interface {
 }
 
 func FromOID(oid asn1.ObjectIdentifier) (Variant, error) {
-	for _, v := range []Variant{Dummy{},AWSSEVSNP{}, AWSNitroTPM{}, GCPSEVES{}, GCPSEVSNP{}, AzureSEVSNP{}, AzureTrustedLaunch{}, AzureTDX{}, QEMUVTPM{}, QEMUTDX{}} {
-		if v.OID().Equal(oid) {
-			return v, nil
-		}
+	switch oid.String() {
+	case Dummy{}.OID().String():
+		return Dummy{}, nil
+	case AWSSEVSNP{}.OID().String():
+		return AWSSEVSNP{}, nil
+	case AWSNitroTPM{}.OID().String():
+		return AWSNitroTPM{}, nil
+	case GCPSEVES{}.OID().String():
+		return GCPSEVES{}, nil
+	case GCPSEVSNP{}.OID().String():
+		return GCPSEVSNP{}, nil
+	case AzureSEVSNP{}.OID().String():
+		return AzureSEVSNP{}, nil
+	case AzureTrustedLaunch{}.OID().String():
+		return AzureTrustedLaunch{}, nil
+	case AzureTDX{}.OID().String():
+		return AzureTDX{}, nil
+	case QEMUVTPM{}.OID().String():
+		return QEMUVTPM{}, nil
+	case QEMUTDX{}.OID().String():
+		return QEMUTDX{}, nil
 	}
-
 	return nil, fmt.Errorf("unknown OID: %q", oid)
 }
 

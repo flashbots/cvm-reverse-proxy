@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package components;
 
-option go_package = "github.com/edgelesssys/constellation/v2/internal/versions/components";
+option go_package = "cvm-reverse-proxy/internal/versions/components";
 
 // Component is a Kubernetes component to install.
 message Component {
