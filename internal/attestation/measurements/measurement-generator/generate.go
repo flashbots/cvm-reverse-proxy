@@ -30,7 +30,6 @@ import (
 	"github.com/flashbots/cvm-reverse-proxy/internal/constants"
 	"github.com/flashbots/cvm-reverse-proxy/internal/sigstore"
 	"github.com/flashbots/cvm-reverse-proxy/internal/sigstore/keyselect"
-
 	"golang.org/x/tools/go/ast/astutil"
 )
 

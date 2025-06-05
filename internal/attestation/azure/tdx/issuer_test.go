@@ -8,7 +8,6 @@ package tdx
 
 import (
 	"bytes"
-	"context"
 	"encoding/binary"
 	"encoding/json"
 	"io"
@@ -16,7 +15,6 @@ import (
 	"testing"
 
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/azure/tdx/testdata"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -136,7 +134,7 @@ func TestIMDSGetQuote(t *testing.T) {
 				client: tc.client,
 			}
 
-			_, err := quoteGetter.getQuote(context.Background(), []byte("test"))
+			_, err := quoteGetter.getQuote(t.Context(), []byte("test"))
 			if tc.wantErr {
 				assert.Error(err)
 			} else {

@@ -19,11 +19,10 @@ import (
 	elbTypes "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2/types"
 	rgtTypes "github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi/types"
 
+	"github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi"
 	"github.com/flashbots/cvm-reverse-proxy/internal/cloud"
 	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/metadata"
 	"github.com/flashbots/cvm-reverse-proxy/internal/role"
-
-	"github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -186,7 +185,7 @@ func TestSelf(t *testing.T) {
 				ec2:  tc.ec2API,
 			}
 
-			self, err := m.Self(context.Background())
+			self, err := m.Self(t.Context())
 			if tc.wantErr {
 				assert.Error(err)
 				return
@@ -432,7 +431,7 @@ func TestList(t *testing.T) {
 				ec2:  tc.ec2,
 			}
 
-			list, err := m.List(context.Background())
+			list, err := m.List(t.Context())
 			if tc.wantErr {
 				assert.Error(err)
 				return
@@ -695,7 +694,7 @@ func TestGetLoadBalancerEndpoint(t *testing.T) {
 				ec2:               successfulEC2,
 			}
 
-			gotHost, gotPort, err := m.GetLoadBalancerEndpoint(context.Background())
+			gotHost, gotPort, err := m.GetLoadBalancerEndpoint(t.Context())
 			if tc.wantErr {
 				assert.Error(err)
 				return

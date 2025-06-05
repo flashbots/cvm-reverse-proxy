@@ -14,7 +14,6 @@ import (
 	"testing"
 
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/snp"
-
 	"github.com/edgelesssys/go-azguestattestation/maa"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -83,7 +82,7 @@ func TestGetSNPAttestation(t *testing.T) {
 
 			data := []byte("data")
 
-			attestationJSON, err := issuer.getInstanceInfo(context.Background(), nil, data)
+			attestationJSON, err := issuer.getInstanceInfo(t.Context(), nil, data)
 			if tc.wantErr {
 				assert.Error(err)
 				return

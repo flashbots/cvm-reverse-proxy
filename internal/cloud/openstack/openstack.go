@@ -17,7 +17,6 @@ import (
 	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/metadata"
 	"github.com/flashbots/cvm-reverse-proxy/internal/constants"
 	"github.com/flashbots/cvm-reverse-proxy/internal/role"
-
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/v2/openstack/networking/v2/subnets"
@@ -55,6 +54,10 @@ func New(ctx context.Context) (*MetadataClient, error) {
 	if err != nil {
 		return nil, fmt.Errorf("getting user domain name: %w", err)
 	}
+	regionName, err := imds.regionName(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("getting region name: %w", err)
+	}
 
 	clientOpts := &clientconfig.ClientOpts{
 		AuthType: clientconfig.AuthV3Password,
@@ -64,6 +67,7 @@ func New(ctx context.Context) (*MetadataClient, error) {
 			Username:       username,
 			Password:       password,
 		},
+		RegionName: regionName,
 	}
 
 	serversClient, err := clientconfig.NewServiceClient(ctx, "compute", clientOpts)

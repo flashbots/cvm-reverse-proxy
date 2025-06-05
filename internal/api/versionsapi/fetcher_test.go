@@ -8,14 +8,12 @@ package versionsapi
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"io"
 	"net/http"
 	"testing"
 
 	"github.com/flashbots/cvm-reverse-proxy/internal/constants"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/goleak"
@@ -193,7 +191,7 @@ func TestFetchVersionList(t *testing.T) {
 
 			fetcher := Fetcher{client, constants.CDNRepositoryURL}
 
-			list, err := fetcher.FetchVersionList(context.Background(), tc.list)
+			list, err := fetcher.FetchVersionList(t.Context(), tc.list)
 
 			if tc.wantErr {
 				assert.Error(err)

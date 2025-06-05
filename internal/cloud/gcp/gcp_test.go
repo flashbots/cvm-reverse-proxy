@@ -11,11 +11,10 @@ import (
 	"errors"
 	"testing"
 
+	"cloud.google.com/go/compute/apiv1/computepb"
 	"github.com/flashbots/cvm-reverse-proxy/internal/cloud"
 	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/metadata"
 	"github.com/flashbots/cvm-reverse-proxy/internal/role"
-
-	"cloud.google.com/go/compute/apiv1/computepb"
 	gax "github.com/googleapis/gax-go/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -173,7 +172,7 @@ func TestGetInstance(t *testing.T) {
 				instanceAPI: &tc.instanceAPI,
 				subnetAPI:   &tc.subnetAPI,
 			}
-			instance, err := cloud.getInstance(context.Background(), tc.projectID, tc.zone, tc.instanceName)
+			instance, err := cloud.getInstance(t.Context(), tc.projectID, tc.zone, tc.instanceName)
 
 			if tc.wantErr {
 				assert.Error(err)
@@ -475,7 +474,7 @@ func TestGetLoadbalancerEndpoint(t *testing.T) {
 				regionalForwardingRulesAPI: &tc.regionalForwardingRulesAPI,
 			}
 
-			gotHost, gotPort, err := cloud.GetLoadBalancerEndpoint(context.Background())
+			gotHost, gotPort, err := cloud.GetLoadBalancerEndpoint(t.Context())
 			if tc.wantErr {
 				assert.Error(err)
 				return
@@ -811,7 +810,7 @@ func TestList(t *testing.T) {
 				zoneAPI:     &tc.zoneAPI,
 			}
 
-			instances, err := cloud.List(context.Background())
+			instances, err := cloud.List(t.Context())
 			if tc.wantErr {
 				assert.Error(err)
 				return
@@ -916,7 +915,7 @@ func TestZones(t *testing.T) {
 
 			assert.Empty(cloud.zoneCache)
 
-			gotZones, err := cloud.zones(context.Background(), "someProject", "someregion-west3")
+			gotZones, err := cloud.zones(t.Context(), "someProject", "someregion-west3")
 			if tc.wantErr {
 				assert.Error(err)
 				return
@@ -1067,7 +1066,7 @@ func TestUID(t *testing.T) {
 				instanceAPI: &tc.instanceAPI,
 			}
 
-			uid, err := cloud.UID(context.Background())
+			uid, err := cloud.UID(t.Context())
 			if tc.wantErr {
 				assert.Error(err)
 				return
@@ -1171,7 +1170,7 @@ func TestInitSecretHash(t *testing.T) {
 				instanceAPI: &tc.instanceAPI,
 			}
 
-			initSecretHash, err := cloud.InitSecretHash(context.Background())
+			initSecretHash, err := cloud.InitSecretHash(t.Context())
 			if tc.wantErr {
 				assert.Error(err)
 				return

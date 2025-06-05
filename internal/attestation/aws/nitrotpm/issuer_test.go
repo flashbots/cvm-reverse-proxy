@@ -12,10 +12,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/simulator"
-
 	"github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
 	"github.com/aws/smithy-go/middleware"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/simulator"
 	tpmclient "github.com/google/go-tpm-tools/client"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -101,7 +100,7 @@ func TestGetInstanceInfo(t *testing.T) {
 			instanceInfoFunc := getInstanceInfo(&tc.client)
 			assert.NotNil(instanceInfoFunc)
 
-			info, err := instanceInfoFunc(context.Background(), tpm, nil)
+			info, err := instanceInfoFunc(t.Context(), tpm, nil)
 			if tc.wantErr {
 				assert.Error(err)
 				assert.Nil(info)

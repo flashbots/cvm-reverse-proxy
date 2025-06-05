@@ -17,7 +17,6 @@ import (
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
 	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/cloudprovider"
 	"github.com/flashbots/cvm-reverse-proxy/internal/sigstore"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -142,7 +141,7 @@ func TestFetchMeasurements(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			assert := assert.New(t)
 			sut := NewVerifyFetcher(tc.cosign, tc.rekor, client)
-			m, err := sut.FetchAndVerifyMeasurements(context.Background(), "v999.999.999", cloudprovider.GCP, variant.GCPSEVES{}, tc.noVerify)
+			m, err := sut.FetchAndVerifyMeasurements(t.Context(), "v999.999.999", cloudprovider.GCP, variant.GCPSEVES{}, tc.noVerify)
 			if tc.wantErr {
 				assert.Error(err)
 				if tc.asRekorErr {

@@ -7,11 +7,11 @@ SPDX-License-Identifier: AGPL-3.0-only
 package crypto
 
 import (
+	"crypto/ed25519"
 	"crypto/x509"
 	"testing"
 
 	"github.com/flashbots/cvm-reverse-proxy/internal/crypto/testvector"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/goleak"
@@ -120,6 +120,47 @@ func TestGenerateRandomBytes(t *testing.T) {
 	n3, err := GenerateRandomBytes(16)
 	require.NoError(err)
 	assert.Len(n3, 16)
+}
+
+func TestGenerateEmergencySSHCAKey(t *testing.T) {
+	nullKey := make([]byte, ed25519.SeedSize)
+
+	testCases := map[string]struct {
+		key     []byte
+		wantErr bool
+	}{
+		"key length = 0": {
+			key:     make([]byte, 0),
+			wantErr: true,
+		},
+		"valid key": {
+			key: nullKey,
+		},
+		"nil input": {
+			key:     nil,
+			wantErr: true,
+		},
+		"long key": {
+			key: make([]byte, 256),
+		},
+		"key too short": {
+			key:     make([]byte, ed25519.SeedSize-1),
+			wantErr: true,
+		},
+	}
+
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			assert := assert.New(t)
+
+			_, err := GenerateEmergencySSHCAKey(tc.key)
+			if tc.wantErr {
+				assert.Error(err)
+			} else {
+				assert.NoError(err)
+			}
+		})
+	}
 }
 
 func TestPemToX509Cert(t *testing.T) {

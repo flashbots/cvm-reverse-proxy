@@ -7,7 +7,6 @@ package attestationconfigapi
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -18,7 +17,6 @@ import (
 
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
 	"github.com/flashbots/cvm-reverse-proxy/internal/constants"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -104,7 +102,7 @@ func TestFetchLatestSEVSNPVersion(t *testing.T) {
 				},
 			}
 			fetcher := newFetcherWithClientAndVerifier(client, stubVerifier{}, constants.CDNRepositoryURL)
-			res, err := fetcher.FetchLatestVersion(context.Background(), tc.attestation)
+			res, err := fetcher.FetchLatestVersion(t.Context(), tc.attestation)
 			assert := assert.New(t)
 			if tc.wantErr {
 				assert.Error(err)
