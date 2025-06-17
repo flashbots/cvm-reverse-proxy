@@ -12,11 +12,10 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/vtpm"
-
 	"github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/vtpm"
 	"github.com/google/go-tpm-tools/proto/attest"
 	"github.com/stretchr/testify/assert"
 )
@@ -43,7 +42,7 @@ func TestGeTrustedKey(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			assert := assert.New(t)
 			out, err := getTrustedKey(
-				context.Background(),
+				t.Context(),
 				vtpm.AttestationDocument{
 					Attestation: &attest.Attestation{
 						AkPub: tc.akPub,

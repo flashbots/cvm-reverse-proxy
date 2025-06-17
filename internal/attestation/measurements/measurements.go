@@ -30,7 +30,6 @@ import (
 
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
 	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/cloudprovider"
-
 	"github.com/google/go-tpm/tpmutil"
 	"github.com/siderolabs/talos/pkg/machinery/config/encoder"
 	"gopkg.in/yaml.v3"
@@ -481,17 +480,17 @@ func (m *Measurement) unmarshal(eM encodedMeasurement) error {
 // WithAllBytes returns a measurement value where all bytes are set to b. Takes a dynamic length as input.
 // Expected are either 32 bytes (PCRMeasurementLength) or 48 bytes (TDXMeasurementLength).
 // Over inputs are possible in this function, but potentially rejected elsewhere.
-func WithAllBytes(b byte, validationOpt MeasurementValidationOption, len int) Measurement {
+func WithAllBytes(b byte, validationOpt MeasurementValidationOption, length int) Measurement {
 	return Measurement{
-		Expected:      bytes.Repeat([]byte{b}, len),
+		Expected:      bytes.Repeat([]byte{b}, length),
 		ValidationOpt: validationOpt,
 	}
 }
 
 // PlaceHolderMeasurement returns a measurement with placeholder values for Expected.
-func PlaceHolderMeasurement(len int) Measurement {
+func PlaceHolderMeasurement(length int) Measurement {
 	return Measurement{
-		Expected:      bytes.Repeat([]byte{0x12, 0x34}, len/2),
+		Expected:      bytes.Repeat([]byte{0x12, 0x34}, length/2),
 		ValidationOpt: Enforce,
 	}
 }

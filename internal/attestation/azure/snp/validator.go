@@ -22,7 +22,6 @@ import (
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/vtpm"
 	"github.com/flashbots/cvm-reverse-proxy/internal/config"
-
 	"github.com/google/go-sev-guest/abi"
 	"github.com/google/go-sev-guest/kds"
 	spb "github.com/google/go-sev-guest/proto/sevsnp"
@@ -222,6 +221,15 @@ func (v *Validator) checkIDKeyDigest(ctx context.Context, report *spb.Attestatio
 	// No IDKeyDigest that was not expected is present.
 	return nil
 }
+
+// nopAttestationLogger is a no-op implementation of AttestationLogger.
+type nopAttestationLogger struct{}
+
+// Infof is a no-op.
+func (nopAttestationLogger) Info(string, ...interface{}) {}
+
+// Warnf is a no-op.
+func (nopAttestationLogger) Warn(string, ...interface{}) {}
 
 type maaValidator interface {
 	validateToken(ctx context.Context, maaURL string, token string, extraData []byte) error

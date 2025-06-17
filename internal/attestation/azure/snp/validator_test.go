@@ -25,7 +25,6 @@ import (
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/vtpm"
 	"github.com/flashbots/cvm-reverse-proxy/internal/config"
 	"github.com/flashbots/cvm-reverse-proxy/internal/logger"
-
 	"github.com/google/go-sev-guest/abi"
 	"github.com/google/go-sev-guest/kds"
 	spb "github.com/google/go-sev-guest/proto/sevsnp"
@@ -183,7 +182,7 @@ func TestCheckIDKeyDigest(t *testing.T) {
 			report := reportWithIDKeyDigest(tc.idKeyDigest)
 			validator := newTestValidator(cfg, tc.validateMaaTokenErr)
 
-			err := validator.checkIDKeyDigest(context.Background(), report, "", nil)
+			err := validator.checkIDKeyDigest(t.Context(), report, "", nil)
 			if tc.wantErr {
 				require.Error(err)
 			} else {
@@ -651,7 +650,7 @@ func TestTrustedKeyFromSNP(t *testing.T) {
 				attestationValidator: tc.validator,
 			}
 
-			key, err := validator.getTrustedKey(context.Background(), attDoc, nil)
+			key, err := validator.getTrustedKey(t.Context(), attDoc, nil)
 			if tc.wantErr {
 				assert.Error(err)
 				if tc.assertion != nil {

@@ -16,7 +16,6 @@ import (
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/measurements"
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
 	"github.com/flashbots/cvm-reverse-proxy/internal/config"
-
 	"github.com/edgelesssys/go-tdx-qpl/verification"
 	"github.com/edgelesssys/go-tdx-qpl/verification/types"
 )
@@ -53,7 +52,7 @@ func (v *Validator) Validate(ctx context.Context, attDocRaw []byte, nonce []byte
 	v.log.Info("Validating attestation document")
 	defer func() {
 		if err != nil {
-			v.log.Warn(fmt.Sprintf("Failed to validate TDX attestation document: %s", err))
+			v.log.Warn(fmt.Sprintf("Failed to validate attestation document: %s", err))
 		}
 	}()
 

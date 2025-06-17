@@ -13,11 +13,10 @@ import (
 	"errors"
 	"testing"
 
+	"cloud.google.com/go/compute/apiv1/computepb"
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/gcp"
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/vtpm"
-
-	"cloud.google.com/go/compute/apiv1/computepb"
 	"github.com/google/go-tpm-tools/proto/attest"
 	"github.com/googleapis/gax-go/v2"
 	"github.com/stretchr/testify/assert"
@@ -154,7 +153,7 @@ Y+t5OxL3kL15VzY1Ob0d5cMCAwEAAQ==
 			getTrustedKey, err := gcp.TrustedKeyGetter(variant.GCPSEVES{}, tc.getClient)
 			require.NoError(t, err)
 
-			out, err := getTrustedKey(context.Background(), attDoc, nil)
+			out, err := getTrustedKey(t.Context(), attDoc, nil)
 
 			if tc.wantErr {
 				assert.Error(err)

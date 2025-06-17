@@ -20,13 +20,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/flashbots/cvm-reverse-proxy/internal/constants"
-
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	s3manager "github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/cloudfront"
 	cftypes "github.com/aws/aws-sdk-go-v2/service/cloudfront/types"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/flashbots/cvm-reverse-proxy/internal/constants"
 	"github.com/google/uuid"
 )
 

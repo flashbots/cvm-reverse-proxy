@@ -20,7 +20,6 @@ import (
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/azure"
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/vtpm"
-
 	"github.com/google/go-tpm/legacy/tpm2"
 )
 

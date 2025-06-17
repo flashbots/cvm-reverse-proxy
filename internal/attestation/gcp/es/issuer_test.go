@@ -14,7 +14,6 @@ import (
 	"testing"
 
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/gcp"
-
 	"github.com/google/go-tpm-tools/proto/attest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -68,7 +67,7 @@ func TestGetGCEInstanceInfo(t *testing.T) {
 			require := require.New(t)
 			var tpm io.ReadWriteCloser
 
-			out, err := gcp.GCEInstanceInfo(tc.client)(context.Background(), tpm, nil)
+			out, err := gcp.GCEInstanceInfo(tc.client)(t.Context(), tpm, nil)
 			if tc.wantErr {
 				assert.Error(err)
 			} else {

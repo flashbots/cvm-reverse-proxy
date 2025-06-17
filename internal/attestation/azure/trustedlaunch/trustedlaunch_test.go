@@ -8,7 +8,6 @@ package trustedlaunch
 
 import (
 	"bytes"
-	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -25,7 +24,6 @@ import (
 	"github.com/flashbots/cvm-reverse-proxy/internal/config"
 	"github.com/flashbots/cvm-reverse-proxy/internal/crypto"
 	"github.com/flashbots/cvm-reverse-proxy/internal/logger"
-
 	tpmclient "github.com/google/go-tpm-tools/client"
 	"github.com/google/go-tpm-tools/proto/attest"
 	"github.com/google/go-tpm/legacy/tpm2"
@@ -193,7 +191,7 @@ func TestGetAttestationCert(t *testing.T) {
 			issuer := NewIssuer(logger.NewTest(t))
 			issuer.hClient = newTestClient(tc.crlServer)
 
-			certs, err := issuer.getAttestationCert(context.Background(), tpm, nil)
+			certs, err := issuer.getAttestationCert(t.Context(), tpm, nil)
 			if tc.wantIssueErr {
 				assert.Error(err)
 				return
@@ -214,7 +212,7 @@ func TestGetAttestationCert(t *testing.T) {
 			roots.AddCert(cert)
 			validator.roots = roots
 
-			key, err := validator.verifyAttestationKey(context.Background(), attDoc, nil)
+			key, err := validator.verifyAttestationKey(t.Context(), attDoc, nil)
 			if tc.wantValidateErr {
 				assert.Error(err)
 				return

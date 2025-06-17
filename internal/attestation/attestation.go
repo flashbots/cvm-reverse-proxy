@@ -45,16 +45,12 @@ const (
 
 // Logger is a logger used to print warnings and infos during attestation validation.
 type Logger interface {
-	Debug(msg string, args ...any)
 	Info(msg string, args ...any)
 	Warn(msg string, args ...any)
 }
 
 // NOPLogger is a no-op implementation of [Logger].
 type NOPLogger struct{}
-
-// Debug is a no-op.
-func (NOPLogger) Debug(string, ...interface{}) {}
 
 // Info is a no-op.
 func (NOPLogger) Info(string, ...interface{}) {}

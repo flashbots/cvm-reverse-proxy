@@ -8,7 +8,6 @@ package snp
 
 import (
 	"bytes"
-	"context"
 	"crypto"
 	"crypto/x509"
 	"encoding/base64"
@@ -26,7 +25,6 @@ import (
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/vtpm"
 	"github.com/flashbots/cvm-reverse-proxy/internal/config"
 	"github.com/flashbots/cvm-reverse-proxy/internal/logger"
-
 	"github.com/google/go-sev-guest/abi"
 	"github.com/google/go-sev-guest/proto/sevsnp"
 	spb "github.com/google/go-sev-guest/proto/sevsnp"
@@ -68,7 +66,7 @@ func TestGetTrustedKey(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			assert := assert.New(t)
 			out, err := validator().getTrustedKey(
-				context.Background(),
+				t.Context(),
 				vtpm.AttestationDocument{
 					Attestation: &attest.Attestation{
 						AkPub: tc.akPub,
