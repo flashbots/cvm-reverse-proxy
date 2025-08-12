@@ -5,6 +5,7 @@ go 1.22.4
 replace github.com/martinjungblut/go-cryptsetup => github.com/daniel-weisse/go-cryptsetup v0.0.0-20230705150314-d8c07bd1723c
 
 replace (
+	github.com/google/go-tdx-guest => github.com/flashbots/go-tdx-guest v0.0.0-20250812101008-c4de93fd5a34
 	k8s.io/cloud-provider => k8s.io/cloud-provider v0.30.2
 	k8s.io/controller-manager => k8s.io/controller-manager v0.30.2
 	k8s.io/csi-translation-lib => k8s.io/csi-translation-lib v0.30.2
@@ -158,7 +159,7 @@ require (
 	github.com/google/certificate-transparency-go v1.1.8 // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/go-attestation v0.5.1 // indirect
-	github.com/google/go-configfs-tsm v0.2.2 // indirect
+	github.com/google/go-configfs-tsm v0.3.2 // indirect
 	github.com/google/go-containerregistry v0.19.2 // indirect
 	github.com/google/go-tspi v0.3.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
