@@ -29,6 +29,8 @@ import (
 	"github.com/google/go-tpm/legacy/tpm2"
 )
 
+const AZURE_V6_BAD_FMSPC = "90c06f000000"
+
 // Validator for Azure confidential VM attestation using TDX.
 type Validator struct {
 	variant.AzureTDX
@@ -39,6 +41,7 @@ type Validator struct {
 	hclValidator hclAkValidator
 
 	tcbOverride func(pcs.TcbInfo) pcs.TcbInfo
+	log         attestation.Logger
 }
 
 // NewValidator returns a new Validator for Azure confidential VM attestation using TDX.
@@ -47,6 +50,7 @@ func NewValidator(cfg *config.AzureTDX, log attestation.Logger) *Validator {
 		cfg:          cfg,
 		getter:       trust.DefaultHTTPSGetter(),
 		hclValidator: &azure.HCLAkValidator{},
+		log:          log,
 	}
 
 	v.Validator = vtpm.NewValidator(
@@ -109,6 +113,19 @@ func (v *Validator) validateQuote(tdxQuote *tdx.QuoteV4) error {
 		Getter:           v.getter,
 	}); err != nil {
 		return err
+	}
+
+	// Hacky way to log every time we validate the outdated v6 tcb
+	if v.tcbOverride != nil {
+		if chain, err := verify.ExtractChainFromQuote(tdxQuote); err == nil {
+			if exts, err := pcs.PckCertificateExtensions(chain.PCKCertificate); err == nil {
+				if exts.FMSPC == AZURE_V6_BAD_FMSPC {
+					if tdxQuote.TdQuoteBody.TeeTcbSvn[7] == 3 {
+						v.log.Info("allowing azure's outdated SEAM loader")
+					}
+				}
+			}
+		}
 	}
 
 	if err := validate.TdxQuote(tdxQuote, &validate.Options{

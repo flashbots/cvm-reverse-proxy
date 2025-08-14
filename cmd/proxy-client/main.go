@@ -49,9 +49,10 @@ var flags []cli.Flag = []cli.Flag{
 		Usage: "type of attestation to present (" + proxy.AvailableAttestationTypes + "). Set to " + string(proxy.AttestationDummy) + " to use remote quote provider.",
 	},
 	&cli.BoolFlag{
-		Name:  "override-azurev6-tcbinfo",
-		Value: false,
-		Usage: "Allows Azure's V6 instance outdated SEAM Loader",
+		Name:    "override-azurev6-tcbinfo",
+		Value:   false,
+		EnvVars: []string{"OVERRIDE_AZUREV6_TCBINFO"},
+		Usage:   "Allows Azure's V6 instance outdated SEAM Loader",
 	},
 	&cli.BoolFlag{
 		Name:  "log-json",

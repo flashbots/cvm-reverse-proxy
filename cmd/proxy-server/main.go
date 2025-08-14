@@ -64,9 +64,10 @@ var flags []cli.Flag = []cli.Flag{
 		Usage:   "optional path to JSON measurements enforced on the client",
 	},
 	&cli.BoolFlag{
-		Name:  "override-azurev6-tcbinfo",
-		Value: false,
-		Usage: "Allows Azure's V6 instance outdated SEAM Loader",
+		Name:    "override-azurev6-tcbinfo",
+		Value:   false,
+		EnvVars: []string{"OVERRIDE_AZUREV6_TCBINFO"},
+		Usage:   "Allows Azure's V6 instance outdated SEAM Loader",
 	},
 	&cli.BoolFlag{
 		Name:    "log-json",
