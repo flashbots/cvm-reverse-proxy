@@ -27,6 +27,10 @@ func NewMultiValidator(validators []atls.Validator) *MultiValidator {
 	}
 }
 
+func (v *MultiValidator) Validators() []atls.Validator {
+	return v.validators
+}
+
 func (v *MultiValidator) OID() asn1.ObjectIdentifier {
 	return v.oid
 }
