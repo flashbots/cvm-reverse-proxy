@@ -155,7 +155,7 @@ func runServer(cCtx *cli.Context) error {
 	}
 
 	if overrideAzurev6Tcbinfo {
-		azure_tcbinfo_override.OverrideAzureValidatorsForV6SEAMLoader(validators)
+		azure_tcbinfo_override.OverrideAzureValidatorsForV6SEAMLoader(log, validators)
 	}
 
 	var issuer atls.Issuer

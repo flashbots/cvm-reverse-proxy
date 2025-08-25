@@ -152,7 +152,7 @@ func runClient(cCtx *cli.Context) error {
 	}
 
 	if overrideAzurev6Tcbinfo {
-		azure_tcbinfo_override.OverrideAzureValidatorsForV6SEAMLoader(validators)
+		azure_tcbinfo_override.OverrideAzureValidatorsForV6SEAMLoader(log, validators)
 	}
 
 	tlsConfig, err := atls.CreateAttestationClientTLSConfig(issuer, validators)

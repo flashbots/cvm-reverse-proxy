@@ -142,7 +142,7 @@ func runClient(cCtx *cli.Context) (err error) {
 		attConfig.SetMeasurements(measurements.M{})
 		validator := azure_tdx.NewValidator(attConfig, proxy.AttestationLogger{Log: log})
 		if overrideAzurev6Tcbinfo {
-			validator = validator.SetTcbOverride(azure_tcbinfo_override.OverrideV6InstanceOutdatedSEAMLoader)
+			azure_tcbinfo_override.OverrideAzureValidatorsForV6SEAMLoader(log, []atls.Validator{validator})
 		}
 		validators = append(validators, validator)
 	default:

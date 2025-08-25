@@ -5,7 +5,7 @@ go 1.22.4
 replace github.com/martinjungblut/go-cryptsetup => github.com/daniel-weisse/go-cryptsetup v0.0.0-20230705150314-d8c07bd1723c
 
 replace (
-	github.com/google/go-tdx-guest => github.com/flashbots/go-tdx-guest v0.0.0-20250812101008-c4de93fd5a34
+	github.com/google/go-tdx-guest => github.com/flashbots/go-tdx-guest v0.0.0-20250825120232-7b8345f036ef
 	k8s.io/cloud-provider => k8s.io/cloud-provider v0.30.2
 	k8s.io/controller-manager => k8s.io/controller-manager v0.30.2
 	k8s.io/csi-translation-lib => k8s.io/csi-translation-lib v0.30.2
