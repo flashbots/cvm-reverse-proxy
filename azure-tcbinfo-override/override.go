@@ -15,7 +15,7 @@ func OverrideV6InstanceOutdatedSEAMLoader(log *slog.Logger, tcbInfo pcs.TcbInfo)
 		for l, tcbLevel := range tcbInfo.TcbLevels {
 			if tcbLevel.TcbStatus == pcs.TcbComponentStatusUpToDate {
 				if tcbLevel.Tcb.SgxTcbcomponents[7].Svn > 3 {
-					log.Info("overriding Azure v6 instance outdated SEAM loader")
+					log.Debug("overriding tcb info to allow outdated Azure v6 SEAM loader")
 					tcbInfo.TcbLevels[l].Tcb.SgxTcbcomponents[7].Svn = 3
 				}
 			}

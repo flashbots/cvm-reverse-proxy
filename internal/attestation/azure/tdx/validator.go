@@ -121,7 +121,7 @@ func (v *Validator) validateQuote(tdxQuote *tdx.QuoteV4) error {
 			if exts, err := pcs.PckCertificateExtensions(chain.PCKCertificate); err == nil {
 				if exts.FMSPC == AZURE_V6_BAD_FMSPC {
 					if tdxQuote.TdQuoteBody.TeeTcbSvn[7] == 3 {
-						v.log.Info("allowing azure's outdated SEAM loader")
+						v.log.Warn("allowing azure's outdated SEAM loader")
 					}
 				}
 			}
