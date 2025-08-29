@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	azure_tcbinfo_override "github.com/flashbots/cvm-reverse-proxy/azure-tcbinfo-override"
 	"github.com/flashbots/cvm-reverse-proxy/common"
 	"github.com/flashbots/cvm-reverse-proxy/internal/atls"
 	"github.com/flashbots/cvm-reverse-proxy/proxy"
@@ -63,6 +64,12 @@ var flags []cli.Flag = []cli.Flag{
 		Usage:   "optional path to JSON measurements enforced on the client",
 	},
 	&cli.BoolFlag{
+		Name:    "override-azurev6-tcbinfo",
+		Value:   false,
+		EnvVars: []string{"OVERRIDE_AZUREV6_TCBINFO"},
+		Usage:   "Allows Azure's V6 instance outdated SEAM Loader",
+	},
+	&cli.BoolFlag{
 		Name:    "log-json",
 		EnvVars: []string{"LOG_JSON"},
 		Value:   false,
@@ -110,6 +117,7 @@ func runServer(cCtx *cli.Context) error {
 	listenAddr := cCtx.String("listen-addr")
 	targetAddr := cCtx.String("target-addr")
 	clientMeasurements := cCtx.String("client-measurements")
+	overrideAzurev6Tcbinfo := cCtx.Bool("override-azurev6-tcbinfo")
 	logJSON := cCtx.Bool("log-json")
 	logDebug := cCtx.Bool("log-debug")
 	tdx.SetLogDcapQuote(cCtx.Bool("log-dcap-quote"))
@@ -144,6 +152,10 @@ func runServer(cCtx *cli.Context) error {
 	if err != nil {
 		log.Error("could not create attestation validators from file", "err", err)
 		return err
+	}
+
+	if overrideAzurev6Tcbinfo {
+		azure_tcbinfo_override.OverrideAzureValidatorsForV6SEAMLoader(log, validators)
 	}
 
 	var issuer atls.Issuer

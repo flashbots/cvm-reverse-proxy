@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	azure_tcbinfo_override "github.com/flashbots/cvm-reverse-proxy/azure-tcbinfo-override"
 	"github.com/flashbots/cvm-reverse-proxy/common"
 	"github.com/flashbots/cvm-reverse-proxy/internal/atls"
 	"github.com/flashbots/cvm-reverse-proxy/proxy"
@@ -48,6 +49,12 @@ var flags []cli.Flag = []cli.Flag{
 		Usage: "type of attestation to present (" + proxy.AvailableAttestationTypes + "). Set to " + string(proxy.AttestationDummy) + " to use remote quote provider.",
 	},
 	&cli.BoolFlag{
+		Name:    "override-azurev6-tcbinfo",
+		Value:   false,
+		EnvVars: []string{"OVERRIDE_AZUREV6_TCBINFO"},
+		Usage:   "Allows Azure's V6 instance outdated SEAM Loader",
+	},
+	&cli.BoolFlag{
 		Name:  "log-json",
 		Value: false,
 		Usage: "log in JSON format",
@@ -87,6 +94,7 @@ func runClient(cCtx *cli.Context) error {
 	listenAddr := cCtx.String("listen-addr")
 	targetAddr := cCtx.String("target-addr")
 	serverMeasurements := cCtx.String("server-measurements")
+	overrideAzurev6Tcbinfo := cCtx.Bool("override-azurev6-tcbinfo")
 	logJSON := cCtx.Bool("log-json")
 	logDebug := cCtx.Bool("log-debug")
 	tdx.SetLogDcapQuote(cCtx.Bool("log-dcap-quote"))
@@ -141,6 +149,10 @@ func runClient(cCtx *cli.Context) error {
 	if err != nil {
 		log.Error("could not create attestation validators from file", "err", err)
 		return err
+	}
+
+	if overrideAzurev6Tcbinfo {
+		azure_tcbinfo_override.OverrideAzureValidatorsForV6SEAMLoader(log, validators)
 	}
 
 	tlsConfig, err := atls.CreateAttestationClientTLSConfig(issuer, validators)

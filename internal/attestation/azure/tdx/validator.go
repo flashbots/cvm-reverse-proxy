@@ -20,6 +20,7 @@ import (
 	"github.com/flashbots/cvm-reverse-proxy/internal/config"
 
 	"github.com/google/go-tdx-guest/abi"
+	"github.com/google/go-tdx-guest/pcs"
 	"github.com/google/go-tdx-guest/proto/tdx"
 	"github.com/google/go-tdx-guest/validate"
 	"github.com/google/go-tdx-guest/verify"
@@ -27,6 +28,8 @@ import (
 	"github.com/google/go-tpm-tools/proto/attest"
 	"github.com/google/go-tpm/legacy/tpm2"
 )
+
+const AZURE_V6_BAD_FMSPC = "90c06f000000"
 
 // Validator for Azure confidential VM attestation using TDX.
 type Validator struct {
@@ -36,6 +39,9 @@ type Validator struct {
 
 	getter       trust.HTTPSGetter
 	hclValidator hclAkValidator
+
+	tcbOverride func(pcs.TcbInfo) pcs.TcbInfo
+	log         attestation.Logger
 }
 
 // NewValidator returns a new Validator for Azure confidential VM attestation using TDX.
@@ -44,6 +50,7 @@ func NewValidator(cfg *config.AzureTDX, log attestation.Logger) *Validator {
 		cfg:          cfg,
 		getter:       trust.DefaultHTTPSGetter(),
 		hclValidator: &azure.HCLAkValidator{},
+		log:          log,
 	}
 
 	v.Validator = vtpm.NewValidator(
@@ -55,6 +62,11 @@ func NewValidator(cfg *config.AzureTDX, log attestation.Logger) *Validator {
 		log,
 	)
 
+	return v
+}
+
+func (v *Validator) SetTcbOverride(overrideFn func(pcs.TcbInfo) pcs.TcbInfo) *Validator {
+	v.tcbOverride = overrideFn
 	return v
 }
 
@@ -96,10 +108,24 @@ func (v *Validator) validateQuote(tdxQuote *tdx.QuoteV4) error {
 	if err := verify.TdxQuote(tdxQuote, &verify.Options{
 		CheckRevocations: true,
 		GetCollateral:    true,
+		PatchTCBInfo:     v.tcbOverride,
 		TrustedRoots:     roots,
 		Getter:           v.getter,
 	}); err != nil {
 		return err
+	}
+
+	// Hacky way to log every time we validate the outdated v6 tcb
+	if v.tcbOverride != nil {
+		if chain, err := verify.ExtractChainFromQuote(tdxQuote); err == nil {
+			if exts, err := pcs.PckCertificateExtensions(chain.PCKCertificate); err == nil {
+				if exts.FMSPC == AZURE_V6_BAD_FMSPC {
+					if tdxQuote.TdQuoteBody.TeeTcbSvn[7] == 3 {
+						v.log.Warn("allowing azure's outdated SEAM loader")
+					}
+				}
+			}
+		}
 	}
 
 	if err := validate.TdxQuote(tdxQuote, &validate.Options{

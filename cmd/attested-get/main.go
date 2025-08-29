@@ -41,6 +41,7 @@ import (
 	"os"
 	"strings"
 
+	azure_tcbinfo_override "github.com/flashbots/cvm-reverse-proxy/azure-tcbinfo-override"
 	"github.com/flashbots/cvm-reverse-proxy/common"
 	"github.com/flashbots/cvm-reverse-proxy/internal/atls"
 	azure_tdx "github.com/flashbots/cvm-reverse-proxy/internal/attestation/azure/tdx"
@@ -79,6 +80,12 @@ var flags []cli.Flag = []cli.Flag{
 		Usage: "File or URL with known measurements (to compare against)",
 	},
 	&cli.BoolFlag{
+		Name:    "override-azurev6-tcbinfo",
+		Value:   false,
+		EnvVars: []string{"OVERRIDE_AZUREV6_TCBINFO"},
+		Usage:   "Allows Azure's V6 instance outdated SEAM Loader",
+	},
+	&cli.BoolFlag{
 		Name:  "log-debug",
 		Value: false,
 		Usage: "log debug messages",
@@ -105,6 +112,7 @@ func runClient(cCtx *cli.Context) (err error) {
 	outResponse := cCtx.String("out-response")
 	attestationTypeStr := cCtx.String("attestation-type")
 	expectedMeasurementsPath := cCtx.String("expected-measurements")
+	overrideAzurev6Tcbinfo := cCtx.Bool("override-azurev6-tcbinfo")
 
 	// Setup logging
 	log := common.SetupLogger(&common.LoggingOpts{
@@ -133,6 +141,9 @@ func runClient(cCtx *cli.Context) (err error) {
 		attConfig := config.DefaultForAzureTDX()
 		attConfig.SetMeasurements(measurements.M{})
 		validator := azure_tdx.NewValidator(attConfig, proxy.AttestationLogger{Log: log})
+		if overrideAzurev6Tcbinfo {
+			azure_tcbinfo_override.OverrideAzureValidatorsForV6SEAMLoader(log, []atls.Validator{validator})
+		}
 		validators = append(validators, validator)
 	default:
 		log.Error("currently only azure-tdx attestation is supported")

@@ -7,5 +7,5 @@ RUN make build-${BINARY}
 
 FROM gcr.io/distroless/cc-debian12:nonroot-6755e21ccd99ddead6edc8106ba03888cbeed41a
 ARG BINARY
-COPY --from=builder /app/build/${BINARY} /app
-ENTRYPOINT [ "/app" ]
+COPY --from=builder /app/build/${BINARY} /proxy
+ENTRYPOINT [ "/proxy" ]
