@@ -1,6 +1,6 @@
 module github.com/flashbots/cvm-reverse-proxy
 
-go 1.22.4
+go 1.23.2
 
 replace github.com/martinjungblut/go-cryptsetup => github.com/daniel-weisse/go-cryptsetup v0.0.0-20230705150314-d8c07bd1723c
 
