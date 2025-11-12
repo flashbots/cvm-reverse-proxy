@@ -4,7 +4,7 @@ package main
 // Make a HTTP GET request over a TEE-attested connection (to a server with aTLS support),
 // and print the verified measurements and the response payload.
 //
-// Currently only works for Azure TDX but is straight-forward to expand.
+// Currently supports Azure TDX and DCAP TDX attestation.
 //
 // Usage:
 //
@@ -47,9 +47,11 @@ import (
 	azure_tdx "github.com/flashbots/cvm-reverse-proxy/internal/attestation/azure/tdx"
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/measurements"
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
+	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/cloudprovider"
 	"github.com/flashbots/cvm-reverse-proxy/internal/config"
 	"github.com/flashbots/cvm-reverse-proxy/multimeasurements"
 	"github.com/flashbots/cvm-reverse-proxy/proxy"
+	dcap_tdx "github.com/flashbots/cvm-reverse-proxy/tdx"
 	"github.com/urfave/cli/v2" // imports as package "cli"
 )
 
@@ -70,9 +72,9 @@ var flags []cli.Flag = []cli.Flag{
 		Usage: "Output file for the response payload",
 	},
 	&cli.StringFlag{
-		Name:  "attestation-type", // TODO: Add support for other attestation types
+		Name:  "attestation-type",
 		Value: string(proxy.AttestationAzureTDX),
-		Usage: "type of attestation to present (currently only azure-tdx)",
+		Usage: "type of attestation to present (azure-tdx or dcap-tdx)",
 	},
 	&cli.StringFlag{
 		Name:  "expected-measurements",
@@ -145,9 +147,15 @@ func runClient(cCtx *cli.Context) (err error) {
 			azure_tcbinfo_override.OverrideAzureValidatorsForV6SEAMLoader(log, []atls.Validator{validator})
 		}
 		validators = append(validators, validator)
+	case proxy.AttestationDCAPTDX:
+		// Prepare a dcap-tdx validator without any required measurements
+		attConfig := &config.QEMUTDX{Measurements: measurements.DefaultsFor(cloudprovider.QEMU, variant.QEMUTDX{})}
+		attConfig.SetMeasurements(measurements.M{})
+		validator := dcap_tdx.NewValidator(attConfig, proxy.AttestationLogger{Log: log})
+		validators = append(validators, validator)
 	default:
-		log.Error("currently only azure-tdx attestation is supported")
-		return errors.New("currently only azure-tdx attestation is supported")
+		log.Error("currently only azure-tdx and dcap-tdx attestation is supported")
+		return errors.New("currently only azure-tdx and dcap-tdx attestation is supported")
 	}
 
 	// Load expected measurements from file or URL (if provided)
@@ -188,7 +196,7 @@ func runClient(cCtx *cli.Context) (err error) {
 	}
 
 	// Extract the aTLS variant and measurements from the TLS connection
-	atlsVariant, extractedMeasurements, err := proxy.GetMeasurementsFromTLS(resp.TLS.PeerCertificates, []asn1.ObjectIdentifier{variant.AzureTDX{}.OID()})
+	atlsVariant, extractedMeasurements, err := proxy.GetMeasurementsFromTLS(resp.TLS.PeerCertificates, []asn1.ObjectIdentifier{variant.AzureTDX{}.OID(), variant.QEMUTDX{}.OID()})
 	if err != nil {
 		log.Error("Error in getMeasurementsFromTLS", "err", err)
 		return err
