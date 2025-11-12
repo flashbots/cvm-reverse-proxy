@@ -47,7 +47,6 @@ import (
 	azure_tdx "github.com/flashbots/cvm-reverse-proxy/internal/attestation/azure/tdx"
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/measurements"
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/variant"
-	"github.com/flashbots/cvm-reverse-proxy/internal/cloud/cloudprovider"
 	"github.com/flashbots/cvm-reverse-proxy/internal/config"
 	"github.com/flashbots/cvm-reverse-proxy/multimeasurements"
 	"github.com/flashbots/cvm-reverse-proxy/proxy"
@@ -149,8 +148,7 @@ func runClient(cCtx *cli.Context) (err error) {
 		validators = append(validators, validator)
 	case proxy.AttestationDCAPTDX:
 		// Prepare a dcap-tdx validator without any required measurements
-		attConfig := &config.QEMUTDX{Measurements: measurements.DefaultsFor(cloudprovider.QEMU, variant.QEMUTDX{})}
-		attConfig.SetMeasurements(measurements.M{})
+		attConfig := &config.QEMUTDX{Measurements: measurements.M{}}
 		validator := dcap_tdx.NewValidator(attConfig, proxy.AttestationLogger{Log: log})
 		validators = append(validators, validator)
 	default:
