@@ -37,6 +37,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"strings"
@@ -72,8 +73,8 @@ var flags []cli.Flag = []cli.Flag{
 	},
 	&cli.StringFlag{
 		Name:  "attestation-type",
-		Value: string(proxy.AttestationAzureTDX),
-		Usage: "type of attestation to present (azure-tdx or dcap-tdx)",
+		Value: string(proxy.AttestationAuto),
+		Usage: "type of attestation to present (auto, azure-tdx, or dcap-tdx)",
 	},
 	&cli.StringFlag{
 		Name:  "expected-measurements",
@@ -104,6 +105,23 @@ func main() {
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
+}
+
+// createAzureTDXValidator creates an Azure TDX validator without required measurements
+func createAzureTDXValidator(log *slog.Logger, overrideAzurev6Tcbinfo bool) atls.Validator {
+	attConfig := config.DefaultForAzureTDX()
+	attConfig.SetMeasurements(measurements.M{})
+	validator := azure_tdx.NewValidator(attConfig, proxy.AttestationLogger{Log: log})
+	if overrideAzurev6Tcbinfo {
+		azure_tcbinfo_override.OverrideAzureValidatorsForV6SEAMLoader(log, []atls.Validator{validator})
+	}
+	return validator
+}
+
+// createDCAPTDXValidator creates a DCAP TDX validator without required measurements
+func createDCAPTDXValidator(log *slog.Logger) atls.Validator {
+	attConfig := &config.QEMUTDX{Measurements: measurements.M{}}
+	return dcap_tdx.NewValidator(attConfig, proxy.AttestationLogger{Log: log})
 }
 
 func runClient(cCtx *cli.Context) (err error) {
@@ -138,22 +156,17 @@ func runClient(cCtx *cli.Context) (err error) {
 	var validators []atls.Validator
 	switch attestationType {
 	case proxy.AttestationAzureTDX:
-		// Prepare an azure-tdx validator without any required measurements
-		attConfig := config.DefaultForAzureTDX()
-		attConfig.SetMeasurements(measurements.M{})
-		validator := azure_tdx.NewValidator(attConfig, proxy.AttestationLogger{Log: log})
-		if overrideAzurev6Tcbinfo {
-			azure_tcbinfo_override.OverrideAzureValidatorsForV6SEAMLoader(log, []atls.Validator{validator})
-		}
-		validators = append(validators, validator)
+		validators = append(validators, createAzureTDXValidator(log, overrideAzurev6Tcbinfo))
 	case proxy.AttestationDCAPTDX:
-		// Prepare a dcap-tdx validator without any required measurements
-		attConfig := &config.QEMUTDX{Measurements: measurements.M{}}
-		validator := dcap_tdx.NewValidator(attConfig, proxy.AttestationLogger{Log: log})
-		validators = append(validators, validator)
+		validators = append(validators, createDCAPTDXValidator(log))
+	case proxy.AttestationAuto:
+		// In auto mode, add all validators to support any attestation type
+		log.Info("Auto mode: creating validators for all supported attestation types")
+		validators = append(validators, createAzureTDXValidator(log, overrideAzurev6Tcbinfo))
+		validators = append(validators, createDCAPTDXValidator(log))
 	default:
-		log.Error("currently only azure-tdx and dcap-tdx attestation is supported")
-		return errors.New("currently only azure-tdx and dcap-tdx attestation is supported")
+		log.Error("unsupported attestation type, see --help for available options")
+		return errors.New("unsupported attestation type")
 	}
 
 	// Load expected measurements from file or URL (if provided)
