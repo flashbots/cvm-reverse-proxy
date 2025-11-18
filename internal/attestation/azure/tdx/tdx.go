@@ -24,5 +24,4 @@ type InstanceInfo struct {
 	AttestationReport []byte
 	RuntimeData       []byte
 	AkCert            []byte
-	CA                []byte
 }

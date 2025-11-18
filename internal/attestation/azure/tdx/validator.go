@@ -276,39 +276,28 @@ func (v *Validator) verifyAKCertificate(instanceInfo InstanceInfo, pubArea *tpm2
 	if err != nil {
 		return fmt.Errorf("parsing attestation key certificate: %w", err)
 	}
-	v.log.Info(fmt.Sprintf("AK Certificate Subject: %s", akCert.Subject.String()))
-	v.log.Info(fmt.Sprintf("AK Certificate Issuer: %s", akCert.Issuer.String()))
+	v.log.Debug(fmt.Sprintf("AK Certificate Subject: %s", akCert.Subject.String()))
+	v.log.Debug(fmt.Sprintf("AK Certificate Issuer: %s", akCert.Issuer.String()))
 
 	// Setup certificate pools
 	roots := x509.NewCertPool()
 	intermediates := x509.NewCertPool()
 
-	// Add all known root CAs
+	// Add all known Azure's root CAs
 	// Microsoft RSA Devices Root CA 2021 (for older VMs)
 	roots.AddCert(microsoftRSADevicesRoot2021)
 	// Azure Virtual TPM Root Certificate Authority 2023 (for TDX and newer Trusted Launch)
 	roots.AddCert(azureVirtualTPMRoot2023)
 
-	v.log.Info("Added root CAs: Microsoft RSA Devices Root CA 2021, Azure Virtual TPM Root CA 2023")
+	v.log.Debug("Added root CAs: Microsoft RSA Devices Root CA 2021, Azure Virtual TPM Root CA 2023")
 
-	// Add all known intermediate CAs
+	// Add known Azure's intermediate CAs
 	// Global Virtual TPM CA - 03 (for TDX VMs)
 	intermediates.AddCert(globalVirtualTPMCA03)
-	v.log.Info("Added intermediate CA: Global Virtual TPM CA - 03")
-
-	// Also try to add any CA certificate provided by the issuer
-	if len(instanceInfo.CA) > 0 {
-		akCertCA, err := x509.ParseCertificate(instanceInfo.CA)
-		if err != nil {
-			v.log.Warn(fmt.Sprintf("Failed to parse provided CA certificate: %v", err))
-		} else {
-			v.log.Info(fmt.Sprintf("Added provided CA certificate: %s", akCertCA.Subject.String()))
-			intermediates.AddCert(akCertCA)
-		}
-	}
+	v.log.Debug("Added intermediate CA: Global Virtual TPM CA - 03")
 
 	// Verify the certificate chain
-	v.log.Info("Verifying certificate chain")
+	v.log.Debug("Verifying certificate chain")
 	chains, err := akCert.Verify(x509.VerifyOptions{
 		Roots:         roots,
 		Intermediates: intermediates,
@@ -321,12 +310,12 @@ func (v *Validator) verifyAKCertificate(instanceInfo InstanceInfo, pubArea *tpm2
 
 	// Log the verified chain
 	for i, chain := range chains {
-		v.log.Info(fmt.Sprintf("Verified chain %d:", i))
+		v.log.Debug(fmt.Sprintf("Verified chain %d:", i))
 		for j, cert := range chain {
-			v.log.Info(fmt.Sprintf("  [%d] %s", j, cert.Subject.String()))
+			v.log.Debug(fmt.Sprintf("  [%d] %s", j, cert.Subject.String()))
 		}
 	}
-	v.log.Info("Certificate chain verification successful")
+	v.log.Debug("Certificate chain verification successful")
 
 	// Verify that the public key in the certificate matches the TPM's AK public key
 	pubKey, err := pubArea.Key()
@@ -343,8 +332,8 @@ func (v *Validator) verifyAKCertificate(instanceInfo InstanceInfo, pubArea *tpm2
 		v.log.Warn("Certificate public key does not match TPM attestation key")
 		return errors.New("certificate public key does not match attestation key")
 	}
-	v.log.Info("Certificate public key matches TPM attestation key")
-	v.log.Info("vTPM AK certificate verification completed successfully")
+	v.log.Debug("Certificate public key matches TPM attestation key")
+	v.log.Debug("vTPM AK certificate verification completed successfully")
 
 	return nil
 }

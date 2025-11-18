@@ -16,7 +16,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"time"
 
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation"
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/azure"
@@ -103,7 +102,7 @@ func (i *Issuer) getInstanceInfo(ctx context.Context, tpm io.ReadWriteCloser, _ 
 		return nil, fmt.Errorf("reading attestation key certificate from TPM: %w", err)
 	}
 
-	i.log.Info(fmt.Sprintf("Read %d bytes from TPM AK cert index", len(certDERRaw)))
+	i.log.Debug(fmt.Sprintf("Read %d bytes from TPM AK cert index", len(certDERRaw)))
 
 	// The TPM NV index contains trailing data. We need to extract just the certificate.
 	// X.509 DER certificates start with 0x30 (SEQUENCE) followed by length encoding
@@ -127,7 +126,7 @@ func (i *Issuer) getInstanceInfo(ctx context.Context, tpm io.ReadWriteCloser, _ 
 
 		if certLen > 0 && certLen <= len(certDERRaw) {
 			cleanCertDER = certDERRaw[:certLen]
-			i.log.Info(fmt.Sprintf("Extracted %d bytes certificate from %d bytes TPM data", certLen, len(certDERRaw)))
+			i.log.Debug(fmt.Sprintf("Extracted %d bytes certificate from %d bytes TPM data", certLen, len(certDERRaw)))
 		} else {
 			return nil, fmt.Errorf("invalid certificate length: %d (total data: %d)", certLen, len(certDERRaw))
 		}
@@ -136,76 +135,21 @@ func (i *Issuer) getInstanceInfo(ctx context.Context, tpm io.ReadWriteCloser, _ 
 	}
 
 	// Verify we can parse the extracted certificate
-	cert, err := x509.ParseCertificate(cleanCertDER)
+	_, err = x509.ParseCertificate(cleanCertDER)
 	if err != nil {
 		return nil, fmt.Errorf("parsing extracted attestation key certificate: %w", err)
-	}
-
-	// Fetch the CA certificate if the AK cert has IssuingCertificateURL extension
-	var caCertDER []byte
-	if len(cert.IssuingCertificateURL) > 0 {
-		i.log.Info(fmt.Sprintf("Downloading CA certificate from: %s", cert.IssuingCertificateURL[0]))
-		caCert, err := downloadCACertificate(ctx, cert.IssuingCertificateURL)
-		if err != nil {
-			i.log.Warn(fmt.Sprintf("Failed to download CA certificate: %v", err))
-			// Don't fail here - validator can still verify directly against root
-		} else {
-			// Use the parsed certificate's Raw field to ensure clean DER encoding
-			caCertDER = caCert.Raw
-			i.log.Info(fmt.Sprintf("Successfully downloaded CA certificate: %s", caCert.Subject.String()))
-		}
-	} else {
-		i.log.Info("No IssuingCertificateURL in AK certificate - will verify directly against root CA")
 	}
 
 	instanceInfo := InstanceInfo{
 		AttestationReport: quote,
 		RuntimeData:       runtimeData,
 		AkCert:            cleanCertDER, // Use the clean certificate
-		CA:                caCertDER,
 	}
 	instanceInfoJSON, err := json.Marshal(instanceInfo)
 	if err != nil {
 		return nil, fmt.Errorf("marshalling instance info: %w", err)
 	}
 	return instanceInfoJSON, nil
-}
-
-// Helper function to download CA certificate from URLs
-func downloadCACertificate(ctx context.Context, urls []string) (*x509.Certificate, error) {
-	client := &http.Client{Timeout: 10 * time.Second}
-
-	for _, url := range urls {
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-		if err != nil {
-			continue
-		}
-
-		resp, err := client.Do(req)
-		if err != nil {
-			continue
-		}
-		defer resp.Body.Close()
-
-		if resp.StatusCode != http.StatusOK {
-			continue
-		}
-
-		certDER, err := io.ReadAll(resp.Body)
-		if err != nil {
-			continue
-		}
-
-		// Parse and validate the certificate
-		cert, err := x509.ParseCertificate(certDER)
-		if err != nil {
-			continue
-		}
-
-		return cert, nil
-	}
-
-	return nil, fmt.Errorf("failed to download CA certificate from any URL")
 }
 
 func parseHCLReport(report []byte) (hwReport, runtimeData []byte, err error) {
