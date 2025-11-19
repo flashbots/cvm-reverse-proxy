@@ -75,6 +75,12 @@ var flags []cli.Flag = []cli.Flag{
 		EnvVars: []string{"DEV_DUMMY_DCAP"},
 		Usage:   "URL of the remote dummy DCAP service. Only with --client-attestation-type dummy.",
 	},
+	&cli.BoolFlag{
+		Name:    "verify-ak-certificate",
+		EnvVars: []string{"VERIFY_AK_CERTIFICATE"},
+		Value:   false,
+		Usage:   "verify Azure TDX vTPM attestation key certificate chain",
+	},
 }
 
 func main() {
@@ -103,6 +109,7 @@ func runClient(cCtx *cli.Context) error {
 	devDummyDcapURL := cCtx.String("dev-dummy-dcap")
 
 	verifyTLS := cCtx.Bool("verify-tls")
+	verifyAKCertificate := cCtx.Bool("verify-ak-certificate")
 
 	log := common.SetupLogger(&common.LoggingOpts{
 		Debug:   logDebug,
@@ -145,7 +152,7 @@ func runClient(cCtx *cli.Context) error {
 		}
 	}
 
-	validators, err := proxy.CreateAttestationValidatorsFromFile(log, serverMeasurements)
+	validators, err := proxy.CreateAttestationValidatorsFromFile(log, serverMeasurements, verifyAKCertificate)
 	if err != nil {
 		log.Error("could not create attestation validators from file", "err", err)
 		return err

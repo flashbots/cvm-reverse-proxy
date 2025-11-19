@@ -84,7 +84,7 @@ func CreateAttestationIssuer(log *slog.Logger, attestationType AttestationType) 
 	}
 }
 
-func CreateAttestationValidatorsFromFile(log *slog.Logger, jsonMeasurementsPath string) ([]atls.Validator, error) {
+func CreateAttestationValidatorsFromFile(log *slog.Logger, jsonMeasurementsPath string, verifyAKCert bool) ([]atls.Validator, error) {
 	if jsonMeasurementsPath == "" {
 		return nil, nil
 	}
@@ -113,9 +113,11 @@ func CreateAttestationValidatorsFromFile(log *slog.Logger, jsonMeasurementsPath 
 		case AttestationAzureTDX:
 			attConfig := config.DefaultForAzureTDX()
 			attConfig.SetMeasurements(measurement.Measurements)
+			validator := azure_tdx.NewValidator(attConfig, AttestationLogger{Log: log})
+			validator.SetVerifyAKCertificate(verifyAKCert)
 			validatorsByType[attestationType] = append(
 				validatorsByType[attestationType],
-				azure_tdx.NewValidator(attConfig, AttestationLogger{Log: log}),
+				validator,
 			)
 		case AttestationDCAPTDX:
 			attConfig := &config.QEMUTDX{Measurements: measurements.DefaultsFor(cloudprovider.QEMU, variant.QEMUTDX{})}

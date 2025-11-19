@@ -156,6 +156,8 @@ type Validator struct {
 
 	tcbOverride func(pcs.TcbInfo) pcs.TcbInfo
 	log         attestation.Logger
+
+	verifyAKCertEnabled bool
 }
 
 // NewValidator returns a new Validator for Azure confidential VM attestation using TDX.
@@ -182,6 +184,10 @@ func NewValidator(cfg *config.AzureTDX, log attestation.Logger) *Validator {
 func (v *Validator) SetTcbOverride(overrideFn func(pcs.TcbInfo) pcs.TcbInfo) *Validator {
 	v.tcbOverride = overrideFn
 	return v
+}
+
+func (v *Validator) SetVerifyAKCertificate(enabled bool) {
+	v.verifyAKCertEnabled = enabled
 }
 
 func (v *Validator) getTrustedTPMKey(_ context.Context, attDoc vtpm.AttestationDocument, _ []byte) (crypto.PublicKey, error) {
@@ -214,8 +220,10 @@ func (v *Validator) getTrustedTPMKey(_ context.Context, attDoc vtpm.AttestationD
 
 	// Verify the vTPM AK certificate chain to prevent forging attestation attacks
 	// This ensures the attestation key is actually signed by Azure's CA
-	if err := v.verifyAKCertificate(instanceInfo, &pubArea); err != nil {
-		return nil, fmt.Errorf("verifying AK certificate: %w", err)
+	if v.verifyAKCertEnabled {
+		if err := v.verifyAKCertificate(instanceInfo, &pubArea); err != nil {
+			return nil, fmt.Errorf("verifying AK certificate: %w", err)
+		}
 	}
 
 	return pubArea.Key()

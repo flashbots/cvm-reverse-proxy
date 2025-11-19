@@ -90,6 +90,12 @@ var flags []cli.Flag = []cli.Flag{
 		Value: false,
 		Usage: "log debug messages",
 	},
+	&cli.BoolFlag{
+		Name:    "verify-ak-certificate",
+		Value:   false,
+		EnvVars: []string{"VERIFY_AK_CERTIFICATE"},
+		Usage:   "verify Azure TDX vTPM attestation key certificate chain",
+	},
 }
 
 func main() {
@@ -113,6 +119,7 @@ func runClient(cCtx *cli.Context) (err error) {
 	attestationTypeStr := cCtx.String("attestation-type")
 	expectedMeasurementsPath := cCtx.String("expected-measurements")
 	overrideAzurev6Tcbinfo := cCtx.Bool("override-azurev6-tcbinfo")
+	verifyAKCertificate := cCtx.Bool("verify-ak-certificate")
 
 	// Setup logging
 	log := common.SetupLogger(&common.LoggingOpts{
@@ -141,6 +148,7 @@ func runClient(cCtx *cli.Context) (err error) {
 		attConfig := config.DefaultForAzureTDX()
 		attConfig.SetMeasurements(measurements.M{})
 		validator := azure_tdx.NewValidator(attConfig, proxy.AttestationLogger{Log: log})
+		validator.SetVerifyAKCertificate(verifyAKCertificate)
 		if overrideAzurev6Tcbinfo {
 			azure_tcbinfo_override.OverrideAzureValidatorsForV6SEAMLoader(log, []atls.Validator{validator})
 		}
