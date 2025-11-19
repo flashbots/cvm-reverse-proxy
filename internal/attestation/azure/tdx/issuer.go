@@ -97,25 +97,32 @@ func (i *Issuer) getInstanceInfo(ctx context.Context, tpm io.ReadWriteCloser, _ 
 
 	// Read the vTPM AK certificate from TPM NV index
 	// This certificate is signed by Azure and needs to be validated on the validator side
+	// If reading fails, we log a warning and continue - the validator will decide if this is critical
+	var cleanCertDER []byte
 	certDERRaw, err := tpm2.NVReadEx(tpm, tpmAkCertIdx, tpm2.HandleOwner, "", 0)
 	if err != nil {
-		return nil, fmt.Errorf("reading attestation key certificate from TPM: %w", err)
-	}
+		i.log.Warn(fmt.Sprintf("Failed to read attestation key certificate from TPM: %v", err))
+	} else {
+		i.log.Debug(fmt.Sprintf("Read %d bytes from TPM AK cert index", len(certDERRaw)))
 
-	i.log.Debug(fmt.Sprintf("Read %d bytes from TPM AK cert index", len(certDERRaw)))
+		// The TPM NV index contains trailing data. We need to extract just the certificate.
+		// X.509 DER certificates start with 0x30 (SEQUENCE) followed by length encoding
+		cleanCertDER, err = extractDERCertificate(certDERRaw)
+		if err != nil {
+			i.log.Warn(fmt.Sprintf("Failed to extract certificate from TPM data: %v", err))
+			cleanCertDER = nil
+		} else {
+			i.log.Debug(fmt.Sprintf("Extracted %d bytes certificate from %d bytes TPM data", len(cleanCertDER), len(certDERRaw)))
 
-	// The TPM NV index contains trailing data. We need to extract just the certificate.
-	// X.509 DER certificates start with 0x30 (SEQUENCE) followed by length encoding
-	cleanCertDER, err := extractDERCertificate(certDERRaw)
-	if err != nil {
-		return nil, fmt.Errorf("extracting certificate from TPM data: %w", err)
-	}
-	i.log.Debug(fmt.Sprintf("Extracted %d bytes certificate from %d bytes TPM data", len(cleanCertDER), len(certDERRaw)))
-
-	// Verify we can parse the extracted certificate
-	_, err = x509.ParseCertificate(cleanCertDER)
-	if err != nil {
-		return nil, fmt.Errorf("parsing extracted attestation key certificate: %w", err)
+			// Verify we can parse the extracted certificate
+			_, err = x509.ParseCertificate(cleanCertDER)
+			if err != nil {
+				i.log.Warn(fmt.Sprintf("Failed to parse extracted attestation key certificate: %v", err))
+				cleanCertDER = nil
+			} else {
+				i.log.Debug("Successfully extracted and validated AK certificate format")
+			}
+		}
 	}
 
 	instanceInfo := InstanceInfo{
