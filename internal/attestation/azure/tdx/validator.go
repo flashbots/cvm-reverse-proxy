@@ -269,15 +269,12 @@ func (v *Validator) validateQuote(tdxQuote *tdx.QuoteV4) error {
 // verifyAKCertificate verifies the vTPM attestation key certificate chain.
 // This prevents attacks where an attacker could forge attestation by using their own key.
 func (v *Validator) verifyAKCertificate(instanceInfo InstanceInfo, pubArea *tpm2.Public) error {
-	v.log.Info("Starting vTPM AK certificate verification")
-
 	// Parse the AK certificate
 	akCert, err := x509.ParseCertificate(instanceInfo.AkCert)
 	if err != nil {
 		return fmt.Errorf("parsing attestation key certificate: %w", err)
 	}
-	v.log.Debug(fmt.Sprintf("AK Certificate Subject: %s", akCert.Subject.String()))
-	v.log.Debug(fmt.Sprintf("AK Certificate Issuer: %s", akCert.Issuer.String()))
+	v.log.Debug(fmt.Sprintf("AK Certificate Subject: %s, Issuer: %s", akCert.Subject.String(), akCert.Issuer.String()))
 
 	// Setup certificate pools
 	roots := x509.NewCertPool()
@@ -289,15 +286,11 @@ func (v *Validator) verifyAKCertificate(instanceInfo InstanceInfo, pubArea *tpm2
 	// Azure Virtual TPM Root Certificate Authority 2023 (for TDX and newer Trusted Launch)
 	roots.AddCert(azureVirtualTPMRoot2023)
 
-	v.log.Debug("Added root CAs: Microsoft RSA Devices Root CA 2021, Azure Virtual TPM Root CA 2023")
-
 	// Add known Azure's intermediate CAs
 	// Global Virtual TPM CA - 03 (for TDX VMs)
 	intermediates.AddCert(globalVirtualTPMCA03)
-	v.log.Debug("Added intermediate CA: Global Virtual TPM CA - 03")
 
 	// Verify the certificate chain
-	v.log.Debug("Verifying certificate chain")
 	chains, err := akCert.Verify(x509.VerifyOptions{
 		Roots:         roots,
 		Intermediates: intermediates,
@@ -315,7 +308,6 @@ func (v *Validator) verifyAKCertificate(instanceInfo InstanceInfo, pubArea *tpm2
 			v.log.Debug(fmt.Sprintf("  [%d] %s", j, cert.Subject.String()))
 		}
 	}
-	v.log.Debug("Certificate chain verification successful")
 
 	// Verify that the public key in the certificate matches the TPM's AK public key
 	pubKey, err := pubArea.Key()
@@ -332,8 +324,6 @@ func (v *Validator) verifyAKCertificate(instanceInfo InstanceInfo, pubArea *tpm2
 		v.log.Warn("Certificate public key does not match TPM attestation key")
 		return errors.New("certificate public key does not match attestation key")
 	}
-	v.log.Debug("Certificate public key matches TPM attestation key")
-	v.log.Debug("vTPM AK certificate verification completed successfully")
 
 	return nil
 }
