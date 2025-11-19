@@ -95,46 +95,51 @@ func (i *Issuer) getInstanceInfo(ctx context.Context, tpm io.ReadWriteCloser, _ 
 		return nil, fmt.Errorf("getting quote: %w", err)
 	}
 
-	// Read the vTPM AK certificate from TPM NV index
-	// This certificate is signed by Azure and needs to be validated on the validator side
-	// If reading fails, we log a warning and continue - the validator will decide if this is critical
-	var cleanCertDER []byte
-	certDERRaw, err := tpm2.NVReadEx(tpm, tpmAkCertIdx, tpm2.HandleOwner, "", 0)
+	// Read and extract the vTPM AK certificate. If this fails, we log a warning and continue without it
+	akCert, err := i.readAKCertificateFromTPM(tpm)
 	if err != nil {
-		i.log.Warn(fmt.Sprintf("Failed to read attestation key certificate from TPM: %v", err))
-	} else {
-		i.log.Debug(fmt.Sprintf("Read %d bytes from TPM AK cert index", len(certDERRaw)))
-
-		// The TPM NV index contains trailing data. We need to extract just the certificate.
-		// X.509 DER certificates start with 0x30 (SEQUENCE) followed by length encoding
-		cleanCertDER, err = extractDERCertificate(certDERRaw)
-		if err != nil {
-			i.log.Warn(fmt.Sprintf("Failed to extract certificate from TPM data: %v", err))
-			cleanCertDER = nil
-		} else {
-			i.log.Debug(fmt.Sprintf("Extracted %d bytes certificate from %d bytes TPM data", len(cleanCertDER), len(certDERRaw)))
-
-			// Verify we can parse the extracted certificate
-			_, err = x509.ParseCertificate(cleanCertDER)
-			if err != nil {
-				i.log.Warn(fmt.Sprintf("Failed to parse extracted attestation key certificate: %v", err))
-				cleanCertDER = nil
-			} else {
-				i.log.Debug("Successfully extracted and validated AK certificate format")
-			}
-		}
+		i.log.Warn(fmt.Sprintf("Failed to read AK certificate: %v", err))
+		akCert = nil
 	}
 
 	instanceInfo := InstanceInfo{
 		AttestationReport: quote,
 		RuntimeData:       runtimeData,
-		AkCert:            cleanCertDER, // Use the clean certificate
+		AkCert:            akCert, // Use the clean certificate
 	}
 	instanceInfoJSON, err := json.Marshal(instanceInfo)
 	if err != nil {
 		return nil, fmt.Errorf("marshalling instance info: %w", err)
 	}
 	return instanceInfoJSON, nil
+}
+
+// readAKCertificateFromTPM reads and extracts the attestation key certificate from TPM.
+// Returns the clean DER-encoded certificate or an error if reading/extraction fails.
+func (i *Issuer) readAKCertificateFromTPM(tpm io.ReadWriteCloser) ([]byte, error) {
+	certDERRaw, err := tpm2.NVReadEx(tpm, tpmAkCertIdx, tpm2.HandleOwner, "", 0)
+	if err != nil {
+		return nil, fmt.Errorf("reading attestation key certificate from TPM: %w", err)
+	}
+
+	i.log.Debug(fmt.Sprintf("Read %d bytes from TPM AK cert index", len(certDERRaw)))
+
+	// The TPM NV index contains trailing data. We need to extract just the certificate.
+	// X.509 DER certificates start with 0x30 (SEQUENCE) followed by length encoding
+	cleanCertDER, err := extractDERCertificate(certDERRaw)
+	if err != nil {
+		return nil, fmt.Errorf("extracting certificate from TPM data: %w", err)
+	}
+
+	i.log.Debug(fmt.Sprintf("Extracted %d bytes certificate from %d bytes TPM data", len(cleanCertDER), len(certDERRaw)))
+
+	// Verify we can parse the extracted certificate
+	_, err = x509.ParseCertificate(cleanCertDER)
+	if err != nil {
+		return nil, fmt.Errorf("parsing extracted attestation key certificate: %w", err)
+	}
+
+	return cleanCertDER, nil
 }
 
 // extractDERCertificate extracts a clean X.509 DER certificate from raw TPM data.
