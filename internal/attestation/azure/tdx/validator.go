@@ -277,6 +277,11 @@ func (v *Validator) validateQuote(tdxQuote *tdx.QuoteV4) error {
 // verifyAKCertificate verifies the vTPM attestation key certificate chain.
 // This prevents attacks where an attacker could forge attestation by using their own key.
 func (v *Validator) verifyAKCertificate(instanceInfo InstanceInfo, pubArea *tpm2.Public) error {
+	// Ensure that the AK certificate is provided
+	if len(instanceInfo.AkCert) == 0 {
+		return errors.New("no AK certificate provided in instance info")
+	}
+
 	// Parse the AK certificate
 	akCert, err := x509.ParseCertificate(instanceInfo.AkCert)
 	if err != nil {
