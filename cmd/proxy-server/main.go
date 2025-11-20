@@ -92,6 +92,12 @@ var flags []cli.Flag = []cli.Flag{
 		EnvVars: []string{"DEV_DUMMY_DCAP"},
 		Usage:   "URL of the remote dummy DCAP service. Only with --server-attestation-type dummy.",
 	},
+	&cli.BoolFlag{
+		Name:    "verify-ak-certificate",
+		EnvVars: []string{"VERIFY_AK_CERTIFICATE"},
+		Value:   false,
+		Usage:   "verify Azure TDX vTPM attestation key certificate chain",
+	},
 }
 
 var log *slog.Logger
@@ -120,6 +126,7 @@ func runServer(cCtx *cli.Context) error {
 	overrideAzurev6Tcbinfo := cCtx.Bool("override-azurev6-tcbinfo")
 	logJSON := cCtx.Bool("log-json")
 	logDebug := cCtx.Bool("log-debug")
+	verifyAKCertificate := cCtx.Bool("verify-ak-certificate")
 	tdx.SetLogDcapQuote(cCtx.Bool("log-dcap-quote"))
 
 	serverAttestationTypeFlag := cCtx.String("server-attestation-type")
@@ -148,7 +155,7 @@ func runServer(cCtx *cli.Context) error {
 		return errors.New("not all of --tls-certificate-path and --tls-private-key-path specified")
 	}
 
-	validators, err := proxy.CreateAttestationValidatorsFromFile(log, clientMeasurements)
+	validators, err := proxy.CreateAttestationValidatorsFromFile(log, clientMeasurements, verifyAKCertificate)
 	if err != nil {
 		log.Error("could not create attestation validators from file", "err", err)
 		return err

@@ -92,6 +92,12 @@ var flags []cli.Flag = []cli.Flag{
 		Value: false,
 		Usage: "log debug messages",
 	},
+	&cli.BoolFlag{
+		Name:    "verify-ak-certificate",
+		Value:   false,
+		EnvVars: []string{"VERIFY_AK_CERTIFICATE"},
+		Usage:   "verify Azure TDX vTPM attestation key certificate chain",
+	},
 }
 
 func main() {
@@ -108,10 +114,11 @@ func main() {
 }
 
 // createAzureTDXValidator creates an Azure TDX validator without required measurements
-func createAzureTDXValidator(log *slog.Logger, overrideAzurev6Tcbinfo bool) atls.Validator {
+func createAzureTDXValidator(log *slog.Logger, overrideAzurev6Tcbinfo bool, verifyAKCertificate bool) atls.Validator {
 	attConfig := config.DefaultForAzureTDX()
 	attConfig.SetMeasurements(measurements.M{})
 	validator := azure_tdx.NewValidator(attConfig, proxy.AttestationLogger{Log: log})
+	validator.SetVerifyAKCertificate(verifyAKCertificate)
 	if overrideAzurev6Tcbinfo {
 		azure_tcbinfo_override.OverrideAzureValidatorsForV6SEAMLoader(log, []atls.Validator{validator})
 	}
@@ -132,6 +139,7 @@ func runClient(cCtx *cli.Context) (err error) {
 	attestationTypeStr := cCtx.String("attestation-type")
 	expectedMeasurementsPath := cCtx.String("expected-measurements")
 	overrideAzurev6Tcbinfo := cCtx.Bool("override-azurev6-tcbinfo")
+	verifyAKCertificate := cCtx.Bool("verify-ak-certificate")
 
 	// Setup logging
 	log := common.SetupLogger(&common.LoggingOpts{
@@ -156,13 +164,13 @@ func runClient(cCtx *cli.Context) (err error) {
 	var validators []atls.Validator
 	switch attestationType {
 	case proxy.AttestationAzureTDX:
-		validators = append(validators, createAzureTDXValidator(log, overrideAzurev6Tcbinfo))
+		validators = append(validators, createAzureTDXValidator(log, overrideAzurev6Tcbinfo, verifyAKCertificate))
 	case proxy.AttestationDCAPTDX:
 		validators = append(validators, createDCAPTDXValidator(log))
 	case proxy.AttestationAuto:
 		// In auto mode, add all validators to support any attestation type
 		log.Info("Auto mode: creating validators for all supported attestation types")
-		validators = append(validators, createAzureTDXValidator(log, overrideAzurev6Tcbinfo))
+		validators = append(validators, createAzureTDXValidator(log, overrideAzurev6Tcbinfo, verifyAKCertificate))
 		validators = append(validators, createDCAPTDXValidator(log))
 	default:
 		log.Error("unsupported attestation type, see --help for available options")

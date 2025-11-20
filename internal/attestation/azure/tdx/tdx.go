@@ -23,4 +23,5 @@ package tdx
 type InstanceInfo struct {
 	AttestationReport []byte
 	RuntimeData       []byte
+	AkCert            []byte `json:"akCert,omitempty"`
 }

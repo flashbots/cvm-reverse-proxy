@@ -9,6 +9,7 @@ package tdx
 import (
 	"bytes"
 	"context"
+	"crypto/x509"
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/json"
@@ -27,6 +28,7 @@ import (
 const (
 	imdsURL                  = "http://169.254.169.254/acc/tdquote"
 	indexHCLReport           = 0x1400001
+	tpmAkCertIdx             = 0x1C101D0
 	hclDataOffset            = 1216
 	hclReportTypeOffset      = 8
 	hclReportTypeOffsetStart = hclDataOffset + hclReportTypeOffset
@@ -53,6 +55,7 @@ type Issuer struct {
 	*vtpm.Issuer
 
 	quoteGetter quoteGetter
+	log         attestation.Logger
 }
 
 // NewIssuer initializes a new Azure Issuer.
@@ -61,6 +64,7 @@ func NewIssuer(log attestation.Logger) *Issuer {
 		quoteGetter: imdsQuoteGetter{
 			client: &http.Client{Transport: &http.Transport{Proxy: nil}},
 		},
+		log: log,
 	}
 
 	i.Issuer = vtpm.NewIssuer(
@@ -91,15 +95,108 @@ func (i *Issuer) getInstanceInfo(ctx context.Context, tpm io.ReadWriteCloser, _ 
 		return nil, fmt.Errorf("getting quote: %w", err)
 	}
 
+	// Read and extract the vTPM AK certificate. If this fails, we log a warning and continue without it
+	akCert, err := i.readAKCertificateFromTPM(tpm)
+	if err != nil {
+		i.log.Warn(fmt.Sprintf("Failed to read AK certificate: %v", err))
+		akCert = nil
+	}
+
 	instanceInfo := InstanceInfo{
 		AttestationReport: quote,
 		RuntimeData:       runtimeData,
+		AkCert:            akCert, // Use the clean certificate
 	}
 	instanceInfoJSON, err := json.Marshal(instanceInfo)
 	if err != nil {
 		return nil, fmt.Errorf("marshalling instance info: %w", err)
 	}
 	return instanceInfoJSON, nil
+}
+
+// readAKCertificateFromTPM reads and extracts the attestation key certificate from TPM.
+// Returns the clean DER-encoded certificate or an error if reading/extraction fails.
+func (i *Issuer) readAKCertificateFromTPM(tpm io.ReadWriteCloser) ([]byte, error) {
+	certDERRaw, err := tpm2.NVReadEx(tpm, tpmAkCertIdx, tpm2.HandleOwner, "", 0)
+	if err != nil {
+		return nil, fmt.Errorf("reading attestation key certificate from TPM: %w", err)
+	}
+
+	i.log.Debug(fmt.Sprintf("Read %d bytes from TPM AK cert index", len(certDERRaw)))
+
+	// The TPM NV index contains trailing data. We need to extract just the certificate.
+	// X.509 DER certificates start with 0x30 (SEQUENCE) followed by length encoding
+	cleanCertDER, err := extractDERCertificate(certDERRaw)
+	if err != nil {
+		return nil, fmt.Errorf("extracting certificate from TPM data: %w", err)
+	}
+
+	i.log.Debug(fmt.Sprintf("Extracted %d bytes certificate from %d bytes TPM data", len(cleanCertDER), len(certDERRaw)))
+
+	// Verify we can parse the extracted certificate
+	_, err = x509.ParseCertificate(cleanCertDER)
+	if err != nil {
+		return nil, fmt.Errorf("parsing extracted attestation key certificate: %w", err)
+	}
+
+	return cleanCertDER, nil
+}
+
+// extractDERCertificate extracts a clean X.509 DER certificate from raw TPM data.
+// The TPM NV index may contain trailing data, so this function parses the DER
+// structure to extract exactly the certificate bytes.
+//
+// X.509 DER certificates use ASN.1 encoding and start with:
+// - Tag: 0x30 (SEQUENCE)
+// - Length: encoded in one of three forms (short, long-1byte, long-2byte)
+// - Content: the certificate data
+func extractDERCertificate(certDERRaw []byte) ([]byte, error) {
+	if len(certDERRaw) < 4 {
+		return nil, fmt.Errorf("certificate data too short: %d bytes", len(certDERRaw))
+	}
+
+	// Verify it starts with DER SEQUENCE tag (0x30)
+	if certDERRaw[0] != 0x30 {
+		return nil, fmt.Errorf("invalid certificate format: does not start with DER SEQUENCE tag (0x30), got 0x%02x", certDERRaw[0])
+	}
+
+	// Parse the DER length encoding to determine certificate size
+	var certLen int
+	lengthByte := certDERRaw[1]
+
+	if lengthByte < 0x80 {
+		// Short form: length fits in 7 bits (0-127 bytes)
+		// Format: 0x30 <length> <data...>
+		certLen = int(lengthByte) + 2 // +2 for tag and length bytes
+	} else if lengthByte == 0x81 {
+		// Long form with 1 length byte (128-255 bytes)
+		// Format: 0x30 0x81 <length> <data...>
+		if len(certDERRaw) < 3 {
+			return nil, fmt.Errorf("truncated DER encoding: expected length byte")
+		}
+		certLen = int(certDERRaw[2]) + 3 // +3 for tag, 0x81, and length byte
+	} else if lengthByte == 0x82 {
+		// Long form with 2 length bytes (256-65535 bytes)
+		// Format: 0x30 0x82 <high-byte> <low-byte> <data...>
+		if len(certDERRaw) < 4 {
+			return nil, fmt.Errorf("truncated DER encoding: expected 2 length bytes")
+		}
+		certLen = (int(certDERRaw[2]) << 8) | int(certDERRaw[3])
+		certLen += 4 // +4 for tag, 0x82, and two length bytes
+	} else {
+		return nil, fmt.Errorf("unsupported DER length encoding: 0x%02x", lengthByte)
+	}
+
+	// Validate the calculated length
+	if certLen <= 0 {
+		return nil, fmt.Errorf("invalid certificate length: %d", certLen)
+	}
+	if certLen > len(certDERRaw) {
+		return nil, fmt.Errorf("invalid certificate length: %d exceeds available data (%d bytes)", certLen, len(certDERRaw))
+	}
+
+	// Extract the exact certificate bytes
+	return certDERRaw[:certLen], nil
 }
 
 func parseHCLReport(report []byte) (hwReport, runtimeData []byte, err error) {
