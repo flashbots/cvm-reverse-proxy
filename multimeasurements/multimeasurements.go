@@ -32,6 +32,10 @@ type MeasurementsContainer struct {
 
 type LegacyMultiMeasurements map[string]measurements.M
 
+// Caps expansion of dstack-mr-gcp measurements
+const maxGCPMeasurementContainers = 10_000
+
+// Structure used by the dstack-mr-gcp output
 type rawGCPMeasurements struct {
 	MRTD  rawGCPMeasurementValues `json:"mrtd"`
 	RTMR0 rawGCPMeasurementValues `json:"rtmr0"`
@@ -149,7 +153,12 @@ func parseRawGCPMeasurements(data []byte) ([]MeasurementsContainer, error) {
 		rtmr3Values = [][]byte{make([]byte, measurements.TDXMeasurementLength)}
 	}
 
-	containers := make([]MeasurementsContainer, 0, len(mrtdValues)*len(rtmr0Values)*len(rtmr1Values)*len(rtmr2Values)*len(rtmr3Values))
+	total := len(mrtdValues) * len(rtmr0Values) * len(rtmr1Values) * len(rtmr2Values) * len(rtmr3Values)
+	if total > maxGCPMeasurementContainers {
+		return nil, fmt.Errorf("parsing raw GCP measurements: cartesian product of %d containers exceeds limit of %d", total, maxGCPMeasurementContainers)
+	}
+
+	containers := make([]MeasurementsContainer, 0, total)
 	for mrtdIdx, mrtd := range mrtdValues {
 		for rtmr0Idx, rtmr0 := range rtmr0Values {
 			for rtmr1Idx, rtmr1 := range rtmr1Values {

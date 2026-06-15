@@ -204,3 +204,23 @@ func TestMultiMeasurementsRawGCPMalformed(t *testing.T) {
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "parsing raw GCP measurements")
 }
+
+// TestMultiMeasurementsRawGCPCartesianLimit tests that oversized cartesian products are rejected
+func TestMultiMeasurementsRawGCPCartesianLimit(t *testing.T) {
+	// 23 values per field -> 23^5 = 6,436,343 >> 10,000 limit
+	manyValues := make([]string, 23)
+	for i := range manyValues {
+		manyValues[i] = `"` + strings.Repeat("ab", 48) + `"`
+	}
+	valuesJSON := "[" + strings.Join(manyValues, ",") + "]"
+
+	_, err := NewFromBytes([]byte(`{
+  "mrtd": ` + valuesJSON + `,
+  "rtmr0": ` + valuesJSON + `,
+  "rtmr1": ` + valuesJSON + `,
+  "rtmr2": ` + valuesJSON + `,
+  "rtmr3": ` + valuesJSON + `
+}`))
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "exceeds limit")
+}
