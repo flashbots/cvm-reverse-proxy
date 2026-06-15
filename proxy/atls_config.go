@@ -4,7 +4,6 @@ package proxy
 import (
 	"context"
 	"crypto/x509/pkix"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -89,16 +88,11 @@ func CreateAttestationValidatorsFromFile(log *slog.Logger, jsonMeasurementsPath 
 		return nil, nil
 	}
 
-	jsonMeasurements, err := os.ReadFile(jsonMeasurementsPath)
+	multiMeasurements, err := multimeasurements.New(jsonMeasurementsPath)
 	if err != nil {
 		return nil, err
 	}
-
-	var parsedMeasurements []multimeasurements.MeasurementsContainer
-	err = json.Unmarshal(jsonMeasurements, &parsedMeasurements)
-	if err != nil {
-		return nil, err
-	}
+	parsedMeasurements := multiMeasurements.Measurements
 
 	// Group validators by attestation type
 	validatorsByType := make(map[AttestationType][]atls.Validator)
