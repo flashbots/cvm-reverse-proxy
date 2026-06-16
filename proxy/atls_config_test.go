@@ -15,8 +15,8 @@ import (
 // TestCreateAttestationValidatorsFromRawGCPMeasurementFile tests dstack-mr-gcp validator setup
 func TestCreateAttestationValidatorsFromRawGCPMeasurementFile(t *testing.T) {
 	measurementsJSON := []byte(`{
-  "mrtd": "` + strings.Repeat("11", 48) + `",
-  "rtmr0": "` + strings.Repeat("22", 48) + `",
+  "mrtd": ["` + strings.Repeat("11", 48) + `"],
+  "rtmr0": ["` + strings.Repeat("22", 48) + `"],
   "rtmr1": "` + strings.Repeat("33", 48) + `",
   "rtmr2": "` + strings.Repeat("44", 48) + `",
   "rtmr3": "` + strings.Repeat("00", 48) + `"

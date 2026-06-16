@@ -64,11 +64,11 @@ const rawGCPChunkedJSON = `{
 	"tdattributes": "0000001000000000"
 }`
 
-// rawGCPScalarJSON returns a scalar-valued dstack-mr-gcp fixture
+// rawGCPScalarJSON returns a single-value dstack-mr-gcp fixture
 func rawGCPScalarJSON() []byte {
 	return []byte(`{
-  "mrtd": "` + strings.Repeat("11", 48) + `",
-  "rtmr0": "` + strings.Repeat("22", 48) + `",
+  "mrtd": ["` + strings.Repeat("11", 48) + `"],
+  "rtmr0": ["` + strings.Repeat("22", 48) + `"],
   "rtmr1": "` + strings.Repeat("33", 48) + `",
   "rtmr2": "` + strings.Repeat("44", 48) + `",
   "mr_aggregated": "` + strings.Repeat("aa", 32) + `",
@@ -196,8 +196,8 @@ func TestMultiMeasurementsRawGCPChunked(t *testing.T) {
 // TestMultiMeasurementsRawGCPMalformed tests malformed dstack-mr-gcp measurements
 func TestMultiMeasurementsRawGCPMalformed(t *testing.T) {
 	_, err := New(writeMeasurementsFile(t, []byte(`{
-  "mrtd": "not-hex",
-  "rtmr0": "`+strings.Repeat("22", 48)+`",
+  "mrtd": ["not-hex"],
+  "rtmr0": ["`+strings.Repeat("22", 48)+`"],
   "rtmr1": "`+strings.Repeat("33", 48)+`",
   "rtmr2": "`+strings.Repeat("44", 48)+`"
 }`)))
@@ -207,8 +207,8 @@ func TestMultiMeasurementsRawGCPMalformed(t *testing.T) {
 
 // TestMultiMeasurementsRawGCPCartesianLimit tests that oversized cartesian products are rejected
 func TestMultiMeasurementsRawGCPCartesianLimit(t *testing.T) {
-	// 23 values per field -> 23^5 = 6,436,343 >> 10,000 limit
-	manyValues := make([]string, 23)
+	// 101 values for both mrtd and rtmr0 -> 101*101 = 10,201 > 10,000 limit
+	manyValues := make([]string, 101)
 	for i := range manyValues {
 		manyValues[i] = `"` + strings.Repeat("ab", 48) + `"`
 	}
@@ -217,9 +217,8 @@ func TestMultiMeasurementsRawGCPCartesianLimit(t *testing.T) {
 	_, err := NewFromBytes([]byte(`{
   "mrtd": ` + valuesJSON + `,
   "rtmr0": ` + valuesJSON + `,
-  "rtmr1": ` + valuesJSON + `,
-  "rtmr2": ` + valuesJSON + `,
-  "rtmr3": ` + valuesJSON + `
+  "rtmr1": "` + strings.Repeat("33", 48) + `",
+  "rtmr2": "` + strings.Repeat("44", 48) + `"
 }`))
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "exceeds limit")
