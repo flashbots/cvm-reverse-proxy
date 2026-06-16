@@ -7,7 +7,6 @@ package multimeasurements
 
 import (
 	"bytes"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -16,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/flashbots/cvm-reverse-proxy/internal/attestation/measurements"
+	"github.com/flashbots/cvm-reverse-proxy/internal/encoding"
 )
 
 // MultiMeasurements holds several known measurements, and can check if
@@ -35,36 +35,14 @@ type LegacyMultiMeasurements map[string]measurements.M
 // Caps expansion of dstack-mr-gcp measurements
 const maxGCPMeasurementContainers = 10_000
 
-// Structure used by the dstack-mr-gcp output
+// Structure used by the dstack-mr-gcp output. mrtd and rtmr0 hold one entry per
+// possible value; rtmr1-3 are single values.
 type rawGCPMeasurements struct {
-	MRTD  rawGCPMeasurementValues `json:"mrtd"`
-	RTMR0 rawGCPMeasurementValues `json:"rtmr0"`
-	RTMR1 rawGCPMeasurementValues `json:"rtmr1"`
-	RTMR2 rawGCPMeasurementValues `json:"rtmr2"`
-	RTMR3 rawGCPMeasurementValues `json:"rtmr3"`
-}
-
-type rawGCPMeasurementValues struct {
-	values []string
-	set    bool
-}
-
-// UnmarshalJSON accepts scalar or list measurement values from dstack-mr-gcp JSON
-func (v *rawGCPMeasurementValues) UnmarshalJSON(data []byte) error {
-	v.set = true
-
-	var scalar string
-	if err := json.Unmarshal(data, &scalar); err == nil {
-		v.values = []string{scalar}
-		return nil
-	}
-
-	var values []string
-	if err := json.Unmarshal(data, &values); err != nil {
-		return err
-	}
-	v.values = values
-	return nil
+	MRTD  []encoding.HexBytes `json:"mrtd"`
+	RTMR0 []encoding.HexBytes `json:"rtmr0"`
+	RTMR1 encoding.HexBytes   `json:"rtmr1"`
+	RTMR2 encoding.HexBytes   `json:"rtmr2"`
+	RTMR3 encoding.HexBytes   `json:"rtmr3"`
 }
 
 // New returns a MultiMeasurements instance, with the measurements
@@ -129,102 +107,60 @@ func parseRawGCPMeasurements(data []byte) ([]MeasurementsContainer, error) {
 		return nil, fmt.Errorf("parsing raw GCP measurements: %w", err)
 	}
 
-	mrtdValues, err := raw.requiredHexValues("mrtd", raw.MRTD)
-	if err != nil {
-		return nil, err
+	if raw.RTMR3 == nil {
+		raw.RTMR3 = make(encoding.HexBytes, measurements.TDXMeasurementLength)
 	}
-	rtmr0Values, err := raw.requiredHexValues("rtmr0", raw.RTMR0)
-	if err != nil {
+	if err := validateGCPMeasurements(raw); err != nil {
 		return nil, err
-	}
-	rtmr1Values, err := raw.requiredHexValues("rtmr1", raw.RTMR1)
-	if err != nil {
-		return nil, err
-	}
-	rtmr2Values, err := raw.requiredHexValues("rtmr2", raw.RTMR2)
-	if err != nil {
-		return nil, err
-	}
-	rtmr3Values, err := raw.optionalHexValues("rtmr3", raw.RTMR3)
-	if err != nil {
-		return nil, err
-	}
-	if len(rtmr3Values) == 0 {
-		rtmr3Values = [][]byte{make([]byte, measurements.TDXMeasurementLength)}
 	}
 
-	total := len(mrtdValues) * len(rtmr0Values) * len(rtmr1Values) * len(rtmr2Values) * len(rtmr3Values)
+	total := len(raw.MRTD) * len(raw.RTMR0)
 	if total > maxGCPMeasurementContainers {
 		return nil, fmt.Errorf("parsing raw GCP measurements: cartesian product of %d containers exceeds limit of %d", total, maxGCPMeasurementContainers)
 	}
 
 	containers := make([]MeasurementsContainer, 0, total)
-	for mrtdIdx, mrtd := range mrtdValues {
-		for rtmr0Idx, rtmr0 := range rtmr0Values {
-			for rtmr1Idx, rtmr1 := range rtmr1Values {
-				for rtmr2Idx, rtmr2 := range rtmr2Values {
-					for rtmr3Idx, rtmr3 := range rtmr3Values {
-						container := MeasurementsContainer{
-							MeasurementID:   fmt.Sprintf("dstack-mr-gcp-%d-%d-%d-%d-%d", mrtdIdx, rtmr0Idx, rtmr1Idx, rtmr2Idx, rtmr3Idx),
-							AttestationType: "dcap-tdx",
-							Measurements: measurements.M{
-								0: {Expected: mrtd, ValidationOpt: measurements.Enforce},
-								1: {Expected: rtmr0, ValidationOpt: measurements.Enforce},
-								2: {Expected: rtmr1, ValidationOpt: measurements.Enforce},
-								3: {Expected: rtmr2, ValidationOpt: measurements.Enforce},
-								4: {Expected: rtmr3, ValidationOpt: measurements.Enforce},
-							},
-						}
-						containers = append(containers, container)
-					}
-				}
-			}
+	for mrtdIdx, mrtd := range raw.MRTD {
+		for rtmr0Idx, rtmr0 := range raw.RTMR0 {
+			containers = append(containers, MeasurementsContainer{
+				MeasurementID:   fmt.Sprintf("dstack-mr-gcp-%d-%d", mrtdIdx, rtmr0Idx),
+				AttestationType: "dcap-tdx",
+				Measurements: measurements.M{
+					0: {Expected: mrtd, ValidationOpt: measurements.Enforce},
+					1: {Expected: rtmr0, ValidationOpt: measurements.Enforce},
+					2: {Expected: raw.RTMR1, ValidationOpt: measurements.Enforce},
+					3: {Expected: raw.RTMR2, ValidationOpt: measurements.Enforce},
+					4: {Expected: raw.RTMR3, ValidationOpt: measurements.Enforce},
+				},
+			})
 		}
 	}
 
 	return containers, nil
 }
 
-// requiredHexValues decodes a required dstack-mr-gcp measurement field
-func (rawGCPMeasurements) requiredHexValues(field string, values rawGCPMeasurementValues) ([][]byte, error) {
-	if !values.set {
-		return nil, fmt.Errorf("parsing raw GCP measurements: missing %q", field)
+// validateGCPMeasurements checks that all dstack-mr-gcp fields are present and have valid TDX measurement lengths
+func validateGCPMeasurements(raw rawGCPMeasurements) error {
+	lists := map[string][]encoding.HexBytes{"mrtd": raw.MRTD, "rtmr0": raw.RTMR0}
+	for field, values := range lists {
+		if len(values) == 0 {
+			return fmt.Errorf("parsing raw GCP measurements: %q must not be empty", field)
+		}
+		for idx, value := range values {
+			if len(value) != measurements.TDXMeasurementLength {
+				return fmt.Errorf("parsing raw GCP measurements: %q[%d] has invalid length %d", field, idx, len(value))
+			}
+		}
 	}
-	decoded, err := decodeRawGCPHexValues(field, values.values)
-	if err != nil {
-		return nil, err
-	}
-	if len(decoded) == 0 {
-		return nil, fmt.Errorf("parsing raw GCP measurements: %q must not be empty", field)
-	}
-	return decoded, nil
-}
 
-// optionalHexValues decodes an optional dstack-mr-gcp measurement field
-func (rawGCPMeasurements) optionalHexValues(field string, values rawGCPMeasurementValues) ([][]byte, error) {
-	if !values.set {
-		return nil, nil
+	scalars := map[string]encoding.HexBytes{"rtmr1": raw.RTMR1, "rtmr2": raw.RTMR2, "rtmr3": raw.RTMR3}
+	for field, value := range scalars {
+		if len(value) != measurements.TDXMeasurementLength {
+			return fmt.Errorf("parsing raw GCP measurements: %q has invalid length %d", field, len(value))
+		}
 	}
-	return decodeRawGCPHexValues(field, values.values)
-}
 
-// decodeRawGCPHexValues decodes and validates dstack-mr-gcp TDX measurement hex values
-func decodeRawGCPHexValues(field string, values []string) ([][]byte, error) {
-	decoded := make([][]byte, 0, len(values))
-	for idx, value := range values {
-		if value == "" {
-			return nil, fmt.Errorf("parsing raw GCP measurements: %q[%d] must not be empty", field, idx)
-		}
-		bytes, err := hex.DecodeString(value)
-		if err != nil {
-			return nil, fmt.Errorf("parsing raw GCP measurements: decoding %q[%d]: %w", field, idx, err)
-		}
-		if len(bytes) != measurements.TDXMeasurementLength {
-			return nil, fmt.Errorf("parsing raw GCP measurements: %q[%d] has invalid length %d", field, idx, len(bytes))
-		}
-		decoded = append(decoded, bytes)
-	}
-	return decoded, nil
+	return nil
 }
 
 // Contains checks if the provided measurements match one of the known measurements. Any keys in the provided
