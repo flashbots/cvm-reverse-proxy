@@ -47,27 +47,23 @@ type rawGCPMeasurements struct {
 
 // New returns a MultiMeasurements instance, with the measurements
 // loaded from a file or URL.
-func New(path string) (m *MultiMeasurements, err error) {
-	var data []byte
+func New(path string) (*MultiMeasurements, error) {
 	if strings.HasPrefix(path, "http") {
-		// load from URL
 		resp, err := http.Get(path)
 		if err != nil {
 			return nil, err
 		}
 		defer resp.Body.Close()
-		data, err = io.ReadAll(resp.Body)
+		data, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return nil, err
 		}
-	} else {
-		// load from file
-		data, err = os.ReadFile(path)
-		if err != nil {
-			return nil, err
-		}
+		return NewFromBytes(data)
 	}
-
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
 	return NewFromBytes(data)
 }
 
