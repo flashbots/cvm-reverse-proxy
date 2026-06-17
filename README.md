@@ -122,7 +122,7 @@ This repository contains a sample [measurements.json](./measurements.json) file 
 ## Measurements
 
 Attestation verification requires the expected measurements which you pass through the `--{client, server}-measurements` flag.
-The measurements are expected to be a JSON map, and multiple valid measurements can be provided. The verifier will attempt to verify with each of the provided measurements, and if any succeeds, the attestation is assumed valid.
+Measurements can be provided in the legacy JSON map format, the current measurement container format, or as raw GCP DCAP measurement JSON output by [flashbots/dstack-mr-gcp](https://github.com/flashbots/dstack-mr-gcp). Multiple valid measurements can be provided. The verifier will attempt to verify with each of the provided measurements, and if any succeeds, the attestation is assumed valid.
 
 The (single) validated measurement is json-marshalled and forwarded (returned in the case of client) as "X-Flashbots-Measurement" header, and the type of attestation as "X-Flashbots-Attestation-Type" header. For mapping attestation types to OIDs and issuers, see [internal/attestation/variant/variant.go](./internal/attestation/variant/variant.go).
 To only validate and forward the measurement (as opposed to also authorizing the measurement against an expected one), simply provide an empty expected measurements object.
